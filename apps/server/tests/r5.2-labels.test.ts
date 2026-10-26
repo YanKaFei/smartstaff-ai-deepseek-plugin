@@ -7,14 +7,14 @@ function iso(time: string) { return `2026-10-01T${time}:00+08:00`; }
 
 function sessionCsv(opts: { managerRequired?: boolean; rows?: number; onDuty?: number; values?: number[] } = {}): string {
   const withRequired = Boolean(opts.managerRequired);
-  const header = `store_code,business_date,event_time,table_type,party_size,queue_at,seat_at,checkout_at,leave_at,clean_at,on_duty_staff,${withRequired ? 'manager_required,' : ''}service_mode,actual_work_minutes,manager_sufficiency`;
+  const header = `store_code,business_date,event_time,table_type,party_size,queue_at,seat_at,checkout_at,leave_at,clean_at,on_duty_staff,${withRequired ? 'manager_required,manager_required_reason,' : ''}service_mode,actual_work_minutes,manager_sufficiency`;
   const rows: string[] = [header];
   const count = opts.rows ?? 6;
   for (let i = 0; i < count; i += 1) {
     const type = i % 3 === 0 ? 'small' : i % 3 === 1 ? 'medium' : 'large';
     const party = type === 'large' ? 8 : type === 'medium' ? 4 : 2;
     const req = opts.values?.[i % (opts.values.length)] ?? 5;
-    rows.push(`K001,2026-10-01,18:00,${type},${party},${iso('18:00')},${iso('18:10')},${iso('21:50')},${iso('22:20')},${iso('22:30')},${opts.onDuty ?? 3},${withRequired ? `${req},` : ''}partial,45,short`);
+    rows.push(`K001,2026-10-01,18:00,${type},${party},${iso('18:00')},${iso('18:10')},${iso('21:50')},${iso('22:20')},${iso('22:30')},${opts.onDuty ?? 3},${withRequired ? `${req},晚市高峰需要,` : ''}partial,45,short`);
   }
   return rows.join('\n');
 }
@@ -59,6 +59,7 @@ test('R5.2 labels: explicit manager_required is the only MAE ground truth', asyn
     assert.equal(actual.labelStatus, 'MANAGER_EXPLICIT');
     assert.equal(actual.required, 5);
     assert.equal(actual.managerRequiredValues[0], 5);
+    assert.deepEqual(actual.managerRequiredReasons, ['晚市高峰需要']);
     assert.ok(metrics.evaluatedCount > 0);
     assert.ok(metrics.mae !== null);
     assert.ok(metrics.understaffedPersonHours !== null);

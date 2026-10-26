@@ -7,6 +7,7 @@ import { computeCapacityForecast } from './capacity.js';
 import { getImport, listObservations } from './dataImport.js';
 import { MINUTE_MS, formatDateTime } from '../lib/time.js';
 import type { StoreConfig, TableType } from './types.js';
+import { EVALUATION_VERSION, FROZEN_CODE_TAG, MODEL_VERSION, SCHEMA_FREEZE } from './modelVersion.js';
 
 export interface ReplayVariant {
   key: string;
@@ -34,6 +35,7 @@ interface Observation {
   actualWorkMinutes: number | null;
   managerSufficiency: 'short' | 'adequate' | 'over' | 'unknown' | null;
   managerRequired: number | null;
+  managerRequiredReason: string | null;
 }
 
 function metricsFor(rows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase?: string; predictedGap: number; actualShortage: boolean; tableCounts: Record<string, number> }>, hourlyRate: number) {
@@ -98,6 +100,7 @@ function observationsFor(db: Db, importId: string): Observation[] {
     actualWorkMinutes: o.actualWorkMinutes === null ? null : Number(o.actualWorkMinutes),
     managerSufficiency: (o.managerSufficiency as Observation['managerSufficiency']) ?? null,
     managerRequired: o.managerRequired === null || o.managerRequired === undefined ? null : Number(o.managerRequired),
+    managerRequiredReason: (o.managerRequiredReason as string | null) ?? null,
   }));
 }
 
@@ -174,6 +177,7 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
       const sufficiency = future.map((r) => r.managerSufficiency).filter((s) => s && s !== 'unknown') as string[];
       const qualitativeShortage = sufficiency.includes('short');
       const managerRequiredValues = future.map((r) => r.managerRequired).filter((v): v is number => v !== null && Number.isFinite(v));
+      const managerRequiredReasons = [...new Set(future.map((r) => r.managerRequiredReason).filter((v): v is string => Boolean(v)))];
       const uniqueManagerRequired = [...new Set(managerRequiredValues)];
       const workMinutes = future.map((r) => r.actualWorkMinutes).filter((v): v is number => v !== null && Number.isFinite(v));
       const workMinuteEstimate = workMinutes.length
@@ -210,6 +214,7 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
         required: actual,
         actualOnDuty: futureOnDuty,
         managerRequiredValues,
+        managerRequiredReasons,
         labelStatus,
         workMinuteEstimate,
         qualitativeShortage,
@@ -242,6 +247,10 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
       distinctDays: dates.length,
       insufficientData: dates.length < 14 || metricsRows.filter((r) => r.phase === 'validation' && r.evaluated).length === 0,
       dataQuality: imported.quality,
+      modelVersion: MODEL_VERSION,
+      evaluationVersion: EVALUATION_VERSION,
+      frozenCodeTag: FROZEN_CODE_TAG,
+      schemaVersion: SCHEMA_FREEZE,
       missingRate: (() => {
         const missing = imported.quality?.missing ?? {};
         const total = Object.values(missing as Record<string, number>).reduce((a, b) => a + Number(b), 0);

@@ -25,6 +25,7 @@ export interface ImportObservation {
   actualWorkMinutes: number | null;
   managerSufficiency: 'short' | 'adequate' | 'over' | 'unknown' | null;
   managerRequired: number | null;
+  managerRequiredReason: string | null;
   dataOrigin: DataOrigin;
   qualityStatus: 'valid' | 'invalid' | 'duplicate';
   issues: string[];
@@ -47,6 +48,7 @@ const HEADER_ALIASES: Record<string, string> = {
   actual_work_minutes: 'actualWorkMinutes', '服务员实际工作分钟数': 'actualWorkMinutes',
   manager_sufficiency: 'managerSufficiency', '店长评价的实际人手充足程度': 'managerSufficiency',
   manager_required: 'managerRequired', '店长明确合理需求人数': 'managerRequired',
+  manager_required_reason: 'managerRequiredReason', '店长需求判断理由': 'managerRequiredReason',
 };
 
 function normalizeHeader(h: string): string {
@@ -153,7 +155,7 @@ export function importDataset(db: Db, storeId: string, input: ImportInput) {
   for (const field of required) {
     if (!headers.includes(field)) throw new AppError(400, 'IMPORT_HEADER_MISSING', `缺少字段 ${field}`);
   }
-  const missingCounts: Record<string, number> = { queueAt: 0, checkoutAt: 0, cleanAt: 0, actualWorkMinutes: 0, managerSufficiency: 0, managerRequired: 0 };
+  const missingCounts: Record<string, number> = { queueAt: 0, checkoutAt: 0, cleanAt: 0, actualWorkMinutes: 0, managerSufficiency: 0, managerRequired: 0, managerRequiredReason: 0 };
   const observations: ImportObservation[] = [];
   const seen = new Set<string>();
   let timeOrderIssues = 0;
@@ -173,6 +175,7 @@ export function importDataset(db: Db, storeId: string, input: ImportInput) {
     const actualWorkMinutes = raw.actualWorkMinutes ? Number(raw.actualWorkMinutes) : null;
     const managerSufficiency = normalizeSufficiency(raw.managerSufficiency);
     const managerRequired = raw.managerRequired ? Number(raw.managerRequired) : null;
+    const managerRequiredReason = raw.managerRequiredReason ?? null;
     const issues: string[] = [];
     if (!raw.storeCode) issues.push('missing_store_code');
     else if (raw.storeCode !== store.manager_code) issues.push('store_code_mismatch');
@@ -217,6 +220,7 @@ export function importDataset(db: Db, storeId: string, input: ImportInput) {
       actualWorkMinutes,
       managerSufficiency,
       managerRequired,
+      managerRequiredReason,
       dataOrigin: input.dataOrigin,
       qualityStatus,
       issues,
@@ -252,9 +256,9 @@ export function importDataset(db: Db, storeId: string, input: ImportInput) {
   for (const o of observations) {
     run(
       db,
-      `INSERT INTO import_observations(id, import_id, store_id, source_row, pilot_id, store_code, business_date, table_type, party_size, queue_at, seat_at, checkout_at, leave_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency, manager_required, data_origin, quality_status, issues_json, dedupe_key, created_at)
-       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [id('obs'), importId, storeId, o.sourceRow, input.pilotId ?? null, o.storeCode, o.businessDate, o.tableType, o.partySize, o.queueAt, o.seatAt, o.checkoutAt, o.leaveAt, o.cleanAt, o.onDutyStaff, o.serviceMode, o.actualWorkMinutes, o.managerSufficiency, o.managerRequired, o.dataOrigin, o.qualityStatus, JSON.stringify(o.issues), o.dedupeKey, now],
+      `INSERT INTO import_observations(id, import_id, store_id, source_row, pilot_id, store_code, business_date, table_type, party_size, queue_at, seat_at, checkout_at, leave_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency, manager_required, manager_required_reason, data_origin, quality_status, issues_json, dedupe_key, created_at)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [id('obs'), importId, storeId, o.sourceRow, input.pilotId ?? null, o.storeCode, o.businessDate, o.tableType, o.partySize, o.queueAt, o.seatAt, o.checkoutAt, o.leaveAt, o.cleanAt, o.onDutyStaff, o.serviceMode, o.actualWorkMinutes, o.managerSufficiency, o.managerRequired, o.managerRequiredReason, o.dataOrigin, o.qualityStatus, JSON.stringify(o.issues), o.dedupeKey, now],
     );
   }
   return { importId, quality };
@@ -304,6 +308,7 @@ export function listObservations(db: Db, importId: string, status = 'valid') {
     actualWorkMinutes: r.actual_work_minutes,
     managerSufficiency: r.manager_sufficiency,
     managerRequired: r.manager_required,
+    managerRequiredReason: r.manager_required_reason,
     dataOrigin: r.data_origin,
     issues: JSON.parse(String(r.issues_json)),
   }));

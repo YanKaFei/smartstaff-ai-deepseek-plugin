@@ -20,7 +20,7 @@ const EVENT_HEADERS: Record<string, string> = {
   pilot_id: 'pilotId', store_code: 'storeCode', business_date: 'businessDate', event_id: 'eventId', event_type: 'eventType',
   occurred_at: 'occurredAt', table_label: 'tableLabel', table_type: 'tableType', party_size: 'partySize',
   staff_role: 'staffRole', staff_anonymous_id: 'staffAnonymousId', call_no: 'callNo', service_mode: 'serviceMode',
-  on_duty_staff: 'onDutyStaff', manager_sufficiency: 'managerSufficiency', manager_required: 'managerRequired',
+  on_duty_staff: 'onDutyStaff', manager_sufficiency: 'managerSufficiency', manager_required: 'managerRequired', manager_required_reason: 'managerRequiredReason',
 };
 const WORKLOAD_HEADERS: Record<string, string> = {
   pilot_id: 'pilotId', store_code: 'storeCode', observation_id: 'observationId', staff_role: 'staffRole',
@@ -81,7 +81,7 @@ export function importPilotEvents(db: Db, pilotId: string, input: { filename: st
       tableLabel: raw.tableLabel, tableType: normalizeTableType(raw.tableType), partySize: raw.partySize ? Number(raw.partySize) : null,
       staffRole: raw.staffRole, staffAnonymousId: raw.staffAnonymousId, callNo: raw.callNo ? Number(raw.callNo) : null,
       serviceMode: normalizeServiceMode(raw.serviceMode), onDutyStaff: raw.onDutyStaff ? Number(raw.onDutyStaff) : null,
-      managerSufficiency: normalizeSufficiency(raw.managerSufficiency), managerRequired: raw.managerRequired ? Number(raw.managerRequired) : null, sourceRow: r + 1, quality, issues,
+      managerSufficiency: normalizeSufficiency(raw.managerSufficiency), managerRequired: raw.managerRequired ? Number(raw.managerRequired) : null, managerRequiredReason: raw.managerRequiredReason ?? null, sourceRow: r + 1, quality, issues,
     });
   }
   const valid = events.filter((e) => e.quality === 'valid');
@@ -106,9 +106,9 @@ export function importPilotEvents(db: Db, pilotId: string, input: { filename: st
   for (const e of events) {
     run(
       db,
-      `INSERT OR IGNORE INTO pilot_events(id, pilot_id, store_id, event_id, event_type, occurred_at, business_date, table_label, table_type, party_size, staff_role, staff_anonymous_id, call_no, service_mode, on_duty_staff, manager_sufficiency, manager_required, source_row, data_origin, quality_status, issues_json, dedupe_key, created_at)
-       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [e.id, pilotId, pilot.storeId, e.eventId, e.eventType, e.timestamp ?? 0, e.businessDate, e.tableLabel, e.tableType, e.partySize, e.staffRole, e.staffAnonymousId, e.callNo, e.serviceMode, e.onDutyStaff, e.managerSufficiency, e.managerRequired, e.sourceRow, input.dataOrigin, e.quality, JSON.stringify(e.issues), e.eventId, Date.now()],
+      `INSERT OR IGNORE INTO pilot_events(id, pilot_id, store_id, event_id, event_type, occurred_at, business_date, table_label, table_type, party_size, staff_role, staff_anonymous_id, call_no, service_mode, on_duty_staff, manager_sufficiency, manager_required, manager_required_reason, source_row, data_origin, quality_status, issues_json, dedupe_key, created_at)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [e.id, pilotId, pilot.storeId, e.eventId, e.eventType, e.timestamp ?? 0, e.businessDate, e.tableLabel, e.tableType, e.partySize, e.staffRole, e.staffAnonymousId, e.callNo, e.serviceMode, e.onDutyStaff, e.managerSufficiency, e.managerRequired, e.managerRequiredReason, e.sourceRow, input.dataOrigin, e.quality, JSON.stringify(e.issues), e.eventId, Date.now()],
     );
   }
   const sessions = materializeSessions(valid as Array<Record<string, any>>);
@@ -119,9 +119,9 @@ export function importPilotEvents(db: Db, pilotId: string, input: { filename: st
     for (const s of sessions) {
       run(
         db,
-        `INSERT INTO import_observations(id, import_id, store_id, source_row, pilot_id, store_code, business_date, table_type, party_size, queue_at, seat_at, checkout_at, leave_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency, manager_required, data_origin, quality_status, issues_json, dedupe_key, created_at)
-         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        [id('obs'), sessionImportId, pilot.storeId, s.sourceRow, pilotId, pilot.anonymousCode, s.businessDate, s.tableType, s.partySize, s.queueAt, s.seatAt, s.checkoutAt, s.leaveAt, s.cleanAt, s.onDutyStaff, s.serviceMode, null, s.managerSufficiency, s.managerRequired, input.dataOrigin, 'valid', '[]', s.dedupeKey, Date.now()],
+        `INSERT INTO import_observations(id, import_id, store_id, source_row, pilot_id, store_code, business_date, table_type, party_size, queue_at, seat_at, checkout_at, leave_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency, manager_required, manager_required_reason, data_origin, quality_status, issues_json, dedupe_key, created_at)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        [id('obs'), sessionImportId, pilot.storeId, s.sourceRow, pilotId, pilot.anonymousCode, s.businessDate, s.tableType, s.partySize, s.queueAt, s.seatAt, s.checkoutAt, s.leaveAt, s.cleanAt, s.onDutyStaff, s.serviceMode, null, s.managerSufficiency, s.managerRequired, s.managerRequiredReason, input.dataOrigin, 'valid', '[]', s.dedupeKey, Date.now()],
       );
     }
   }
@@ -162,6 +162,7 @@ function materializeSessions(events: Array<Record<string, any>>) {
         serviceMode: seat.serviceMode ?? 'partial',
         managerSufficiency: seat.managerSufficiency ?? 'unknown',
         managerRequired: seat.managerRequired ?? null,
+        managerRequiredReason: seat.managerRequiredReason ?? null,
         dedupeKey: key + '|' + seat.timestamp,
       });
     }

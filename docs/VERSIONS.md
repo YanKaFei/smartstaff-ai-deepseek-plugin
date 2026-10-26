@@ -8,7 +8,7 @@
 | uni-app | 3.0.0-5030320261023001 |
 | Vue | 3.4.21 |
 | SQLite | Node built-in `node:sqlite` |
-| Schema | 13 (R5.2 explicit manager_required label) |
+| Schema | 14 (R5.2 explicit manager_required + reason) |
 | R3 baseline commit | `1e94563d1ff4e9032d53311a19f9af534f73025a` |
 | R3 baseline tag | `r3-baseline` |
 | R4 commit/tag | `see git log` / `r4-engineering-ready` (local; no remote push) |
