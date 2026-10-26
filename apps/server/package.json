@@ -1,0 +1,23 @@
+{
+  "name": "@smartstaff/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "seed": "tsx src/seed.ts",
+    "reset": "tsx src/seed.ts --reset",
+    "test": "tsx --test tests/*.test.ts",
+    "test:report": "tsx tests/report.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

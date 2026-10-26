@@ -1,0 +1,11 @@
+DeepSeek direct endpoint check (no API key configured)
+======================================================
+Timestamp: 2026-10-26 (local)
+Host: api.deepseek.com -> 61.170.66.121 / 61.170.82.99
+Request: POST https://api.deepseek.com/chat/completions
+Body: {"model":"deepseek-flash","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"response_format":{"type":"json_object"}}
+Result: HTTP 401
+Elapsed: 0.107917 s
+Body: Authentication Fails (governor)
+
+This is a real transport/auth check, NOT a model response validation.

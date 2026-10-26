@@ -1,0 +1,89 @@
+R1 SECURITY / CONFIGURATION SCAN (2026-10-26)
+=============================================
+
+1) Client-side secret material
+   - Scanned apps/miniapp/src, apps/admin, apps/miniapp/dist/build/h5/assets for
+     "DEEPSEEK_API_KEY" and "sk-*" patterns.
+   - Result: NO API key or sk-* secret found in client code or built assets.
+   - DEEPSEEK_API_KEY is read only in apps/server/src/config.ts.
+   - No apps/server/.env exists in this workspace; the running server uses defaults.
+
+2) Default admin credentials
+   - Code: apps/server/src/config.ts: adminPassword = env.ADMIN_PASSWORD || 'admin123'
+   - Admin login page placeholder: "默认 admin123"
+   - Live check: POST /api/auth/admin-login {"password":"admin123"} -> 200
+   - Login page is reachable at /admin/ and served by the same API process.
+   - Result: FAIL for production readiness. A known default credential is active.
+
+3) Login rate limiting / lockout
+   - 10 consecutive wrong admin passwords were attempted against /api/auth/admin-login.
+   - All returned HTTP 401; no 429, lockout, delay or captcha appeared.
+   - Result: FAIL. Brute-force protection is absent.
+
+4) CORS
+   - Request with "Origin: https://evil.example" returned:
+     access-control-allow-origin: https://evil.example
+     access-control-allow-methods: GET,POST,PATCH,PUT,DELETE,OPTIONS
+   - Cause: CORS_ORIGIN default is "*" and the server reflects the request origin.
+   - Result: FAIL for production. Restrict to the admin/H5 origins.
+
+5) Authorization isolation (live)
+   - GET /api/admin/overview without token -> 401
+   - Staff token -> GET /api/manager/today -> 403
+   - Manager token -> GET /api/admin/staff -> 403
+   - Staff token -> GET /api/staff/offers only returns that staff member's rows.
+   - Result: PASS for role separation in the tested paths.
+
+6) Demo identity model
+   - Manager login only requires store code K001; name is free text.
+   - Staff login only requires phone 13800000001; nickname is ignored.
+   - Live test (R1 security test) confirms a caller who knows the phone gets
+     that staff member's session, and a caller who knows the store code becomes manager.
+   - Result: FAIL for production. This is possession-only authentication with no
+     OpenID, SMS verification, password or manager binding.
+
+7) Session storage
+   - Mini program: uni.setStorageSync('smartstaff_session', JSON with bearer token).
+   - Admin: localStorage 'ss_token'.
+   - Tokens are random and stored as SHA-256 hashes server-side, expire in 7 days.
+   - Result: PARTIAL. Server token handling is sound, but browser-accessible storage
+     increases XSS impact; H5 should use an HttpOnly SameSite cookie or short-lived
+     token with refresh rotation for production.
+
+8) WeChat / H5 deployment settings
+   - Built mp-weixin project.config.json: appid=touristappid, urlCheck=false.
+   - manifest.json: appid=touristappid.
+   - H5 is served over plain HTTP by the API process at /app/.
+   - Result: FAIL for production. Replace appid, enable domain checks, serve HTTPS.
+
+9) AI key handling / error exposure
+   - Key exists only in server env; no VITE_* or client key.
+   - Real failed-auth response was stored as aiError and includes upstream text:
+     "Authentication Fails, Your api key: ****-key is invalid (request_id: ...)".
+   - DeepSeek masks the key, so the full secret is not exposed, but upstream request IDs
+     and provider error bodies are surfaced to the client.
+   - Result: PARTIAL. Redact upstream errors before returning them to clients.
+
+10) Log leakage
+   - Request logs contain method/path/status/userId only; no Authorization header.
+   - No bearer token or API key value was found in the current server log.
+   - Result: PASS for tested paths.
+
+11) Database / environment files
+   - apps/server/data/smartstaff.db exists (demo data), no .env file.
+   - Production must set DATABASE_PATH, ADMIN_PASSWORD, CORS_ORIGIN and HTTPS.
+
+== live brute-force check ==
+attempt 1 -> 401
+attempt 2 -> 401
+attempt 3 -> 401
+attempt 4 -> 401
+attempt 5 -> 401
+attempt 6 -> 401
+attempt 7 -> 401
+attempt 8 -> 401
+attempt 9 -> 401
+attempt 10 -> 401
+
+== live default admin check ==
+admin123 -> 200

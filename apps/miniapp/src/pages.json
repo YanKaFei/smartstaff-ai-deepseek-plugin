@@ -1,0 +1,44 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": { "navigationStyle": "custom", "navigationBarTitleText": "SmartStaff AI" }
+    },
+    {
+      "path": "pages/manager/setup",
+      "style": { "navigationBarTitleText": "门店配置", "enablePullDownRefresh": false }
+    },
+    {
+      "path": "pages/manager/home",
+      "style": { "navigationBarTitleText": "今日经营", "enablePullDownRefresh": true }
+    },
+    {
+      "path": "pages/manager/plans",
+      "style": { "navigationBarTitleText": "AI 调配方案", "enablePullDownRefresh": true }
+    },
+    {
+      "path": "pages/manager/records",
+      "style": { "navigationBarTitleText": "调配记录", "enablePullDownRefresh": true }
+    },
+    {
+      "path": "pages/staff/offers",
+      "style": { "navigationBarTitleText": "工作邀约", "enablePullDownRefresh": true }
+    },
+    {
+      "path": "pages/staff/shifts",
+      "style": { "navigationBarTitleText": "我的班次", "enablePullDownRefresh": true }
+    },
+    {
+      "path": "pages/staff/availability",
+      "style": { "navigationBarTitleText": "我的可用时间", "enablePullDownRefresh": false }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "SmartStaff AI",
+    "navigationBarBackgroundColor": "#0b0d0c",
+    "backgroundColor": "#0b0d0c",
+    "backgroundColorTop": "#0b0d0c",
+    "backgroundColorBottom": "#0b0d0c"
+  }
+}

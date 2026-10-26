@@ -1,0 +1,52 @@
+npm warn Unknown env config "sharp-libvips-binary-host". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "sharp-binary-host". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @smartstaff/server@1.0.0 test
+> tsx --test tests/*.test.ts
+
+✔ ai: deterministic analysis always works without an API key (0.69275ms)
+✔ ai: valid DeepSeek JSON is accepted but headcount and times stay engine-owned (10.580875ms)
+✔ ai: malformed JSON, missing fields and HTTP errors degrade deterministically (0.934834ms)
+✔ ai: schema rejects invented numeric ranges (0.290125ms)
+✔ capacity: sufficient staff produces no gap and no dispatch ranges (1.501542ms)
+✔ capacity: understaffed full house yields a contiguous staff gap range (0.245125ms)
+✔ capacity: queue pressure with enough staff is classified as a table bottleneck (0.174375ms)
+✔ capacity: checkout does not free a table; cleaning and leaving time are included (0.186916ms)
+✔ capacity: history raises the projected arrival rate (0.311375ms)
+✔ e2e: confirm day -> forecast -> plans -> offer -> accept -> check-in -> checkout -> completion (554.644917ms)
+✔ dispatch: rejecting an offer automatically falls back to the next candidate (519.179666ms)
+✔ dispatch: unanswered offers expire on simulated time and fall back (504.252875ms)
+✔ dispatch: no remaining candidate cancels the shift and raises a manager exception (483.897792ms)
+✔ concurrency: only one accept wins and overlapping shifts are blocked (489.406125ms)
+✔ security: role isolation, cross-user access and input validation (565.434209ms)
+✔ admin: staff registration requires training and approval before matching (535.548667ms)
+✔ plans: candidate replacement is validated and reflected before confirmation (485.044791ms)
+✔ plans: insufficient candidates are shown as a shortage and cannot be confirmed (469.999833ms)
+✔ ai failure: DeepSeek outage falls back while forecast and dispatch still work (466.870834ms)
+✔ onboarding: a new store can be created and configured, isolating its data (441.520334ms)
+✔ matching: hard filters reject unapproved, untrained, unavailable, distant and conflicting staff (0.611709ms)
+✔ matching: notification and travel time are respected (0.104791ms)
+✔ matching: overnight availability windows cover late shifts (0.090041ms)
+✔ matching: economic plan minimizes cost while guarantee plan picks reliability (0.433875ms)
+✔ matching: shortage is reported honestly and no staff are fabricated (0.406375ms)
+✔ matching: a person is never double-booked across overlapping ranges (0.10775ms)
+T_DEBUG 1793008800000 2026-10-26T18:00:00.000Z {"index":2,"startAt":1793014200000,"endAt":1793016000000,"label":"19:30-20:00","projectedOccupied":{"small":8,"medium":8,"large":4},"projectedQueueGroups":0,"projectedWaitMin":0,"projectedActiveTables":20,"weightedLoad":30.4,"tableCapacity":24,"tableUtilization":0.83,"serviceCapacityTables":15,"requiredStaff":7,"onDutyStaff":3,"gap":4,"bottleneck":"staff"}
+✔ R1 algorithm: seeded scene explains the 5-person gap slot by slot (496.895125ms)
+✔ R1 algorithm: service modes swing the requirement by ±2 staff and the current semantics are ambiguous (481.542667ms)
+✔ R1 dispatch: sent invitations, accepted, checked-in and completed are counted separately (529.486959ms)
+✔ R1 dispatch: rejection and timeout keep the shift open and count only a successful accept (496.224459ms)
+✔ R1 dispatch: concurrent accepts produce one winner; a second staff can take another shift (492.015167ms)
+✔ R1 dispatch: manager cancellation and no-show leave coverage gaps; staff cannot cancel themselves (491.663334ms)
+✔ R1 operations: second login restores the store and confirmation is idempotent (477.186667ms)
+✔ R1 security: demo credentials work by possession only and default admin password is active (497.355042ms)
+✔ seed: seven days of history exist before the demo day (488.409834ms)
+✔ simulator: advancing time writes ops events, moves tables and recomputes demand (489.030542ms)
+✔ simulator: API advance is validated and simulated clock is returned (505.168917ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5677.142959

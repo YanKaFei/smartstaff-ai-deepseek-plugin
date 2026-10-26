@@ -1,0 +1,131 @@
+{
+  "checkedAt": "2026-10-25T23:40:59.268Z",
+  "scenario": "R1 canonical 24 tables / 3 on-duty / 14 queue / 7-day history",
+  "modes": {
+    "legacy_standard": {
+      "peakRequiredStaff": 8,
+      "peakGap": 5,
+      "perSlotRequired": [
+        8,
+        8,
+        7,
+        8,
+        8,
+        7
+      ],
+      "perSlotWorkloadMinutes": [
+        274.86,
+        228.86,
+        156.35,
+        229.86,
+        210.86,
+        219.86
+      ],
+      "reliability": "high",
+      "modelWarning": null,
+      "model": "legacy",
+      "capacityBasis": "standard_equivalent",
+      "serviceMode": "partial"
+    },
+    "legacy_physical": {
+      "peakRequiredStaff": 6,
+      "peakGap": 3,
+      "perSlotRequired": [
+        6,
+        5,
+        4,
+        5,
+        5,
+        5
+      ],
+      "perSlotWorkloadMinutes": [
+        274.86,
+        228.86,
+        156.35,
+        229.86,
+        210.86,
+        219.86
+      ],
+      "reliability": "high",
+      "modelWarning": null,
+      "model": "legacy",
+      "capacityBasis": "physical_tables",
+      "serviceMode": "partial"
+    },
+    "minutes_full": {
+      "peakRequiredStaff": 18,
+      "peakGap": 15,
+      "perSlotRequired": [
+        18,
+        15,
+        11,
+        15,
+        14,
+        15
+      ],
+      "perSlotWorkloadMinutes": [
+        412.83,
+        351.43,
+        242.34,
+        356.28,
+        326.83,
+        340.78
+      ],
+      "reliability": "medium",
+      "modelWarning": "服务分钟模型尚未用真实工作记录校准；请勿把模拟结果当作真实经营校准。",
+      "model": "service_minutes",
+      "capacityBasis": "standard_equivalent",
+      "serviceMode": "full"
+    },
+    "minutes_partial": {
+      "peakRequiredStaff": 12,
+      "peakGap": 9,
+      "perSlotRequired": [
+        12,
+        10,
+        7,
+        10,
+        9,
+        10
+      ],
+      "perSlotWorkloadMinutes": [
+        274.86,
+        228.86,
+        156.35,
+        229.86,
+        210.86,
+        219.86
+      ],
+      "reliability": "medium",
+      "modelWarning": "服务分钟模型尚未用真实工作记录校准；请勿把模拟结果当作真实经营校准。",
+      "model": "service_minutes",
+      "capacityBasis": "standard_equivalent",
+      "serviceMode": "partial"
+    },
+    "minutes_self": {
+      "peakRequiredStaff": 7,
+      "peakGap": 4,
+      "perSlotRequired": [
+        7,
+        6,
+        4,
+        6,
+        5,
+        6
+      ],
+      "perSlotWorkloadMinutes": [
+        161.97,
+        128.57,
+        85.99,
+        126.42,
+        115.97,
+        120.92
+      ],
+      "reliability": "medium",
+      "modelWarning": "服务分钟模型尚未用真实工作记录校准；请勿把模拟结果当作真实经营校准。",
+      "model": "service_minutes",
+      "capacityBasis": "standard_equivalent",
+      "serviceMode": "self"
+    }
+  }
+}

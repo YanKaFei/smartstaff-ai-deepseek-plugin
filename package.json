@@ -1,0 +1,21 @@
+{
+  "name": "smartstaff-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SmartStaff AI - 烤肉门店智能人力调配系统 1.0",
+  "scripts": {
+    "setup": "npm --prefix apps/server install && npm --prefix apps/miniapp install",
+    "dev": "npm --prefix apps/server run dev",
+    "build": "npm --prefix apps/server run build",
+    "start": "npm --prefix apps/server run start",
+    "seed": "npm --prefix apps/server run seed",
+    "test": "npm --prefix apps/server test",
+    "build:miniapp": "npm --prefix apps/miniapp run build:mp-weixin",
+    "build:h5": "npm --prefix apps/miniapp run build:h5",
+    "reset": "npm --prefix apps/server run reset",
+    "dev:h5": "npm --prefix apps/miniapp run dev:h5",
+    "dev:mp": "npm --prefix apps/miniapp run dev:mp-weixin",
+    "build:all": "npm --prefix apps/server run build && npm --prefix apps/miniapp run build:h5 && npm --prefix apps/miniapp run build:mp-weixin",
+    "verify": "npm test && npm run build:all"
+  }
+}

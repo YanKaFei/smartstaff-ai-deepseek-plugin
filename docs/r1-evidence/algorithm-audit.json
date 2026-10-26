@@ -1,0 +1,363 @@
+{
+  "generatedAt": "2026-10-25T17:44:00.703Z",
+  "scene": {
+    "store": "焰遇烤肉 · 科技园店",
+    "clock": "2026-10-26 18:00",
+    "onDutyStaff": 3,
+    "tables": [
+      {
+        "type": "small",
+        "label": "小桌",
+        "total": 8,
+        "available": 1,
+        "dining": 5,
+        "checkout": 1,
+        "cleaning": 1
+      },
+      {
+        "type": "medium",
+        "label": "中桌",
+        "total": 12,
+        "available": 1,
+        "dining": 9,
+        "checkout": 2,
+        "cleaning": 0
+      },
+      {
+        "type": "large",
+        "label": "大桌",
+        "total": 4,
+        "available": 1,
+        "dining": 3,
+        "checkout": 0,
+        "cleaning": 0
+      }
+    ],
+    "totalTables": 24,
+    "queueGroups": 14,
+    "queueCustomers": 57,
+    "latestCallNo": 38,
+    "tablesPerStaff": 5,
+    "weights": {
+      "small": 1,
+      "medium": 1.6,
+      "large": 2.4
+    },
+    "checkoutToLeaveMin": 8,
+    "leaveToCleanMin": 6
+  },
+  "baseline": {
+    "peakRequiredStaff": 8,
+    "peakGap": 5,
+    "reliability": "high",
+    "reliabilityReason": "最近 2 小时有 21 次实际入座、3 次叫号，且已有 7 天历史数据",
+    "bottleneck": "staff",
+    "bottleneckReason": "6 个时段的服务工作量超出在岗 3 人产能",
+    "arrivalAssumption": 5.67,
+    "gapRanges": [
+      {
+        "startAt": 1793010600000,
+        "endAt": 1793021400000,
+        "headcount": 5
+      }
+    ],
+    "slots": [
+      {
+        "label": "18:30-19:00",
+        "occupied": {
+          "small": 8,
+          "medium": 12,
+          "large": 4
+        },
+        "activeTables": 24,
+        "queue": 12,
+        "weightedLoad": 39.2,
+        "tableComponent": 36.800000000000004,
+        "queueComponent": 2.4,
+        "capacityTableEquivalents": 15,
+        "required": 8,
+        "gap": 5,
+        "bottleneck": "staff",
+        "waitMin": 36,
+        "tableUtilization": 1
+      },
+      {
+        "label": "19:00-19:30",
+        "occupied": {
+          "small": 8,
+          "medium": 12,
+          "large": 4
+        },
+        "activeTables": 24,
+        "queue": 3,
+        "weightedLoad": 37.4,
+        "tableComponent": 36.800000000000004,
+        "queueComponent": 0.6,
+        "capacityTableEquivalents": 15,
+        "required": 8,
+        "gap": 5,
+        "bottleneck": "staff",
+        "waitMin": 15,
+        "tableUtilization": 1
+      },
+      {
+        "label": "19:30-20:00",
+        "occupied": {
+          "small": 8,
+          "medium": 8,
+          "large": 4
+        },
+        "activeTables": 20,
+        "queue": 0,
+        "weightedLoad": 30.4,
+        "tableComponent": 30.4,
+        "queueComponent": 0,
+        "capacityTableEquivalents": 15,
+        "required": 7,
+        "gap": 4,
+        "bottleneck": "staff",
+        "waitMin": 0,
+        "tableUtilization": 0.83
+      },
+      {
+        "label": "20:00-20:30",
+        "occupied": {
+          "small": 8,
+          "medium": 12,
+          "large": 4
+        },
+        "activeTables": 24,
+        "queue": 0,
+        "weightedLoad": 36.8,
+        "tableComponent": 36.800000000000004,
+        "queueComponent": 0,
+        "capacityTableEquivalents": 15,
+        "required": 8,
+        "gap": 5,
+        "bottleneck": "staff",
+        "waitMin": 0,
+        "tableUtilization": 1
+      },
+      {
+        "label": "20:30-21:00",
+        "occupied": {
+          "small": 7,
+          "medium": 12,
+          "large": 4
+        },
+        "activeTables": 23,
+        "queue": 0,
+        "weightedLoad": 35.8,
+        "tableComponent": 35.800000000000004,
+        "queueComponent": 0,
+        "capacityTableEquivalents": 15,
+        "required": 8,
+        "gap": 5,
+        "bottleneck": "staff",
+        "waitMin": 0,
+        "tableUtilization": 0.96
+      },
+      {
+        "label": "21:00-21:30",
+        "occupied": {
+          "small": 6,
+          "medium": 12,
+          "large": 4
+        },
+        "activeTables": 22,
+        "queue": 0,
+        "weightedLoad": 34.8,
+        "tableComponent": 34.800000000000004,
+        "queueComponent": 0,
+        "capacityTableEquivalents": 15,
+        "required": 7,
+        "gap": 4,
+        "bottleneck": "staff",
+        "waitMin": 0,
+        "tableUtilization": 0.92
+      }
+    ],
+    "recentCalls": null
+  },
+  "modeComparison": [
+    {
+      "key": "full_assisted",
+      "label": "全程代烤",
+      "tablesPerStaff": 4,
+      "assumption": "服务员全程代烤、换篦、分餐；1 人可同时照看 4 张桌",
+      "peakRequiredStaff": 10,
+      "peakGap": 7,
+      "slots": [
+        {
+          "label": "18:30-19:00",
+          "activeTables": 24,
+          "load": 39.2,
+          "required": 10,
+          "gap": 7,
+          "physicalRequired": 6
+        },
+        {
+          "label": "19:00-19:30",
+          "activeTables": 24,
+          "load": 37.4,
+          "required": 10,
+          "gap": 7,
+          "physicalRequired": 6
+        },
+        {
+          "label": "19:30-20:00",
+          "activeTables": 20,
+          "load": 30.4,
+          "required": 8,
+          "gap": 5,
+          "physicalRequired": 5
+        },
+        {
+          "label": "20:00-20:30",
+          "activeTables": 24,
+          "load": 36.8,
+          "required": 10,
+          "gap": 7,
+          "physicalRequired": 6
+        },
+        {
+          "label": "20:30-21:00",
+          "activeTables": 23,
+          "load": 35.8,
+          "required": 9,
+          "gap": 6,
+          "physicalRequired": 6
+        },
+        {
+          "label": "21:00-21:30",
+          "activeTables": 22,
+          "load": 34.8,
+          "required": 9,
+          "gap": 6,
+          "physicalRequired": 6
+        }
+      ]
+    },
+    {
+      "key": "partial_assisted",
+      "label": "部分代烤",
+      "tablesPerStaff": 5,
+      "assumption": "服务员在入座、翻台与高峰时段代烤；1 人可同时照看 5 张桌（当前门店配置）",
+      "peakRequiredStaff": 8,
+      "peakGap": 5,
+      "slots": [
+        {
+          "label": "18:30-19:00",
+          "activeTables": 24,
+          "load": 39.2,
+          "required": 8,
+          "gap": 5,
+          "physicalRequired": 5
+        },
+        {
+          "label": "19:00-19:30",
+          "activeTables": 24,
+          "load": 37.4,
+          "required": 8,
+          "gap": 5,
+          "physicalRequired": 5
+        },
+        {
+          "label": "19:30-20:00",
+          "activeTables": 20,
+          "load": 30.4,
+          "required": 7,
+          "gap": 4,
+          "physicalRequired": 4
+        },
+        {
+          "label": "20:00-20:30",
+          "activeTables": 24,
+          "load": 36.8,
+          "required": 8,
+          "gap": 5,
+          "physicalRequired": 5
+        },
+        {
+          "label": "20:30-21:00",
+          "activeTables": 23,
+          "load": 35.8,
+          "required": 8,
+          "gap": 5,
+          "physicalRequired": 5
+        },
+        {
+          "label": "21:00-21:30",
+          "activeTables": 22,
+          "load": 34.8,
+          "required": 7,
+          "gap": 4,
+          "physicalRequired": 5
+        }
+      ]
+    },
+    {
+      "key": "self_grill",
+      "label": "顾客自主烤制",
+      "tablesPerStaff": 7,
+      "assumption": "顾客自主烤制，服务员主要负责补炭、换篦与清台；1 人可同时照看 7 张桌",
+      "peakRequiredStaff": 6,
+      "peakGap": 3,
+      "slots": [
+        {
+          "label": "18:30-19:00",
+          "activeTables": 24,
+          "load": 39.2,
+          "required": 6,
+          "gap": 3,
+          "physicalRequired": 4
+        },
+        {
+          "label": "19:00-19:30",
+          "activeTables": 24,
+          "load": 37.4,
+          "required": 6,
+          "gap": 3,
+          "physicalRequired": 4
+        },
+        {
+          "label": "19:30-20:00",
+          "activeTables": 20,
+          "load": 30.4,
+          "required": 5,
+          "gap": 2,
+          "physicalRequired": 3
+        },
+        {
+          "label": "20:00-20:30",
+          "activeTables": 24,
+          "load": 36.8,
+          "required": 6,
+          "gap": 3,
+          "physicalRequired": 4
+        },
+        {
+          "label": "20:30-21:00",
+          "activeTables": 23,
+          "load": 35.8,
+          "required": 6,
+          "gap": 3,
+          "physicalRequired": 4
+        },
+        {
+          "label": "21:00-21:30",
+          "activeTables": 22,
+          "load": 34.8,
+          "required": 5,
+          "gap": 2,
+          "physicalRequired": 4
+        }
+      ]
+    }
+  ],
+  "semantics": {
+    "currentFormula": "ceil((Σ 桌数×权重 + 排队组数×0.2) / 每人可负责桌数)",
+    "rawTableFormula": "ceil(在用桌数 / 每人可负责桌数)",
+    "note": "The seeded tablesPerStaff=5 is documented as \"每人可负责桌数\". The engine divides the weighted load by 5, which only makes sense if 5 means standard-table equivalents, not physical tables. If the manager reads it as physical tables, the engine overestimates."
+  }
+}

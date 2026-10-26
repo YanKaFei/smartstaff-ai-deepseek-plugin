@@ -1,0 +1,90 @@
+{
+  "startedAt": "2026-10-26T02:12:10.552Z",
+  "steps": [
+    {
+      "step": "inline_plans",
+      "count": 2,
+      "body": "今日经营\n焰遇烤肉 · 科技园店\n今日已确认\n影子模式\n2026-10-26 · 18:00 · 签到码 K001\n设置\n退出\n今日营业已确认\n有变化随时用下方按钮更新\n在岗员工\n3人\n−\n+\n排队组数\n14组\n−\n+\n最新叫号\n38号\n57 位顾客等待\n空闲桌位\n3/ 24\n占用率 88%\n✓\n更新营业\n✦\nAI 调配\n!\n处理异常\n现场操作：加队 / 叫号 / 刷新\n▾\nAI 人力预测\n人员瓶颈\n5\n人建议增派\n需求 8 人 · 在岗 3 人 · 可靠性高\n生成 AI 调配方案\n今日影子建议\n不邀约 · 不产生费用\n经济方案\n5 人 · ¥450\n成本优先 · 点击记录此建议\n记录此建议\n保障方案\n5 人 · ¥510\n高峰保障 · 点击记录此建议\n记录此建议\n记录后可在试点控制中查看影子结果，不会通知兼职。\n排队与叫号\n14 组 / 57 人\n36\n5 位 · 中桌\n已叫号，等待入座 · 已等 34 分钟\n入座\n37\n6 位 · 中桌\n已叫号，等待入座 · 已等 17 分钟\n入座\n38\n3 位 · 小桌\n已叫号，等待入座 · 已等 8 分钟\n入座\n—\n2 位 · 小桌\n等待中 ·"
+    },
+    {
+      "step": "after_shadow_apply",
+      "groups": {
+        "pending": 0,
+        "confirmed": 0,
+        "checkedIn": 0,
+        "completed": 0,
+        "exceptions": 0
+      },
+      "demands": 0,
+      "pilot": {
+        "shadowMode": true,
+        "control": {
+          "paused": false,
+          "reason": null,
+          "updatedBy": null,
+          "updatedAt": 0
+        },
+        "shadowRuns": [
+          {
+            "id": "shadow_5238e7546764c5e52b",
+            "planId": "plan_9a47e2b56e6c5d28b9",
+            "forecastId": "fc_3ca2b0ecd20a92e2c0",
+            "totalCost": 450,
+            "recommendations": [
+              {
+                "staffId": "staff_3b3820551412eb09ee",
+                "nickname": "吴思远",
+                "startAt": 1793010600000,
+                "endAt": 1793021400000,
+                "hourlyRate": 28,
+                "estimatedCost": 84
+              },
+              {
+                "staffId": "staff_83a71dc85531b28a6d",
+                "nickname": "孙明轩",
+                "startAt": 1793010600000,
+                "endAt": 1793021400000,
+                "hourlyRate": 29,
+                "estimatedCost": 87
+              },
+              {
+                "staffId": "staff_e327dff851cd69c413",
+                "nickname": "林小雨",
+                "startAt": 1793010600000,
+                "endAt": 1793021400000,
+                "hourlyRate": 30,
+                "estimatedCost": 90
+              },
+              {
+                "staffId": "staff_0fb59c2629031e21bc",
+                "nickname": "赵子涵",
+                "startAt": 1793010600000,
+                "endAt": 1793021400000,
+                "hourlyRate": 31,
+                "estimatedCost": 93
+              },
+              {
+                "staffId": "staff_5126b227a8a20340f1",
+                "nickname": "陈浩然",
+                "startAt": 1793010600000,
+                "endAt": 1793021400000,
+                "hourlyRate": 32,
+                "estimatedCost": 96
+              }
+            ],
+            "createdAt": 1792980736518
+          }
+        ],
+        "feedback": {
+          "count": 0,
+          "mae": null,
+          "bias": null,
+          "overloaded": 0,
+          "noShow": 0
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "endedAt": "2026-10-26T02:12:18.827Z"
+}

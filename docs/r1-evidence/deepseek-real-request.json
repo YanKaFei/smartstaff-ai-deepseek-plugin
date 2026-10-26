@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-25T17:39:11.543Z",
+  "hasValidKey": false,
+  "note": "No DEEPSEEK_API_KEY is configured in this environment. A real HTTPS request was sent to the official endpoint with an invalid placeholder key. Authentication was rejected, so model JSON, token usage and cost are NOT verified. Mock-based tests from the 1.0 suite are not counted as real API acceptance.",
+  "endpoint": "https://api.deepseek.com/chat/completions",
+  "requestedModel": "deepseek-flash",
+  "responseFormat": "json_object",
+  "timeoutMs": 12000,
+  "realRequest": {
+    "status": "fallback",
+    "latencyMs": 145,
+    "error": "DeepSeek HTTP 401 {\"error\":{\"message\":\"Authentication Fails, Your api key: ****-key is invalid (request_id: 37549138-8329-4126-84ec-d2671069ad9a)\",\"type\":\"authentication_error\",\"param\":null,\"code\":\"invalid_request_erro",
+    "returnedAnalysisIsDeterministic": true
+  },
+  "withoutKey": {
+    "status": "fallback",
+    "latencyMs": 0,
+    "error": "未配置 DEEPSEEK_API_KEY"
+  },
+  "verified": {
+    "transportReachable": true,
+    "authRejected": true,
+    "modelJsonOutput": false,
+    "latencyUnderLoad": false,
+    "tokenUsage": false,
+    "cost": false
+  }
+}

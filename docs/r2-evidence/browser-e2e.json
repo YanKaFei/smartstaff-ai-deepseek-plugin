@@ -1,0 +1,64 @@
+{
+  "startedAt": "2026-10-25T23:07:57.873Z",
+  "steps": [
+    {
+      "step": "plan_confirmed",
+      "offers": 5,
+      "headcount": 5,
+      "cost": 450
+    },
+    {
+      "step": "manager_records",
+      "groups": {
+        "pending": 5,
+        "confirmed": 0,
+        "checkedIn": 0,
+        "completed": 0,
+        "exceptions": 0
+      },
+      "demands": [
+        {
+          "headcount": 5,
+          "committed": 0,
+          "pending": 5,
+          "unfilled": 5
+        }
+      ]
+    },
+    {
+      "step": "staff_cancel_ui",
+      "text": "我的班次\n0\n已完成\n0.0\n累计小时\n¥0\n预计报酬\n消息通知\n全部已读\n新的工作邀约\n焰遇烤肉 · 科技园店 邀请你 2026-10-26 18:30-2026-10-26 21:30 到店担任烤肉辅助\n暂无待执行班次。接受工作邀约后会出现在这里。\n历史班次\n焰遇烤肉 · 科技园店\n10月26日 18:30-21:30\n已取消\n取消原因：临时有事 · 本人取消\n✳\n工作邀约\n◷\n我的班次\n⌘\n可用时间\n\n已取消，门店将自动寻找候补"
+    },
+    {
+      "step": "approval_button_visible",
+      "count": 1
+    },
+    {
+      "step": "after_approve",
+      "groups": {
+        "pending": 5,
+        "confirmed": 0,
+        "checkedIn": 0,
+        "completed": 0,
+        "exceptions": 1
+      },
+      "demands": [
+        {
+          "headcount": 5,
+          "committed": 0,
+          "pending": 5,
+          "unfilled": 5,
+          "tasks": [
+            "offered"
+          ]
+        }
+      ]
+    },
+    {
+      "step": "admin_data",
+      "text": "经营事件摄取\n数据陈旧\n来源 simulator · 最近 — · 暂无事件\n需检查\n已接收 / 已应用 / 异常\n{}\nWebhook 未配置\n生成 Webhook 密钥\n刷新\n\n签名算法：HMAC-SHA256(rawBody, secret)，请求头 x-signature。密钥仅在生成时显示一次。\n\nAI 用量与预算\n$0 / $5 今日\n30 日 $0 / $80 · 模型 deepseek-flash\n预算可用\n\n暂无 AI 调用记录（未配置 Key 时不会调用）。\n\n最近事件（可重放异常）\n\n暂无摄取事件。"
+    }
+  ],
+  "errors": [],
+  "endedAt": "2026-10-25T23:08:18.230Z"
+}

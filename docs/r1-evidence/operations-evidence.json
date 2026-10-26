@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-10-25T17:41:46.204Z",
+  "scene": "seed 18:00 + 3 simulated hours",
+  "summary": {
+    "from": 1793008800000,
+    "to": 1793019600000,
+    "arrivals": 54,
+    "seated": 49,
+    "checkout": 44,
+    "left": 46,
+    "cleaned": 46,
+    "calls": 46,
+    "latestCallNo": 84,
+    "queueGroups": 19,
+    "forecastGenerated": true
+  },
+  "events": [
+    {
+      "type": "seat",
+      "n": 49
+    },
+    {
+      "type": "queue_call",
+      "n": 46
+    },
+    {
+      "type": "leave",
+      "n": 46
+    },
+    {
+      "type": "clean_done",
+      "n": 46
+    },
+    {
+      "type": "checkout",
+      "n": 44
+    },
+    {
+      "type": "queue_join",
+      "n": 32
+    }
+  ],
+  "manualEquivalentTransitions": 263,
+  "uiActionEstimate": 399,
+  "note": "If entered manually at one action per event, these 3 hours require the lower-bound number of manager actions shown. The UI action sheet adds a selection step for table transitions, so the uiActionEstimate is the more realistic count. The simulator sources all of them automatically."
+}

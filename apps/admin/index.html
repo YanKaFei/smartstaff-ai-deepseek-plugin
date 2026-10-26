@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartStaff AI · 管理后台</title>
+  <link rel="icon" href="./favicon.svg" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <section class="login" id="login">
+      <div class="login-card">
+        <div class="brand"><span class="brand-mark">SS</span><div>SmartStaff AI<small>烤肉门店智能人力调配 · 管理后台</small></div></div>
+        <label>管理员密码<input id="password" type="password" placeholder="请输入管理员密码" autocomplete="current-password" /></label>
+        <button id="login-btn" class="primary">进入后台</button>
+        <p class="hint" id="login-hint">仅限门店运营管理员。兼职与店长请使用微信小程序。</p>
+      </div>
+    </section>
+
+    <div id="shell" class="shell hidden">
+      <aside class="side">
+        <div class="brand small"><span class="brand-mark">SS</span><div>SmartStaff AI<small>Admin Console</small></div></div>
+        <nav id="nav">
+          <button data-tab="overview" class="active">经营概览</button>
+          <button data-tab="staff">人员审核 <span id="staff-badge" class="badge"></span></button>
+          <button data-tab="orders">订单与异常 <span id="exc-badge" class="badge warn"></span></button>
+          <button data-tab="simulator">门店模拟器</button>
+          <button data-tab="data">数据接入 / AI</button>
+          <button data-tab="logs">审计日志</button>
+        </nav>
+        <div class="side-foot">
+          <select id="store-select" aria-label="选择门店"></select>
+          <button id="claim-btn" class="ghost">生成店长授权码</button>
+          <button id="change-password" class="ghost">修改管理员密码</button>
+          <button id="logout" class="ghost">退出登录</button>
+          <p id="system-line" class="tiny"></p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h1 id="page-title">经营概览</h1>
+            <p class="sub" id="page-sub">—</p>
+          </div>
+          <div class="clock"><span id="sim-clock">--:--</span><small id="sim-mode">门店时钟</small></div>
+        </header>
+
+        <section id="panel-overview" class="panel">
+          <div class="grid metrics" id="overview-metrics"></div>
+          <div class="grid two">
+            <article class="card">
+              <h2>桌位状态</h2>
+              <div id="table-status" class="table-status"></div>
+              <div class="legend"><span class="dot free"></span>可入座 <span class="dot dining"></span>用餐中 <span class="dot checkout"></span>已结账 <span class="dot cleaning"></span>待清台</div>
+            </article>
+            <article class="card">
+              <h2>AI 人力预测</h2>
+              <div id="forecast-summary" class="forecast"></div>
+            </article>
+          </div>
+          <article class="card">
+            <h2>待处理异常</h2>
+            <div id="overview-exceptions"></div>
+          </article>
+          <article class="card">
+            <h2>最近班次</h2>
+            <div id="overview-shifts" class="list"></div>
+          </article>
+        </section>
+
+        <section id="panel-staff" class="panel hidden">
+          <div class="filter-row">
+            <button class="chip active" data-staff-filter="pending">待审核</button>
+            <button class="chip" data-staff-filter="all">全部人员</button>
+            <button class="chip" data-staff-filter="approved">已通过</button>
+          </div>
+          <div id="staff-list" class="staff-grid"></div>
+        </section>
+
+        <section id="panel-orders" class="panel hidden">
+          <article class="card">
+            <h2>异常处理</h2>
+            <div id="exception-list"></div>
+          </article>
+          <article class="card">
+            <h2>工作邀约与班次</h2>
+            <div id="shift-list" class="list"></div>
+          </article>
+        </section>
+
+        <section id="panel-simulator" class="panel hidden">
+          <div class="grid two">
+            <article class="card">
+              <h2>模拟时钟</h2>
+              <p class="big-time" id="sim-big">--:--</p>
+              <p class="sub" id="sim-date">—</p>
+              <div class="row">
+                <button id="sim-toggle" class="primary">开始模拟</button>
+                <label class="inline">倍速
+                  <select id="sim-speed">
+                    <option value="30">30×</option>
+                    <option value="60">60×</option>
+                    <option value="120" selected>120×</option>
+                    <option value="300">300×</option>
+                  </select>
+                </label>
+              </div>
+              <div class="row wrap">
+                <button class="ghost" data-advance="15">+15 分钟</button>
+                <button class="ghost" data-advance="30">+30 分钟</button>
+                <button class="ghost" data-advance="60">+1 小时</button>
+                <button class="ghost" data-advance="120">+2 小时</button>
+              </div>
+              <p class="tiny">推进时间会真实写入叫号、入座、结账、离店、清台事件，并按 30 分钟节奏重新计算人力需求。加速期间工作邀约按模拟时间失效与顺延。</p>
+            </article>
+            <article class="card">
+              <h2>最近一次推进</h2>
+              <div id="sim-summary" class="sim-summary">尚未推进</div>
+            </article>
+          </div>
+          <article class="card">
+            <h2>预测时段</h2>
+            <div id="sim-slots" class="slots"></div>
+          </article>
+          <article class="card">
+            <h2>模拟说明</h2>
+            <ul class="notes">
+              <li>初始状态：8 小桌 / 12 中桌 / 4 大桌，3 名在岗员工，14 组排队，叫号至 38 号。</li>
+              <li>7 天历史事件已写入数据库，预测只读取「当前时刻之前」的事件。</li>
+              <li>模拟兼职人员均带「模拟数据」来源标记；所有接单、签到与完工都走真实业务状态机。</li>
+              <li>每日 30 分钟自动重算需求，DeepSeek 仅在你手动点击生成时解释结果。</li>
+            </ul>
+          </article>
+        </section>
+
+        <section id="panel-data" class="panel hidden">
+          <div class="grid two">
+            <article class="card">
+              <h2>经营事件摄取</h2>
+              <div id="ingest-status"></div>
+              <div class="row wrap">
+                <button id="rotate-webhook" class="ghost">生成 Webhook 密钥</button>
+                <button id="refresh-data" class="ghost">刷新</button>
+              </div>
+              <p class="tiny">签名算法：HMAC-SHA256(rawBody, secret)，请求头 x-signature。密钥仅在生成时显示一次。</p>
+            </article>
+            <article class="card">
+              <h2>AI 用量与预算</h2>
+              <div id="ai-usage"></div>
+            </article>
+          </div>
+          <article class="card">
+            <h2>最近事件（可重放异常）</h2>
+            <div id="ingest-events" class="list"></div>
+          </article>
+        </section>
+
+        <section id="panel-logs" class="panel hidden">
+          <article class="card"><div id="log-list" class="logs"></div></article>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+npm warn Unknown env config "sharp-libvips-binary-host". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown env config "sharp-binary-host". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> @smartstaff/server@1.0.0 test
+> tsx --test tests/*.test.ts
+
+✔ ai: deterministic analysis always works without an API key (0.602625ms)
+✔ ai: valid DeepSeek JSON is accepted but headcount and times stay engine-owned (10.954125ms)
+✔ ai: malformed JSON, missing fields and HTTP errors degrade deterministically (0.9515ms)
+✔ ai: schema rejects invented numeric ranges (0.285541ms)
+✔ capacity: sufficient staff produces no gap and no dispatch ranges (1.271416ms)
+✔ capacity: understaffed full house yields a contiguous staff gap range (0.217333ms)
+✔ capacity: queue pressure with enough staff is classified as a table bottleneck (0.177708ms)
+✔ capacity: checkout does not free a table; cleaning and leaving time are included (0.187625ms)
+✔ capacity: history raises the projected arrival rate (0.301417ms)
+✔ e2e: confirm day -> forecast -> plans -> offer -> accept -> check-in -> checkout -> completion (528.561ms)
+✔ dispatch: rejecting an offer automatically falls back to the next candidate (495.329875ms)
+✔ dispatch: unanswered offers expire on simulated time and fall back (490.537291ms)
+✔ dispatch: no remaining candidate cancels the shift and raises a manager exception (460.373ms)
+✔ concurrency: only one accept wins and overlapping shifts are blocked (460.236084ms)
+✔ security: role isolation, cross-user access and input validation (519.361625ms)
+✔ admin: staff registration requires training and approval before matching (489.059542ms)
+✔ plans: candidate replacement is validated and reflected before confirmation (447.091ms)
+✔ plans: insufficient candidates are shown as a shortage and cannot be confirmed (445.827667ms)
+✔ ai failure: DeepSeek outage falls back while forecast and dispatch still work (443.63675ms)
+✔ onboarding: a new store can be created and configured, isolating its data (440.830875ms)
+✔ matching: hard filters reject unapproved, untrained, unavailable, distant and conflicting staff (0.638916ms)
+✔ matching: notification and travel time are respected (0.103667ms)
+✔ matching: overnight availability windows cover late shifts (0.0995ms)
+✔ matching: economic plan minimizes cost while guarantee plan picks reliability (0.442209ms)
+✔ matching: shortage is reported honestly and no staff are fabricated (0.44125ms)
+✔ matching: a person is never double-booked across overlapping ranges (0.1115ms)
+✔ seed: seven days of history exist before the demo day (467.360208ms)
+✔ simulator: advancing time writes ops events, moves tables and recomputes demand (469.302875ms)
+✔ simulator: API advance is validated and simulated clock is returned (494.808917ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5373.981833

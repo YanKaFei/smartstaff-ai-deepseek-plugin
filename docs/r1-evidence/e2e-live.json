@@ -1,0 +1,196 @@
+{
+  "startedAt": "2026-10-25T17:45:00.589Z",
+  "steps": [
+    {
+      "step": "forecast",
+      "httpMs": 5,
+      "gap": 5,
+      "required": 8,
+      "aiStatus": "fallback",
+      "slots": [
+        {
+          "label": "18:30-19:00",
+          "required": 8,
+          "gap": 5
+        },
+        {
+          "label": "19:00-19:30",
+          "required": 8,
+          "gap": 5
+        },
+        {
+          "label": "19:30-20:00",
+          "required": 7,
+          "gap": 4
+        },
+        {
+          "label": "20:00-20:30",
+          "required": 8,
+          "gap": 5
+        },
+        {
+          "label": "20:30-21:00",
+          "required": 8,
+          "gap": 5
+        },
+        {
+          "label": "21:00-21:30",
+          "required": 7,
+          "gap": 4
+        }
+      ]
+    },
+    {
+      "step": "plans",
+      "httpMs": 2,
+      "plans": [
+        {
+          "type": "economic",
+          "headcount": 5,
+          "cost": 450,
+          "shortage": 0
+        },
+        {
+          "type": "guarantee",
+          "headcount": 5,
+          "cost": 510,
+          "shortage": 0
+        }
+      ]
+    },
+    {
+      "step": "after_manager_confirms_plan",
+      "groups": {
+        "pending": 5,
+        "confirmed": 0,
+        "checkedIn": 0,
+        "completed": 0,
+        "exceptions": 0
+      }
+    },
+    {
+      "step": "staff_received_offer",
+      "httpMs": 3,
+      "pending": 1,
+      "items": [
+        {
+          "status": "pending",
+          "store": "焰遇烤肉 · 科技园店",
+          "startAt": 1793010600000,
+          "pay": 90
+        }
+      ]
+    },
+    {
+      "step": "staff_notifications",
+      "httpMs": 3,
+      "items": [
+        {
+          "type": "offer",
+          "title": "新的工作邀约"
+        }
+      ]
+    },
+    {
+      "step": "after_staff_accept",
+      "groups": {
+        "pending": 4,
+        "confirmed": 1,
+        "checkedIn": 0,
+        "completed": 0,
+        "exceptions": 0
+      }
+    },
+    {
+      "step": "after_staff_checkin",
+      "groups": {
+        "pending": 4,
+        "confirmed": 0,
+        "checkedIn": 1,
+        "completed": 0,
+        "exceptions": 0
+      }
+    },
+    {
+      "step": "after_checkout_and_manager_completion",
+      "groups": {
+        "pending": 0,
+        "confirmed": 0,
+        "checkedIn": 0,
+        "completed": 1,
+        "exceptions": 4
+      }
+    },
+    {
+      "step": "final_shift_rows",
+      "items": [
+        {
+          "staff": "冯嘉豪",
+          "status": "cancelled",
+          "offer": "expired",
+          "minutes": null,
+          "pay": null,
+          "confirmed": false
+        },
+        {
+          "staff": "周佳怡",
+          "status": "cancelled",
+          "offer": "expired",
+          "minutes": null,
+          "pay": null,
+          "confirmed": false
+        },
+        {
+          "staff": "林小雨",
+          "status": "completed",
+          "offer": "accepted",
+          "minutes": 60,
+          "pay": 30,
+          "confirmed": true
+        },
+        {
+          "staff": "郑晓彤",
+          "status": "cancelled",
+          "offer": "expired",
+          "minutes": null,
+          "pay": null,
+          "confirmed": false
+        },
+        {
+          "staff": "何雅雯",
+          "status": "cancelled",
+          "offer": "expired",
+          "minutes": null,
+          "pay": null,
+          "confirmed": false
+        }
+      ]
+    },
+    {
+      "step": "admin_default_password",
+      "accepted": true,
+      "note": "admin123 accepted; production blocker if left unchanged"
+    }
+  ],
+  "interactions": {
+    "firstLogin": {
+      "typedFields": 0,
+      "clicks": 1,
+      "loginInputsOnStart": 2
+    },
+    "returningSession": {
+      "reloadedWithoutLoginForm": true,
+      "homeVisible": true,
+      "authClicks": 0,
+      "confirmClicks": 1
+    },
+    "managerCompletion": {
+      "navClicks": 1,
+      "tabClicks": 1,
+      "confirmClicks": 1
+    }
+  },
+  "errors": [],
+  "endedAt": "2026-10-25T17:45:31.400Z",
+  "consoleErrors": []
+}
