@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -372,6 +372,8 @@ CREATE TABLE IF NOT EXISTS data_imports (
   invalid_count INTEGER NOT NULL,
   duplicate_count INTEGER NOT NULL,
   quality_json TEXT NOT NULL,
+  pilot_id TEXT,
+  dataset_type TEXT NOT NULL DEFAULT 'sessions',
   created_by TEXT,
   created_at INTEGER NOT NULL
 );
@@ -382,6 +384,7 @@ CREATE TABLE IF NOT EXISTS import_observations (
   import_id TEXT NOT NULL REFERENCES data_imports(id),
   store_id TEXT NOT NULL REFERENCES stores(id),
   source_row INTEGER NOT NULL,
+  pilot_id TEXT,
   store_code TEXT,
   business_date TEXT,
   table_type TEXT,
@@ -433,10 +436,82 @@ CREATE TABLE IF NOT EXISTS replay_predictions (
   reason TEXT NOT NULL,
   quality_json TEXT NOT NULL,
   actual_json TEXT,
+  phase TEXT,
   evaluated INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_replay_predictions_run ON replay_predictions(run_id, prediction_time);
+
+CREATE TABLE IF NOT EXISTS pilot_profiles (
+  id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL REFERENCES stores(id),
+  anonymous_code TEXT NOT NULL UNIQUE,
+  service_mode TEXT NOT NULL CHECK (service_mode IN ('full','partial','self')),
+  hours_start TEXT NOT NULL,
+  hours_end TEXT NOT NULL,
+  table_config_json TEXT NOT NULL DEFAULT '{}',
+  staffing_json TEXT NOT NULL DEFAULT '{}',
+  roles_json TEXT NOT NULL DEFAULT '[]',
+  data_sources_json TEXT NOT NULL DEFAULT '[]',
+  coverage_start TEXT,
+  coverage_end TEXT,
+  authorization_status TEXT NOT NULL CHECK (authorization_status IN ('pending','authorized','revoked')),
+  owner TEXT,
+  start_date TEXT,
+  end_date TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_pilots_store ON pilot_profiles(store_id, created_at);
+
+CREATE TABLE IF NOT EXISTS pilot_events (
+  id TEXT PRIMARY KEY,
+  pilot_id TEXT NOT NULL REFERENCES pilot_profiles(id),
+  store_id TEXT NOT NULL REFERENCES stores(id),
+  event_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  occurred_at INTEGER NOT NULL,
+  business_date TEXT,
+  table_label TEXT,
+  table_type TEXT,
+  party_size INTEGER,
+  staff_role TEXT,
+  staff_anonymous_id TEXT,
+  call_no INTEGER,
+  service_mode TEXT,
+  on_duty_staff INTEGER,
+  manager_sufficiency TEXT,
+  source_row INTEGER NOT NULL,
+  data_origin TEXT NOT NULL CHECK (data_origin IN ('REAL','SIMULATED')),
+  quality_status TEXT NOT NULL CHECK (quality_status IN ('valid','invalid','duplicate')),
+  issues_json TEXT NOT NULL DEFAULT '[]',
+  dedupe_key TEXT,
+  created_at INTEGER NOT NULL,
+  UNIQUE (pilot_id, event_id)
+);
+CREATE INDEX IF NOT EXISTS ix_pilot_events_time ON pilot_events(pilot_id, occurred_at);
+
+CREATE TABLE IF NOT EXISTS workload_observations (
+  id TEXT PRIMARY KEY,
+  pilot_id TEXT NOT NULL REFERENCES pilot_profiles(id),
+  store_id TEXT NOT NULL REFERENCES stores(id),
+  observation_id TEXT NOT NULL,
+  staff_role TEXT,
+  service_mode TEXT,
+  table_type TEXT,
+  action TEXT,
+  start_at INTEGER,
+  end_at INTEGER,
+  minutes REAL,
+  source_row INTEGER NOT NULL,
+  data_origin TEXT NOT NULL CHECK (data_origin IN ('REAL','SIMULATED')),
+  quality_status TEXT NOT NULL CHECK (quality_status IN ('valid','invalid','duplicate')),
+  issues_json TEXT NOT NULL DEFAULT '[]',
+  dedupe_key TEXT,
+  created_at INTEGER NOT NULL,
+  UNIQUE (pilot_id, observation_id)
+);
+CREATE INDEX IF NOT EXISTS ix_workload_pilot_time ON workload_observations(pilot_id, start_at);
 
 CREATE TABLE IF NOT EXISTS pilot_ux_metrics (
   id TEXT PRIMARY KEY,

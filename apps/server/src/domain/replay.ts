@@ -35,15 +35,17 @@ interface Observation {
   managerSufficiency: 'short' | 'adequate' | 'over' | 'unknown' | null;
 }
 
-function metricsFor(rows: Array<{ recommended: number; actual: number | null; tableType: TableType; leadMinutes: number; evaluated: boolean }>) {
+function metricsFor(rows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase?: string }>, hourlyRate: number) {
   const evaluated = rows.filter((r) => r.evaluated && r.actual !== null);
   const mae = evaluated.length ? evaluated.reduce((s, r) => s + Math.abs(r.recommended - (r.actual ?? 0)), 0) / evaluated.length : null;
   const bias = evaluated.length ? evaluated.reduce((s, r) => s + (r.recommended - (r.actual ?? 0)), 0) / evaluated.length : null;
   const overHours = evaluated.reduce((s, r) => s + Math.max(0, r.recommended - (r.actual ?? 0)) * 0.5, 0);
   const underHours = evaluated.reduce((s, r) => s + Math.max(0, (r.actual ?? 0) - r.recommended) * 0.5, 0);
   const peakMiss = evaluated.filter((r) => (r.actual ?? 0) > r.recommended).length;
+  const shortageCount = evaluated.filter((r) => (r.actual ?? 0) > r.recommended).length;
+  const peakShortageDetectionRate = shortageCount ? Math.round((1 - peakMiss / shortageCount) * 1000) / 1000 : null;
   const byType: Record<string, { count: number; mae: number | null; bias: number | null }> = {};
-  for (const type of ['small', 'medium', 'large']) {
+  for (const type of ['small', 'medium', 'large', 'mixed']) {
     const subset = evaluated.filter((r) => r.tableType === type);
     byType[type] = {
       count: subset.length,
@@ -59,6 +61,8 @@ function metricsFor(rows: Array<{ recommended: number; actual: number | null; ta
     overstaffedPersonHours: Math.round(overHours * 100) / 100,
     understaffedPersonHours: Math.round(underHours * 100) / 100,
     peakMissCount: peakMiss,
+    peakShortageDetectionRate,
+    estimatedExtraLaborCost: Math.round(overHours * hourlyRate * 100) / 100,
     averageLeadMinutes: evaluated.length ? Math.round((evaluated.reduce((s, r) => s + r.leadMinutes, 0) / evaluated.length) * 10) / 10 : null,
     byTableType: byType,
     labelNote: 'actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty.',
@@ -87,12 +91,30 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
   if (!rows.length) throw new AppError(409, 'NO_VALID_OBSERVATIONS', '导入批次没有可回放的有效样本');
   const store = getStore(db, storeId);
   const base = parseConfig(store);
-  const minSeat = Math.min(...rows.map((r) => r.seatAt));
-  const maxLeave = Math.max(...rows.map((r) => r.leaveAt));
-  const start = Math.ceil((minSeat + 1) / (30 * MINUTE_MS)) * 30 * MINUTE_MS;
+  // Replay each business day independently; never bridge overnight gaps.
+  const byDay = new Map<string, Observation[]>();
+  for (const row of rows) {
+    const key = new Date(row.seatAt + 8 * 3_600_000).toISOString().slice(0, 10);
+    const list = byDay.get(key) ?? [];
+    list.push(row);
+    byDay.set(key, list);
+  }
   const points: number[] = [];
-  for (let t = start; t + 3 * 60 * MINUTE_MS <= maxLeave; t += 30 * MINUTE_MS) points.push(t);
+  for (const dayRows of byDay.values()) {
+    const minSeat = Math.min(...dayRows.map((r) => r.seatAt));
+    const maxLeave = Math.max(...dayRows.map((r) => r.leaveAt));
+    const start = Math.ceil((minSeat + 1) / (30 * MINUTE_MS)) * 30 * MINUTE_MS;
+    for (let t = start; t + 3 * 60 * MINUTE_MS <= maxLeave; t += 30 * MINUTE_MS) points.push(t);
+  }
+  points.sort((a, b) => a - b);
   if (!points.length) throw new AppError(409, 'REPLAY_TOO_SHORT', '导入数据不足 3 小时，无法回放');
+  const dates = [...new Set(rows.map((r) => new Date(r.seatAt + 8 * 3_600_000).toISOString().slice(0, 10)))].sort();
+  const splitDate = dates.length >= 14 ? dates[6] : null;
+  const phaseOf = (t: number) => {
+    const d = new Date(t + 8 * 3_600_000).toISOString().slice(0, 10);
+    if (!splitDate) return 'calibration';
+    return d <= splitDate ? 'calibration' : 'validation';
+  };
   const runs = [];
   for (const variant of variants) {
     const cfg: StoreConfig = { ...base, staffing: { ...base.staffing, ...variant.patch } };
@@ -104,7 +126,7 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
        VALUES(?,?,?,?,?,?,?,?)`,
       [runId, importId, storeId, cfg.staffing.capacityModel, cfg.staffing.serviceMode, 'running', actorId, now],
     );
-    const metricsRows: Array<{ recommended: number; actual: number | null; tableType: TableType; leadMinutes: number; evaluated: boolean }> = [];
+    const metricsRows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase: string }> = [];
     for (const t of points) {
       const active = rows.filter((r) => r.seatAt <= t && r.leaveAt > t);
       const queued = rows.filter((r) => r.queueAt !== null && r.queueAt <= t && r.seatAt > t);
@@ -165,17 +187,39 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
         futureObservationIds: future.map((r) => r.id),
         futureObservationCount: future.length,
       };
+      const phase = phaseOf(t);
       run(
         db,
-        `INSERT INTO replay_predictions(id, run_id, prediction_time, horizon_start, horizon_end, input_snapshot_json, model, service_mode, recommended, reason, quality_json, actual_json, evaluated, created_at)
-         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        [id('rpp'), runId, t, forecast.horizonStart, horizonEnd, JSON.stringify(snapshot), cfg.staffing.capacityModel, cfg.staffing.serviceMode, forecast.peakRequiredStaff, `${forecast.bottleneckReason}；${forecast.reliabilityReason}`, JSON.stringify({ reliability: forecast.reliability, calibrationStatus: cfg.staffing.calibrationStatus }), JSON.stringify(actualJson), evaluated ? 1 : 0, Date.now()],
+        `INSERT INTO replay_predictions(id, run_id, prediction_time, horizon_start, horizon_end, input_snapshot_json, model, service_mode, recommended, reason, quality_json, actual_json, phase, evaluated, created_at)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        [id('rpp'), runId, t, forecast.horizonStart, horizonEnd, JSON.stringify(snapshot), cfg.staffing.capacityModel, cfg.staffing.serviceMode, forecast.peakRequiredStaff, `${forecast.bottleneckReason}；${forecast.reliabilityReason}`, JSON.stringify({ reliability: forecast.reliability, calibrationStatus: cfg.staffing.calibrationStatus }), JSON.stringify(actualJson), phase, evaluated ? 1 : 0, Date.now()],
       );
       const dominant = active.reduce<Record<string, number>>((acc, r) => { acc[r.tableType] = (acc[r.tableType] ?? 0) + 1; return acc; }, {});
-      const tableType = (Object.entries(dominant).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'small') as TableType;
-      metricsRows.push({ recommended: forecast.peakRequiredStaff, actual, tableType, leadMinutes: Math.round((forecast.horizonStart - t) / MINUTE_MS), evaluated });
+      const types = Object.entries(dominant).filter(([, n]) => n > 0);
+      const max = Math.max(0, ...types.map(([, n]) => n));
+      const top = types.filter(([, n]) => n === max);
+      const tableType = (top.length !== 1 || types.length > 1 ? 'mixed' : (top[0]?.[0] ?? 'small')) as TableType | 'mixed';
+      metricsRows.push({ recommended: forecast.peakRequiredStaff, actual, tableType, leadMinutes: Math.round((forecast.horizonStart - t) / MINUTE_MS), evaluated, phase });
     }
-    const metrics = metricsFor(metricsRows);
+    const baseMetrics = metricsFor(metricsRows, base.basic.hourlyRate);
+    const metrics = {
+      ...baseMetrics,
+      phases: {
+        calibration: metricsFor(metricsRows.filter((r) => r.phase === 'calibration'), base.basic.hourlyRate),
+        validation: metricsFor(metricsRows.filter((r) => r.phase === 'validation'), base.basic.hourlyRate),
+      },
+      splitDate,
+      distinctDays: dates.length,
+      insufficientData: dates.length < 14 || metricsRows.filter((r) => r.phase === 'validation' && r.evaluated).length === 0,
+      dataQuality: imported.quality,
+      missingRate: (() => {
+        const missing = imported.quality?.missing ?? {};
+        const total = Object.values(missing as Record<string, number>).reduce((a, b) => a + Number(b), 0);
+        const fields = Object.keys(missing).length || 1;
+        return imported.quality?.validCount ? Math.round((total / (imported.quality.validCount * fields)) * 10000) / 10000 : null;
+      })(),
+      timestampIssues: imported.quality?.timeOrderIssues ?? imported.quality?.timestampInvalid ?? null,
+    };
     run(
       db,
       "UPDATE replay_runs SET status = 'completed', prediction_count = ?, metrics_json = ?, data_quality_json = ?, completed_at = ? WHERE id = ?",

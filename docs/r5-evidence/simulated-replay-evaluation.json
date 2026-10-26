@@ -1,0 +1,595 @@
+{
+  "dataOrigin": "SIMULATED",
+  "pilotId": "pilot_b6f14b94a7905fd4fb",
+  "replay": {
+    "importId": "imp_c9df0d6dac6c27b0b3",
+    "dataOrigin": "SIMULATED",
+    "points": 28,
+    "runs": [
+      {
+        "runId": "rpl_a2803c7748c12c93c8",
+        "model": "legacy",
+        "serviceMode": "partial",
+        "metrics": {
+          "predictionCount": 28,
+          "evaluatedCount": 28,
+          "mae": 2,
+          "bias": -2,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 28,
+          "peakMissCount": 28,
+          "peakShortageDetectionRate": 0,
+          "estimatedExtraLaborCost": 0,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "mixed": {
+              "count": 28,
+              "mae": 2,
+              "bias": -2
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty.",
+          "phases": {
+            "calibration": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 2,
+              "bias": -2,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 14,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 2,
+                  "bias": -2
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            },
+            "validation": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 2,
+              "bias": -2,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 14,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 2,
+                  "bias": -2
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            }
+          },
+          "splitDate": "2026-10-07",
+          "distinctDays": 14,
+          "insufficientData": false,
+          "dataQuality": {
+            "dataOrigin": "SIMULATED",
+            "datasetType": "events_sessions",
+            "rowCount": 140,
+            "validCount": 140,
+            "invalidCount": 0,
+            "duplicateCount": 0,
+            "missing": {
+              "businessDate": 0,
+              "tableLabel": 0,
+              "partySize": 0,
+              "staffAnonymousId": 0,
+              "onDutyStaff": 0
+            },
+            "timestampInvalid": 0,
+            "piiRows": 0,
+            "eventTypes": [
+              "queue_join",
+              "seat",
+              "checkout",
+              "leave",
+              "clean"
+            ],
+            "dateRange": [
+              "2026-10-01",
+              "2026-10-14"
+            ],
+            "note": "Derived sessions from events; one row per seat/leave pair."
+          },
+          "missingRate": 0,
+          "timestampIssues": 0
+        }
+      },
+      {
+        "runId": "rpl_8d706b9422608bf2e7",
+        "model": "service_minutes",
+        "serviceMode": "partial",
+        "metrics": {
+          "predictionCount": 28,
+          "evaluatedCount": 28,
+          "mae": 2,
+          "bias": -2,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 28,
+          "peakMissCount": 28,
+          "peakShortageDetectionRate": 0,
+          "estimatedExtraLaborCost": 0,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "mixed": {
+              "count": 28,
+              "mae": 2,
+              "bias": -2
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty.",
+          "phases": {
+            "calibration": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 2,
+              "bias": -2,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 14,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 2,
+                  "bias": -2
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            },
+            "validation": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 2,
+              "bias": -2,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 14,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 2,
+                  "bias": -2
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            }
+          },
+          "splitDate": "2026-10-07",
+          "distinctDays": 14,
+          "insufficientData": false,
+          "dataQuality": {
+            "dataOrigin": "SIMULATED",
+            "datasetType": "events_sessions",
+            "rowCount": 140,
+            "validCount": 140,
+            "invalidCount": 0,
+            "duplicateCount": 0,
+            "missing": {
+              "businessDate": 0,
+              "tableLabel": 0,
+              "partySize": 0,
+              "staffAnonymousId": 0,
+              "onDutyStaff": 0
+            },
+            "timestampInvalid": 0,
+            "piiRows": 0,
+            "eventTypes": [
+              "queue_join",
+              "seat",
+              "checkout",
+              "leave",
+              "clean"
+            ],
+            "dateRange": [
+              "2026-10-01",
+              "2026-10-14"
+            ],
+            "note": "Derived sessions from events; one row per seat/leave pair."
+          },
+          "missingRate": 0,
+          "timestampIssues": 0
+        }
+      },
+      {
+        "runId": "rpl_21ae6e21f1492da19b",
+        "model": "service_minutes",
+        "serviceMode": "full",
+        "metrics": {
+          "predictionCount": 28,
+          "evaluatedCount": 28,
+          "mae": 1,
+          "bias": -1,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 14,
+          "peakMissCount": 28,
+          "peakShortageDetectionRate": 0,
+          "estimatedExtraLaborCost": 0,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "mixed": {
+              "count": 28,
+              "mae": 1,
+              "bias": -1
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty.",
+          "phases": {
+            "calibration": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 1,
+              "bias": -1,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 7,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 1,
+                  "bias": -1
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            },
+            "validation": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 1,
+              "bias": -1,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 7,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 1,
+                  "bias": -1
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            }
+          },
+          "splitDate": "2026-10-07",
+          "distinctDays": 14,
+          "insufficientData": false,
+          "dataQuality": {
+            "dataOrigin": "SIMULATED",
+            "datasetType": "events_sessions",
+            "rowCount": 140,
+            "validCount": 140,
+            "invalidCount": 0,
+            "duplicateCount": 0,
+            "missing": {
+              "businessDate": 0,
+              "tableLabel": 0,
+              "partySize": 0,
+              "staffAnonymousId": 0,
+              "onDutyStaff": 0
+            },
+            "timestampInvalid": 0,
+            "piiRows": 0,
+            "eventTypes": [
+              "queue_join",
+              "seat",
+              "checkout",
+              "leave",
+              "clean"
+            ],
+            "dateRange": [
+              "2026-10-01",
+              "2026-10-14"
+            ],
+            "note": "Derived sessions from events; one row per seat/leave pair."
+          },
+          "missingRate": 0,
+          "timestampIssues": 0
+        }
+      },
+      {
+        "runId": "rpl_eb6dc4fcc547ec3e19",
+        "model": "service_minutes",
+        "serviceMode": "self",
+        "metrics": {
+          "predictionCount": 28,
+          "evaluatedCount": 28,
+          "mae": 3,
+          "bias": -3,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 42,
+          "peakMissCount": 28,
+          "peakShortageDetectionRate": 0,
+          "estimatedExtraLaborCost": 0,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "mixed": {
+              "count": 28,
+              "mae": 3,
+              "bias": -3
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty.",
+          "phases": {
+            "calibration": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 3,
+              "bias": -3,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 21,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 3,
+                  "bias": -3
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            },
+            "validation": {
+              "predictionCount": 14,
+              "evaluatedCount": 14,
+              "mae": 3,
+              "bias": -3,
+              "overstaffedPersonHours": 0,
+              "understaffedPersonHours": 21,
+              "peakMissCount": 14,
+              "peakShortageDetectionRate": 0,
+              "estimatedExtraLaborCost": 0,
+              "averageLeadMinutes": 30,
+              "byTableType": {
+                "small": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "medium": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "large": {
+                  "count": 0,
+                  "mae": null,
+                  "bias": null
+                },
+                "mixed": {
+                  "count": 14,
+                  "mae": 3,
+                  "bias": -3
+                }
+              },
+              "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+            }
+          },
+          "splitDate": "2026-10-07",
+          "distinctDays": 14,
+          "insufficientData": false,
+          "dataQuality": {
+            "dataOrigin": "SIMULATED",
+            "datasetType": "events_sessions",
+            "rowCount": 140,
+            "validCount": 140,
+            "invalidCount": 0,
+            "duplicateCount": 0,
+            "missing": {
+              "businessDate": 0,
+              "tableLabel": 0,
+              "partySize": 0,
+              "staffAnonymousId": 0,
+              "onDutyStaff": 0
+            },
+            "timestampInvalid": 0,
+            "piiRows": 0,
+            "eventTypes": [
+              "queue_join",
+              "seat",
+              "checkout",
+              "leave",
+              "clean"
+            ],
+            "dateRange": [
+              "2026-10-01",
+              "2026-10-14"
+            ],
+            "note": "Derived sessions from events; one row per seat/leave pair."
+          },
+          "missingRate": 0,
+          "timestampIssues": 0
+        }
+      }
+    ]
+  }
+}

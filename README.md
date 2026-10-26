@@ -2,11 +2,12 @@
 
 **烤肉门店智能人力调配系统** — 门店经营数据 → 未来 3 小时人力预测 → 自动匹配兼职 → 店长确认 → 兼职接单 → 到店签到 → 完工记录。
 
-一套代码同时交付 **微信小程序（uni-app + Vue 3 + TypeScript）**、**H5 预览**、**Web 管理后台** 和 **Node.js + SQLite API**。1.0 的完整业务闭环已实现；R2 在其上完成安全、候补、服务分钟模型、统一事件摄取与 AI 成本治理。当前 **85 项自动化测试全部通过**（37 项 R1 基线 + 48 项 R2/R3/R4 增量），不是原型或伪代码。
+一套代码同时交付 **微信小程序（uni-app + Vue 3 + TypeScript）**、**H5 预览**、**Web 管理后台** 和 **Node.js + SQLite API**。1.0 的完整业务闭环已实现；R2 在其上完成安全、候补、服务分钟模型、统一事件摄取与 AI 成本治理。当前 **87 项自动化测试全部通过**（37 项 R1 基线 + 50 项 R2–R5 增量），不是原型或伪代码。
 
 > R2 验收详情与证据见 [`R2-VALIDATION-REPORT.md`](R2-VALIDATION-REPORT.md)。
 > R3 试点准备、集成矩阵、安全、校准与试点计划见 [`R3-READINESS-REPORT.md`](R3-READINESS-REPORT.md)。
 > R4 影子数据导入、回放、评估与 Gate 见 [`R4-RELEASE-GATE.md`](R4-RELEASE-GATE.md)。
+> R5 首店影子工作包与决策见 [`R5-PILOT-DECISION.md`](R5-PILOT-DECISION.md)。
 
 ![登录页](docs/screenshots/01-login.png)
 
@@ -107,7 +108,7 @@ SmartStaff-AI/
 │   │   │   ├── app.ts
 │   │   │   ├── index.ts
 │   │   │   └── seed.ts         # 模拟数据：14 名兼职 + 7 天事件
-│   │   ├── tests/              # 85 项 node:test 自动化测试
+│   │   ├── tests/              # 87 项 node:test 自动化测试
 │   │   ├── data/               # smartstaff.db（seed 生成）
 │   │   └── .env.example
 │   ├── miniapp/                # uni-app Vue3 + TS
@@ -224,7 +225,7 @@ H5 构建：`npm run build:h5`，产物位于 `apps/miniapp/dist/build/h5`，API
 | `npm run seed` | 生成/补齐演示数据 |
 | `npm run build` | 编译 server |
 | `npm run start` | 运行编译后的 server |
-| `npm run test` | 85 项自动化测试 |
+| `npm run test` | 87 项自动化测试 |
 | `npm run reset` | 删除并重建模拟数据库 |
 | `npm run build:all` | 构建 server + H5 + 微信小程序 |
 | `npm run dev:h5` | uni-app H5 开发服务器（5173，/api 代理到 8787） |
@@ -371,14 +372,14 @@ pending ──accept──▶ accepted  → shift confirmed → checked_in → c
 
 ## 12. 测试与验收
 
-当前：`npm test` → 85/85 通过（37 项 R1 基线 + 48 项 R2/R3/R4）。证据在 `docs/r4-evidence/`。
+当前：`npm test` → 87/87 通过（37 项 R1 基线 + 50 项 R2–R5）。证据在 `docs/r4-evidence/`。
 
 ```bash
 cd SmartStaff-AI
 npm test
 ```
 
-**85 项全部通过**（详见 [`R4-RELEASE-GATE.md`](R4-RELEASE-GATE.md) 与原始输出 [`docs/r4-evidence/test-output-r4.txt`](docs/r4-evidence/test-output-r4.txt)）：
+**87 项全部通过**（详见 [`R4-RELEASE-GATE.md`](R4-RELEASE-GATE.md) 与原始输出 [`docs/r4-evidence/test-output-r4.txt`](docs/r4-evidence/test-output-r4.txt)）：
 
 - 容量引擎：人力充足零建议、连续缺口合并、桌位瓶颈、结账不清空桌位、历史到达率
 - 匹配：审核/培训/时间/冲突/距离/通知时间硬过滤、跨午夜、双方案差异、缺口不虚构、防重复派单

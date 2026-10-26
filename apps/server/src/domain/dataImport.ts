@@ -51,7 +51,7 @@ function normalizeHeader(h: string): string {
   return HEADER_ALIASES[h.trim().toLowerCase()] ?? HEADER_ALIASES[h.trim()] ?? h.trim();
 }
 
-function valueOrNull(v: string | undefined): string | null {
+export function valueOrNull(v: string | undefined): string | null {
   if (v === undefined) return null;
   const t = v.trim();
   return t === '' || t.toLowerCase() === 'null' || t === '-' ? null : t;
@@ -70,14 +70,14 @@ function parseExcelSerial(value: string): { date: string; minutes: number } | nu
   };
 }
 
-function parseBusinessDate(value: string | null): string | null {
+export function parseBusinessDate(value: string | null): string | null {
   if (!value) return null;
   if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
   const serial = parseExcelSerial(value);
   return serial?.date ?? null;
 }
 
-function parseInstant(value: string | null, businessDate: string | null): number | null {
+export function parseInstant(value: string | null, businessDate: string | null): number | null {
   if (!value) return null;
   if (/^\d{4}-\d{2}-\d{2}T/.test(value) || /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(value)) {
     const iso = value.replace(' ', 'T');
@@ -98,7 +98,7 @@ function parseInstant(value: string | null, businessDate: string | null): number
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function normalizeTableType(value: string | null): 'small' | 'medium' | 'large' | null {
+export function normalizeTableType(value: string | null): 'small' | 'medium' | 'large' | null {
   if (!value) return null;
   const v = value.toLowerCase();
   if (['small', '小', '小桌', '2'].includes(v)) return 'small';
@@ -107,7 +107,7 @@ function normalizeTableType(value: string | null): 'small' | 'medium' | 'large' 
   return null;
 }
 
-function normalizeServiceMode(value: string | null): 'full' | 'partial' | 'self' | null {
+export function normalizeServiceMode(value: string | null): 'full' | 'partial' | 'self' | null {
   if (!value) return null;
   const v = value.toLowerCase();
   if (['full', '全程代烤', '全程', 'full_assisted'].includes(v)) return 'full';
@@ -116,7 +116,7 @@ function normalizeServiceMode(value: string | null): 'full' | 'partial' | 'self'
   return null;
 }
 
-function normalizeSufficiency(value: string | null): 'short' | 'adequate' | 'over' | 'unknown' | null {
+export function normalizeSufficiency(value: string | null): 'short' | 'adequate' | 'over' | 'unknown' | null {
   if (!value) return null;
   const v = value.toLowerCase();
   if (['short', 'under', '偏少', '不足', '缺人'].includes(v)) return 'short';
@@ -137,6 +137,8 @@ export interface ImportInput {
   content: string | Buffer;
   dataOrigin: DataOrigin;
   actorId: string;
+  pilotId?: string | null;
+  datasetType?: 'sessions' | 'events' | 'workload';
 }
 
 export function importDataset(db: Db, storeId: string, input: ImportInput) {
@@ -238,16 +240,16 @@ export function importDataset(db: Db, storeId: string, input: ImportInput) {
   const now = Date.now();
   run(
     db,
-    `INSERT INTO data_imports(id, store_id, filename, format, data_origin, row_count, valid_count, invalid_count, duplicate_count, quality_json, created_by, created_at)
-     VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`,
-    [importId, storeId, input.filename, input.format, input.dataOrigin, observations.length, valid.length, invalid.length, duplicates.length, JSON.stringify(quality), input.actorId, now],
+    `INSERT INTO data_imports(id, store_id, filename, format, data_origin, row_count, valid_count, invalid_count, duplicate_count, quality_json, pilot_id, dataset_type, created_by, created_at)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    [importId, storeId, input.filename, input.format, input.dataOrigin, observations.length, valid.length, invalid.length, duplicates.length, JSON.stringify(quality), input.pilotId ?? null, input.datasetType ?? 'sessions', input.actorId, now],
   );
   for (const o of observations) {
     run(
       db,
-      `INSERT INTO import_observations(id, import_id, store_id, source_row, store_code, business_date, table_type, party_size, queue_at, seat_at, checkout_at, leave_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency, data_origin, quality_status, issues_json, dedupe_key, created_at)
-       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [id('obs'), importId, storeId, o.sourceRow, o.storeCode, o.businessDate, o.tableType, o.partySize, o.queueAt, o.seatAt, o.checkoutAt, o.leaveAt, o.cleanAt, o.onDutyStaff, o.serviceMode, o.actualWorkMinutes, o.managerSufficiency, o.dataOrigin, o.qualityStatus, JSON.stringify(o.issues), o.dedupeKey, now],
+      `INSERT INTO import_observations(id, import_id, store_id, source_row, pilot_id, store_code, business_date, table_type, party_size, queue_at, seat_at, checkout_at, leave_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency, data_origin, quality_status, issues_json, dedupe_key, created_at)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [id('obs'), importId, storeId, o.sourceRow, input.pilotId ?? null, o.storeCode, o.businessDate, o.tableType, o.partySize, o.queueAt, o.seatAt, o.checkoutAt, o.leaveAt, o.cleanAt, o.onDutyStaff, o.serviceMode, o.actualWorkMinutes, o.managerSufficiency, o.dataOrigin, o.qualityStatus, JSON.stringify(o.issues), o.dedupeKey, now],
     );
   }
   return { importId, quality };

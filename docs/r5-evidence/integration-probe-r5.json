@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-10-26T04:21:48.276Z",
+  "secretsPrinted": false,
+  "modules": {
+    "deepseek": {
+      "status": "BLOCKED",
+      "reason": "DEEPSEEK_API_KEY not configured",
+      "realSuccessVerified": false
+    },
+    "wechat": {
+      "status": "BLOCKED",
+      "reason": "WECHAT_APPID/WECHAT_SECRET not configured",
+      "realLoginVerified": false
+    },
+    "sms": {
+      "status": "BLOCKED",
+      "reason": "SMS_PROVIDER/SMS_API_KEY not configured",
+      "realSendVerified": false
+    },
+    "pos": {
+      "status": "BLOCKED",
+      "reason": "No vendor API documentation/credentials; generic HMAC adapter contract and contract tests only",
+      "adapters": [
+        {
+          "id": "generic",
+          "label": "通用 HMAC 事件适配器",
+          "capabilities": [
+            "queue_join",
+            "queue_call",
+            "queue_abandon",
+            "seat",
+            "checkout",
+            "leave",
+            "clean",
+            "clean_done",
+            "table_status",
+            "staff_checkin",
+            "staff_checkout"
+          ]
+        }
+      ],
+      "realVendorVerified": false
+    },
+    "storeIngress": {
+      "status": "MOCK_VERIFIED",
+      "reason": "Generic signed webhook/manual/simulator paths covered by automated tests; no real POS delivery",
+      "realVendorVerified": false
+    }
+  }
+}

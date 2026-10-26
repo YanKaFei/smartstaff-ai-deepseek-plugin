@@ -15,6 +15,8 @@ import { analyzeCalibrationSamples, type CalibrationSample } from '../domain/cal
 import { getImport, importDataset, listImports } from '../domain/dataImport.js';
 import { listReplayRuns, runReplay } from '../domain/replay.js';
 import { recordPilotFeedback } from '../domain/pilot.js';
+import { assertPilotAuthorized, createPilot, getPilot, listPilots, updatePilot } from '../domain/pilots.js';
+import { importPilotEvents, importPilotWorkload, pilotDataQuality, workloadAnalysis } from '../domain/pilotData.js';
 import { listExceptions, resolveException, todayView } from '../domain/ops.js';
 import { shiftApi } from '../domain/dispatch.js';
 import { advanceSimulationAndSummarize, setSimRunning, simulationStatus } from '../domain/simulator.js';
@@ -113,6 +115,132 @@ export function registerAdminRoutes(): void {
   route('GET', '/api/admin/ingest/status', { roles: ['admin'] }, (ctx) => {
     const store = requireStore(ctx.db, adminStoreQuery(ctx));
     return ingestStatus(ctx.db, store.id);
+  });
+
+  route('POST', '/api/admin/stores/:id/pilots', { roles: ['admin'] }, (ctx) => {
+    const store = getStore(ctx.db, ctx.params.id);
+    const body = z.object({
+      anonymousCode: z.string().trim().min(2).max(40),
+      serviceMode: z.enum(['full', 'partial', 'self']),
+      hoursStart: z.string().regex(/^\d{2}:\d{2}$/),
+      hoursEnd: z.string().regex(/^\d{2}:\d{2}$/),
+      tableConfig: z.unknown().optional(),
+      staffing: z.unknown().optional(),
+      roles: z.array(z.string()).optional(),
+      dataSources: z.array(z.string()).optional(),
+      coverageStart: z.string().optional(),
+      coverageEnd: z.string().optional(),
+      owner: z.string().max(80).optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }).parse(ctx.body ?? {});
+    return createPilot(ctx.db, store.id, body, ctx.auth!.userId);
+  });
+
+  route('GET', '/api/admin/stores/:id/pilots', { roles: ['admin'] }, (ctx) => {
+    const store = getStore(ctx.db, ctx.params.id);
+    return { pilots: listPilots(ctx.db, store.id) };
+  });
+
+  route('GET', '/api/admin/pilots/:id', { roles: ['admin'] }, (ctx) => getPilot(ctx.db, ctx.params.id));
+
+  route('PATCH', '/api/admin/pilots/:id', { roles: ['admin'] }, (ctx) => {
+    const body = z.object({
+      owner: z.string().max(80).optional(),
+      coverageStart: z.string().optional(),
+      coverageEnd: z.string().optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      authorizationStatus: z.enum(['pending', 'authorized', 'revoked']).optional(),
+      dataSources: z.array(z.string()).optional(),
+      roles: z.array(z.string()).optional(),
+    }).parse(ctx.body ?? {});
+    return updatePilot(ctx.db, ctx.params.id, body, ctx.auth!.userId);
+  });
+
+  route('POST', '/api/admin/pilots/:id/authorize', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const body = z.object({ owner: z.string().max(80).optional(), coverageStart: z.string().optional(), coverageEnd: z.string().optional() }).parse(ctx.body ?? {});
+    return updatePilot(ctx.db, ctx.params.id, { ...body, authorizationStatus: 'authorized' }, ctx.auth!.userId);
+  });
+
+  route('POST', '/api/admin/pilots/:id/events/import', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const pilot = assertPilotAuthorized(ctx.db, ctx.params.id);
+    const body = z.object({
+      filename: z.string().min(1).max(200), format: z.enum(['csv', 'xlsx']),
+      content: z.string().optional(), contentBase64: z.string().optional(),
+      dataOrigin: z.enum(['REAL', 'SIMULATED']),
+    }).parse(ctx.body ?? {});
+    if (!body.content && !body.contentBase64) throw new AppError(400, 'IMPORT_CONTENT_REQUIRED', '缺少文件内容');
+    const content = body.contentBase64 ? Buffer.from(body.contentBase64, 'base64') : body.content!;
+    return importPilotEvents(ctx.db, pilot.id, { ...body, content, actorId: ctx.auth!.userId });
+  });
+
+  route('POST', '/api/admin/pilots/:id/workload/import', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const pilot = assertPilotAuthorized(ctx.db, ctx.params.id);
+    const body = z.object({
+      filename: z.string().min(1).max(200), format: z.enum(['csv', 'xlsx']),
+      content: z.string().optional(), contentBase64: z.string().optional(),
+      dataOrigin: z.enum(['REAL', 'SIMULATED']),
+    }).parse(ctx.body ?? {});
+    if (!body.content && !body.contentBase64) throw new AppError(400, 'IMPORT_CONTENT_REQUIRED', '缺少文件内容');
+    const content = body.contentBase64 ? Buffer.from(body.contentBase64, 'base64') : body.content!;
+    return importPilotWorkload(ctx.db, pilot.id, { ...body, content, actorId: ctx.auth!.userId });
+  });
+
+  route('GET', '/api/admin/pilots/:id/data-quality', { roles: ['admin'] }, (ctx) => pilotDataQuality(ctx.db, ctx.params.id));
+  route('GET', '/api/admin/pilots/:id/workload-analysis', { roles: ['admin'] }, (ctx) => workloadAnalysis(ctx.db, ctx.params.id));
+
+  route('POST', '/api/admin/pilots/:id/replay', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const pilot = assertPilotAuthorized(ctx.db, ctx.params.id);
+    const body = z.object({ importId: z.string().optional() }).parse(ctx.body ?? {});
+    const importId = body.importId
+      ?? get<{ id: string }>(ctx.db, "SELECT id FROM data_imports WHERE pilot_id = ? AND dataset_type = 'events_sessions' ORDER BY created_at DESC LIMIT 1", [pilot.id])?.id;
+    if (!importId) throw new AppError(409, 'NO_PILOT_SESSIONS', '没有可用的事件会话；请先导入事件数据');
+    return runReplay(ctx.db, pilot.storeId, importId, ctx.auth!.userId);
+  });
+
+  route('GET', '/api/admin/pilots/:id/replays', { roles: ['admin'] }, (ctx) => {
+    const pilot = getPilot(ctx.db, ctx.params.id);
+    return { runs: listReplayRuns(ctx.db, pilot.storeId) };
+  });
+
+  route('GET', '/api/admin/pilots/:id/daily-report', { roles: ['admin'] }, (ctx) => {
+    const pilot = getPilot(ctx.db, ctx.params.id);
+    const date = ctx.query.get('date') ?? new Date().toISOString().slice(0, 10);
+    const observations = all<{ on_duty_staff: number | null; manager_sufficiency: string | null; data_origin: string }>(
+      ctx.db,
+      "SELECT on_duty_staff, manager_sufficiency, data_origin FROM import_observations WHERE pilot_id = ? AND business_date = ? AND quality_status = 'valid'",
+      [pilot.id, date],
+    );
+    const feedback = all<{ decision: string | null; reasons_json: string | null; notes: string | null; manager_actual: number; recommended: number }>(
+      ctx.db,
+      "SELECT decision, reasons_json, notes, manager_actual, recommended FROM pilot_feedback WHERE store_id = ? AND date(created_at / 1000, 'unixepoch') = ?",
+      [pilot.storeId, date],
+    );
+    const actualOnDuty = observations.length ? Math.max(...observations.map((o) => o.on_duty_staff ?? 0)) : null;
+    const shadowRows = all<{ recommendations_json: string }>(ctx.db, 'SELECT recommendations_json FROM shadow_runs WHERE store_id = ? ORDER BY created_at DESC LIMIT 30', [pilot.storeId]);
+    const aiRecommendations = shadowRows
+      .flatMap((r) => JSON.parse(r.recommendations_json) as Array<{ startAt: number; endAt: number; nickname: string; hourlyRate: number }>)
+      .filter((r) => new Date(r.startAt + 8 * 3_600_000).toISOString().slice(0, 10) === date)
+      .map((r) => ({ startAt: r.startAt, endAt: r.endAt, nickname: r.nickname, hourlyRate: r.hourlyRate }));
+    const pressures = [...new Set(observations.map((o) => o.manager_sufficiency).filter(Boolean))];
+    return {
+      pilotId: pilot.id,
+      date,
+      dataOrigin: observations.length ? observations[0].data_origin : null,
+      status: observations.length ? (observations[0].data_origin === 'REAL' ? 'REAL_DATA' : 'SIMULATED_ONLY') : 'REAL_DATA_PENDING',
+      actualOnDuty,
+      aiRecommendations,
+      aiRecommendationCount: aiRecommendations.length,
+      servicePressure: pressures,
+      feedback,
+      overstaffPossible: feedback.some((f) => f.decision === 'too_many') || (actualOnDuty !== null && actualOnDuty > 0 && feedback.some((f) => f.recommended > f.manager_actual)),
+      note: 'Daily report is generated from imported observations and recorded manager feedback; no live staff invitation.',
+    };
   });
 
   route('POST', '/api/admin/stores/:id/data/import', { roles: ['admin'] }, (ctx) => {

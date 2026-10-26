@@ -1,0 +1,109 @@
+{
+  "dataOrigin": "SIMULATED",
+  "pilot": {
+    "id": "pilot_b6f14b94a7905fd4fb",
+    "storeId": "store_c348e42af42763420d",
+    "anonymousCode": "R5-PILOT-001",
+    "serviceMode": "partial",
+    "hours": {
+      "start": "16:00",
+      "end": "02:00"
+    },
+    "tableConfig": {
+      "small": 8,
+      "medium": 12,
+      "large": 4
+    },
+    "staffing": {
+      "onDuty": 3
+    },
+    "roles": [
+      "server",
+      "grill"
+    ],
+    "dataSources": [
+      "simulated_event_sheet"
+    ],
+    "coverage": {
+      "start": "2026-10-01",
+      "end": "2026-10-14"
+    },
+    "authorizationStatus": "authorized",
+    "owner": "pilot-owner",
+    "startDate": "2026-10-01",
+    "endDate": "2026-10-14",
+    "createdAt": 1792987585937,
+    "updatedAt": 1792987585937
+  },
+  "eventQuality": {
+    "dataOrigin": "SIMULATED",
+    "datasetType": "events",
+    "rowCount": 140,
+    "validCount": 140,
+    "invalidCount": 0,
+    "duplicateCount": 0,
+    "missing": {
+      "businessDate": 0,
+      "tableLabel": 0,
+      "partySize": 0,
+      "staffAnonymousId": 0,
+      "onDutyStaff": 0
+    },
+    "timestampInvalid": 0,
+    "piiRows": 0,
+    "eventTypes": [
+      "queue_join",
+      "seat",
+      "checkout",
+      "leave",
+      "clean"
+    ],
+    "dateRange": [
+      "2026-10-01",
+      "2026-10-14"
+    ],
+    "note": "SIMULATED events; framework test only."
+  },
+  "sessionCount": 28,
+  "workloadQuality": {
+    "dataOrigin": "SIMULATED",
+    "datasetType": "workload",
+    "rowCount": 3,
+    "validCount": 3,
+    "invalidCount": 0,
+    "duplicateCount": 0,
+    "missing": {
+      "staffRole": 0,
+      "tableType": 0,
+      "serviceMode": 0,
+      "minutes": 0
+    },
+    "piiRows": 0,
+    "timeIssues": 0,
+    "minutesMismatch": 0,
+    "note": "One row = one service action; repeated rows are deduplicated by observation_id."
+  },
+  "totals": {
+    "validEvents": 140,
+    "validWorkloadRows": 3,
+    "workloadMinutes": 35
+  },
+  "workload": {
+    "sampleCount": 3,
+    "totalMinutes": 35,
+    "averageMinutes": 11.67,
+    "byRole": {
+      "server": 35
+    },
+    "byTable": {
+      "small": 25,
+      "medium": 10
+    },
+    "byAction": {
+      "greet": 1,
+      "grill": 1,
+      "serve": 1
+    },
+    "status": "ENGINEERING_VERIFIED"
+  }
+}

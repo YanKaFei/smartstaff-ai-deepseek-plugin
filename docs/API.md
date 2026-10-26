@@ -385,3 +385,38 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - `shadow_runs` 独立记录；
 - 影子确认返回 `{ shadow:true, offersCreated:0, shifts:[], shadowRunId }`；
 - 不创建 `job_offers/shifts/staffing_demands/notifications`，无支付路径。
+
+
+---
+
+## R5 首店影子试点
+
+### 试点档案
+
+- `POST /api/admin/stores/:id/pilots` `{ anonymousCode, serviceMode, hoursStart, hoursEnd, tableConfig?, staffing?, roles?, dataSources?, coverageStart?, coverageEnd?, owner?, startDate?, endDate? }`
+- `GET /api/admin/stores/:id/pilots`
+- `GET /api/admin/pilots/:id`
+- `PATCH /api/admin/pilots/:id`
+- `POST /api/admin/pilots/:id/authorize` `{ owner?, coverageStart?, coverageEnd? }`
+
+只有 `authorizationStatus=authorized` 才允许导入；否则 `403 PILOT_NOT_AUTHORIZED`。档案/数据行出现手机号/邮箱会被拒绝或标记 invalid。
+
+### 事件与工作量导入
+
+- `POST /api/admin/pilots/:id/events/import` `{ filename, format: csv|xlsx, content|contentBase64, dataOrigin: REAL|SIMULATED }`
+- `POST /api/admin/pilots/:id/workload/import` 同上
+- `GET /api/admin/pilots/:id/data-quality`
+- `GET /api/admin/pilots/:id/workload-analysis`
+
+事件类型：queue_join、queue_call、seat、checkout、leave、clean、staff_checkin、staff_checkout、table_status。  
+工作量一行一个动作，`observation_id` 唯一；重复不计分钟；缺失不补写。
+
+### 回放与日报
+
+- `POST /api/admin/pilots/:id/replay` `{ importId? }`：从事件派生的会话运行 4 个模型变体；前 7 天 calibration、后 7 天 validation；不足 14 天 `insufficientData=true`。
+- `GET /api/admin/pilots/:id/replays`
+- `GET /api/admin/pilots/:id/daily-report?date=YYYY-MM-DD`：AI 建议、实际在岗、店长评价、压力、过度增派可能、反馈。
+- `POST /api/admin/stores/:id/pilot/feedback`：内部人员代录店长反馈。
+- `POST /api/manager/pilot/feedback`：店长本人录入。
+
+真实数据缺失时返回 `REAL_DATA_PENDING` 或 `SIMULATED_ONLY`。

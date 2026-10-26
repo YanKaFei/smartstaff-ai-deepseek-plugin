@@ -76,7 +76,8 @@ test('R4 replay: four model variants evaluate with no future leakage in input sn
     for (const run of replay.data.runs) {
       assert.ok(run.metrics.evaluatedCount > 0);
       assert.ok(run.metrics.mae !== null);
-      assert.ok(run.metrics.byTableType.small.count >= 1);
+      const tableCounts = ['small', 'medium', 'large', 'mixed'].reduce((sum, k) => sum + (run.metrics.byTableType[k]?.count ?? 0), 0);
+      assert.ok(tableCounts >= 1);
     }
     const prediction = get<{ prediction_time: number; input_snapshot_json: string }>(
       app.db,

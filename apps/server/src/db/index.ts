@@ -46,6 +46,10 @@ function migrate(db: Db): void {
   add('pilot_feedback', 'decision', 'decision TEXT');
   add('pilot_feedback', 'reasons_json', 'reasons_json TEXT');
   add('pilot_feedback', 'correction', 'correction TEXT');
+  add('data_imports', 'pilot_id', 'pilot_id TEXT');
+  add('data_imports', 'dataset_type', "dataset_type TEXT NOT NULL DEFAULT 'sessions'");
+  add('import_observations', 'pilot_id', 'pilot_id TEXT');
+  add('replay_predictions', 'phase', 'phase TEXT');
   add('shifts', 'demand_id', 'demand_id TEXT');
   add('shifts', 'is_backfill', 'is_backfill INTEGER NOT NULL DEFAULT 0');
   add('shifts', 'cancelled_at', 'cancelled_at INTEGER');
