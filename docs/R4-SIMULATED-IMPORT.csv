@@ -1,0 +1,9 @@
+store_code,business_date,event_time,table_type,party_size,queue_at,seat_at,checkout_at,leave_at,clean_at,on_duty_staff,service_mode,actual_work_minutes,manager_sufficiency
+K001,2026-10-26,18:00,small,2,18:00,18:10,19:10,19:20,19:30,3,partial,45,short
+K001,2026-10-26,18:00,medium,4,18:05,18:20,19:30,19:40,19:50,3,partial,55,adequate
+K001,2026-10-26,18:00,large,8,,18:30,20:00,20:10,20:20,3,partial,70,short
+K001,2026-10-26,18:30,small,3,18:30,19:00,20:10,20:20,20:30,3,partial,50,adequate
+K001,2026-10-26,19:00,medium,5,19:00,19:30,21:10,21:20,21:30,3,partial,60,adequate
+K001,2026-10-26,19:30,large,7,19:30,20:00,22:10,22:20,22:30,3,partial,80,short
+K001,2026-10-26,18:00,small,2,18:00,18:10,19:10,19:20,19:30,3,partial,45,short
+K001,2026-10-26,20:00,small,2,20:20,20:00,20:10,19:50,20:30,3,partial,40,short

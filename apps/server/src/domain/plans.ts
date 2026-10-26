@@ -308,13 +308,6 @@ export function confirmPlan(
         detail: { shadowRunId, recommendations: recommendations.length, totalCost: plan.total_cost },
         at: effectiveNow,
       });
-      notifyStoreManagers(db, storeId, {
-        type: 'shadow',
-        title: '影子建议已记录',
-        body: `已记录 ${recommendations.length} 条推荐；未向兼职发送邀约，也未产生费用。`,
-        related: { planId: plan.id, shadowRunId },
-        at: effectiveNow,
-      });
     });
     const refreshedShadow = get<PlanRow>(db, 'SELECT * FROM assignment_plans WHERE id = ?', [plan.id])!;
     return {

@@ -43,11 +43,7 @@ test('R3 pilot: shadow mode records recommendations but creates zero offers, shi
     assert.equal(get<{ n: number }>(app.db, 'SELECT COUNT(*) AS n FROM shifts')!.n, 0);
     assert.equal(get<{ n: number }>(app.db, 'SELECT COUNT(*) AS n FROM staffing_demands')!.n, 0);
     assert.equal(get<{ n: number }>(app.db, 'SELECT COUNT(*) AS n FROM shadow_runs')!.n, 1);
-    const staffNotifications = get<{ n: number }>(
-      app.db,
-      "SELECT COUNT(*) AS n FROM notifications WHERE type = 'offer'",
-    )!.n;
-    assert.equal(staffNotifications, 0);
+    assert.equal(get<{ n: number }>(app.db, 'SELECT COUNT(*) AS n FROM notifications')!.n, 0);
     const planRow = get<{ status: string; shadow: number }>(app.db, 'SELECT status, shadow FROM assignment_plans WHERE id = ?', [plan.id])!;
     assert.equal(planRow.status, 'confirmed');
     assert.equal(planRow.shadow, 1);
@@ -58,6 +54,9 @@ test('R3 pilot: shadow mode records recommendations but creates zero offers, shi
       managerActual: 6,
       onDuty: 3,
       overloaded: true,
+      decision: 'too_few',
+      reasons: ['高峰排队更严重', '店长现场判断'],
+      correction: '建议增至 6 人',
       notes: '实际比建议多一人',
     }, token);
     assert.equal(feedback.status, 200);
@@ -83,6 +82,7 @@ test('R3 pilot: shadow mode records recommendations but creates zero offers, shi
     assert.equal(summary.data.feedback.count, 1);
     assert.equal(summary.data.feedback.mae, 1);
     assert.equal(summary.data.feedback.bias, -1);
+    assert.equal(summary.data.feedback.decisions.too_few, 1);
   } finally {
     await app.close();
   }

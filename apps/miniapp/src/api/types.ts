@@ -107,7 +107,7 @@ export interface PilotSummary {
   shadowMode: boolean;
   control: { paused: boolean; reason: string | null; updatedBy: string | null; updatedAt: number };
   shadowRuns: Array<{ id: string; planId: string; forecastId: string; totalCost: number; recommendations: unknown[]; createdAt: number }>;
-  feedback: { count: number; mae: number | null; bias: number | null; overloaded: number; noShow: number };
+  feedback: { count: number; mae: number | null; bias: number | null; overloaded: number; noShow: number; decisions: Record<string, number> };
   plan?: { shadow?: boolean };
 }
 

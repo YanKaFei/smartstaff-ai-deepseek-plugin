@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -353,10 +353,90 @@ CREATE TABLE IF NOT EXISTS pilot_feedback (
   on_duty INTEGER NOT NULL,
   overloaded INTEGER NOT NULL DEFAULT 0,
   no_show INTEGER NOT NULL DEFAULT 0,
+  decision TEXT,
+  reasons_json TEXT,
+  correction TEXT,
   notes TEXT,
   created_by TEXT,
   created_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS data_imports (
+  id TEXT PRIMARY KEY,
+  store_id TEXT NOT NULL REFERENCES stores(id),
+  filename TEXT NOT NULL,
+  format TEXT NOT NULL CHECK (format IN ('csv','xlsx')),
+  data_origin TEXT NOT NULL CHECK (data_origin IN ('REAL','SIMULATED')),
+  row_count INTEGER NOT NULL,
+  valid_count INTEGER NOT NULL,
+  invalid_count INTEGER NOT NULL,
+  duplicate_count INTEGER NOT NULL,
+  quality_json TEXT NOT NULL,
+  created_by TEXT,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_imports_store_time ON data_imports(store_id, created_at);
+
+CREATE TABLE IF NOT EXISTS import_observations (
+  id TEXT PRIMARY KEY,
+  import_id TEXT NOT NULL REFERENCES data_imports(id),
+  store_id TEXT NOT NULL REFERENCES stores(id),
+  source_row INTEGER NOT NULL,
+  store_code TEXT,
+  business_date TEXT,
+  table_type TEXT,
+  party_size INTEGER,
+  queue_at INTEGER,
+  seat_at INTEGER,
+  checkout_at INTEGER,
+  leave_at INTEGER,
+  clean_at INTEGER,
+  on_duty_staff INTEGER,
+  service_mode TEXT,
+  actual_work_minutes REAL,
+  manager_sufficiency TEXT,
+  data_origin TEXT NOT NULL CHECK (data_origin IN ('REAL','SIMULATED')),
+  quality_status TEXT NOT NULL CHECK (quality_status IN ('valid','invalid','duplicate')),
+  issues_json TEXT NOT NULL DEFAULT '[]',
+  dedupe_key TEXT,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_observations_import ON import_observations(import_id, quality_status);
+CREATE INDEX IF NOT EXISTS ix_observations_time ON import_observations(store_id, seat_at);
+
+CREATE TABLE IF NOT EXISTS replay_runs (
+  id TEXT PRIMARY KEY,
+  import_id TEXT NOT NULL REFERENCES data_imports(id),
+  store_id TEXT NOT NULL REFERENCES stores(id),
+  model TEXT NOT NULL,
+  service_mode TEXT NOT NULL,
+  status TEXT NOT NULL,
+  prediction_count INTEGER NOT NULL DEFAULT 0,
+  metrics_json TEXT NOT NULL DEFAULT '{}',
+  data_quality_json TEXT NOT NULL DEFAULT '{}',
+  created_by TEXT,
+  created_at INTEGER NOT NULL,
+  completed_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS ix_replay_import ON replay_runs(import_id, created_at);
+
+CREATE TABLE IF NOT EXISTS replay_predictions (
+  id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL REFERENCES replay_runs(id),
+  prediction_time INTEGER NOT NULL,
+  horizon_start INTEGER NOT NULL,
+  horizon_end INTEGER NOT NULL,
+  input_snapshot_json TEXT NOT NULL,
+  model TEXT NOT NULL,
+  service_mode TEXT NOT NULL,
+  recommended INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  quality_json TEXT NOT NULL,
+  actual_json TEXT,
+  evaluated INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_replay_predictions_run ON replay_predictions(run_id, prediction_time);
 
 CREATE TABLE IF NOT EXISTS pilot_ux_metrics (
   id TEXT PRIMARY KEY,

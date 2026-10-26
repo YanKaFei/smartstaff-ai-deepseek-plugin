@@ -250,6 +250,9 @@ export function registerManagerRoutes(): void {
         onDuty: z.number().int().min(0).max(1000),
         overloaded: z.boolean(),
         noShow: z.number().int().min(0).max(1000).optional(),
+        decision: z.enum(['accepted', 'too_many', 'too_few', 'timing', 'no_candidates', 'other']).optional(),
+        reasons: z.array(z.string().trim().min(1).max(200)).max(10).optional(),
+        correction: z.string().max(1000).optional(),
         notes: z.string().max(1000).optional(),
       })
       .parse(ctx.body ?? {});

@@ -1,17 +1,20 @@
-# Reproducible baseline (R3)
+# Reproducible baseline
 
 | Item | Value |
 | --- | --- |
-| Node.js | v24.19.0 |
+| Node.js | v24.19.0 (`.nvmrc`) |
 | npm | 11.17.0 |
-| TypeScript | 5.6.3 (apps/server devDependency) |
-| uni-app | 3.0.0-5030320261023001 (apps/miniapp) |
+| TypeScript | 5.6.3 |
+| uni-app | 3.0.0-5030320261023001 |
 | Vue | 3.4.21 |
 | SQLite | Node built-in `node:sqlite` |
-| Schema | 10 |
-| Tests at baseline | 82/82 (`docs/r3-evidence/test-output-r3.txt`) |
+| Schema | 11 (R4 import/replay) |
+| R3 baseline commit | `1e94563d1ff4e9032d53311a19f9af534f73025a` |
+| R3 baseline tag | `r3-baseline` |
+| R4 commit/tag | `see git log` / `r4-engineering-ready` (local; no remote push) |
+| R3 tests | 82/82 (`docs/r3-evidence/test-output-r3.txt`) |
+| R4 tests | 85/85 (`docs/r4-evidence/test-output-r4.txt`) |
 | Dependency locks | `apps/server/package-lock.json`, `apps/miniapp/package-lock.json` |
-| Git baseline | tag `r3-baseline`; hash in `git log` (no remote push) |
 
 Reproduce:
 

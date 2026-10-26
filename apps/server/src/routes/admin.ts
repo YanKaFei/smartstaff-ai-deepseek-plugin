@@ -12,6 +12,9 @@ import { aiBudgetStatus, listAiUsage } from '../domain/aiUsage.js';
 import { ingestStatus } from '../domain/ingest.js';
 import { listServiceCalibrations, recordServiceCalibration } from '../domain/calibration.js';
 import { analyzeCalibrationSamples, type CalibrationSample } from '../domain/calibrationAnalysis.js';
+import { getImport, importDataset, listImports } from '../domain/dataImport.js';
+import { listReplayRuns, runReplay } from '../domain/replay.js';
+import { recordPilotFeedback } from '../domain/pilot.js';
 import { listExceptions, resolveException, todayView } from '../domain/ops.js';
 import { shiftApi } from '../domain/dispatch.js';
 import { advanceSimulationAndSummarize, setSimRunning, simulationStatus } from '../domain/simulator.js';
@@ -110,6 +113,71 @@ export function registerAdminRoutes(): void {
   route('GET', '/api/admin/ingest/status', { roles: ['admin'] }, (ctx) => {
     const store = requireStore(ctx.db, adminStoreQuery(ctx));
     return ingestStatus(ctx.db, store.id);
+  });
+
+  route('POST', '/api/admin/stores/:id/data/import', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const store = getStore(ctx.db, ctx.params.id);
+    const body = z
+      .object({
+        filename: z.string().trim().min(1).max(200),
+        format: z.enum(['csv', 'xlsx']),
+        content: z.string().optional(),
+        contentBase64: z.string().optional(),
+        dataOrigin: z.enum(['REAL', 'SIMULATED']),
+      })
+      .parse(ctx.body ?? {});
+    if (!body.content && !body.contentBase64) throw new AppError(400, 'IMPORT_CONTENT_REQUIRED', '缺少文件内容');
+    const content = body.contentBase64 ? Buffer.from(body.contentBase64, 'base64') : body.content!;
+    return importDataset(ctx.db, store.id, {
+      filename: body.filename,
+      format: body.format,
+      content,
+      dataOrigin: body.dataOrigin,
+      actorId: ctx.auth!.userId,
+    });
+  });
+
+  route('GET', '/api/admin/stores/:id/data/imports', { roles: ['admin'] }, (ctx) => {
+    const store = getStore(ctx.db, ctx.params.id);
+    return { imports: listImports(ctx.db, store.id) };
+  });
+
+  route('POST', '/api/admin/stores/:id/pilot/feedback', { roles: ['admin'] }, (ctx) => {
+    const store = getStore(ctx.db, ctx.params.id);
+    const body = z
+      .object({
+        shadowRunId: z.string().optional(),
+        recommended: z.number().int().min(0).max(1000),
+        managerActual: z.number().int().min(0).max(1000),
+        onDuty: z.number().int().min(0).max(1000),
+        overloaded: z.boolean(),
+        noShow: z.number().int().min(0).max(1000).optional(),
+        decision: z.enum(['accepted', 'too_many', 'too_few', 'timing', 'no_candidates', 'other']).optional(),
+        reasons: z.array(z.string().trim().min(1).max(200)).max(10).optional(),
+        correction: z.string().max(1000).optional(),
+        notes: z.string().max(1000).optional(),
+      })
+      .parse(ctx.body ?? {});
+    return recordPilotFeedback(ctx.db, store.id, ctx.auth!.userId, body);
+  });
+
+  route('GET', '/api/admin/data/imports/:id/quality', { roles: ['admin'] }, (ctx) => {
+    const row = get<{ store_id: string }>(ctx.db, 'SELECT store_id FROM data_imports WHERE id = ?', [ctx.params.id]);
+    if (!row) throw new AppError(404, 'IMPORT_NOT_FOUND', '导入批次不存在');
+    return getImport(ctx.db, row.store_id, ctx.params.id);
+  });
+
+  route('POST', '/api/admin/stores/:id/data/replay', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const store = getStore(ctx.db, ctx.params.id);
+    const body = z.object({ importId: z.string().trim().min(1) }).parse(ctx.body ?? {});
+    return runReplay(ctx.db, store.id, body.importId, ctx.auth!.userId);
+  });
+
+  route('GET', '/api/admin/stores/:id/data/replays', { roles: ['admin'] }, (ctx) => {
+    const store = getStore(ctx.db, ctx.params.id);
+    return { runs: listReplayRuns(ctx.db, store.id, ctx.query.get('importId') ?? undefined) };
   });
 
   route('GET', '/api/admin/stores/:id/service-calibrations', { roles: ['admin'] }, (ctx) => {

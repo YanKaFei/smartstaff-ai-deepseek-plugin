@@ -1,0 +1,143 @@
+{
+  "dataOrigin": "SIMULATED",
+  "importId": "imp_5f8f0894614e78e3b7",
+  "replay": {
+    "importId": "imp_5f8f0894614e78e3b7",
+    "dataOrigin": "SIMULATED",
+    "points": 2,
+    "runs": [
+      {
+        "runId": "rpl_2523fb77b6e2b9a339",
+        "model": "legacy",
+        "serviceMode": "partial",
+        "metrics": {
+          "predictionCount": 2,
+          "evaluatedCount": 2,
+          "mae": 2,
+          "bias": -2,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 2,
+          "peakMissCount": 2,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 2,
+              "mae": 2,
+              "bias": -2
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+        }
+      },
+      {
+        "runId": "rpl_0b93bc6768921be875",
+        "model": "service_minutes",
+        "serviceMode": "partial",
+        "metrics": {
+          "predictionCount": 2,
+          "evaluatedCount": 2,
+          "mae": 1,
+          "bias": -1,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 1,
+          "peakMissCount": 2,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 2,
+              "mae": 1,
+              "bias": -1
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+        }
+      },
+      {
+        "runId": "rpl_49da1f8da5ed474347",
+        "model": "service_minutes",
+        "serviceMode": "full",
+        "metrics": {
+          "predictionCount": 2,
+          "evaluatedCount": 2,
+          "mae": 0,
+          "bias": 0,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 0,
+          "peakMissCount": 0,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 2,
+              "mae": 0,
+              "bias": 0
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+        }
+      },
+      {
+        "runId": "rpl_c3b3d3f247781ba79a",
+        "model": "service_minutes",
+        "serviceMode": "self",
+        "metrics": {
+          "predictionCount": 2,
+          "evaluatedCount": 2,
+          "mae": 2,
+          "bias": -2,
+          "overstaffedPersonHours": 0,
+          "understaffedPersonHours": 2,
+          "peakMissCount": 2,
+          "averageLeadMinutes": 30,
+          "byTableType": {
+            "small": {
+              "count": 2,
+              "mae": 2,
+              "bias": -2
+            },
+            "medium": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            },
+            "large": {
+              "count": 0,
+              "mae": null,
+              "bias": null
+            }
+          },
+          "labelNote": "actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty."
+        }
+      }
+    ]
+  }
+}

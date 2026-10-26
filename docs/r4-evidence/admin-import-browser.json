@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-10-26T02:34:19.582Z",
+  "steps": [
+    {
+      "step": "import",
+      "text": "已导入 imp_22caffcbad2216f8df\nSIMULATED · 有效 6 / 总 8 · 重复 1 · 无效 1 · 时间顺序异常 1\n数据质量\n\n缺失统计：{\"queueAt\":1,\"checkoutAt\":0,\"cleanAt\":0,\"actualWorkMinutes\":0,\"managerSufficiency\":0}"
+    },
+    {
+      "step": "replay",
+      "text": "回放完成 · SIMULATED\n2 个预测时点 · 4 个模型变体\nlegacy / partial\nMAE 2 · 偏差 -2 · 过度 0 人时 · 不足 2 人时 · 高峰缺人 2\n2 评估\nservice_minutes / partial\nMAE 1 · 偏差 -1 · 过度 0 人时 · 不足 1 人时 · 高峰缺人 2\n2 评估\nservice_minutes / full\nMAE 0 · 偏差 0 · 过度 0 人时 · 不足 0 人时 · 高峰缺人 0\n2 评估\nservice_minutes / self\nMAE 2 · 偏差 -2 · 过度 0 人时 · 不足 2 人时 · 高峰缺人 2\n2 评估"
+    }
+  ],
+  "errors": [],
+  "endedAt": "2026-10-26T02:34:27.700Z"
+}

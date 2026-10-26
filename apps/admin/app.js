@@ -50,7 +50,7 @@
     const res = await fetch('/api' + path, {
       method: options.method || 'GET',
       headers: { 'content-type': 'application/json', ...(state.token ? { authorization: 'Bearer ' + state.token } : {}) },
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      body: options.body ? (typeof options.body === 'string' ? options.body : JSON.stringify(options.body)) : undefined,
     });
     const json = await parseJson(res);
     if (res.status === 401 && !retried && state.refreshToken && path !== '/auth/refresh') {
@@ -343,6 +343,63 @@
     }));
   }
 
+  let lastImportId = null;
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function importData() {
+    const input = $('#import-file');
+    const file = input.files?.[0];
+    if (!file) return toast('请选择 CSV 或 XLSX 文件', true);
+    const ext = file.name.toLowerCase().endsWith('.xlsx') ? 'xlsx' : 'csv';
+    const contentBase64 = await fileToBase64(file);
+    const data = await api(`/admin/stores/${encodeURIComponent(state.storeId)}/data/import`, {
+      method: 'POST',
+      body: JSON.stringify({
+        filename: file.name,
+        format: ext,
+        contentBase64,
+        dataOrigin: $('#import-origin').value,
+      }),
+    });
+    lastImportId = data.importId;
+    $('#run-replay').disabled = false;
+    $('#import-result').innerHTML = `<div class="list-item"><div><b>已导入 ${esc(data.importId)}</b><div class="meta">${esc(data.quality.dataOrigin)} · 有效 ${data.quality.validCount} / 总 ${data.quality.rowCount} · 重复 ${data.quality.duplicateCount} · 无效 ${data.quality.invalidCount} · 时间顺序异常 ${data.quality.timeOrderIssues}</div></div><span class="pill ${data.quality.invalidCount || data.quality.duplicateCount ? 'warn' : 'ok'}">数据质量</span></div>
+      <p class="tiny">缺失统计：${esc(JSON.stringify(data.quality.missing))}</p>`;
+  }
+
+  async function submitFeedback() {
+    const reasons = $('#fb-reasons').value.split(',').map((s) => s.trim()).filter(Boolean);
+    const body = {
+      recommended: Number($('#fb-recommended').value || 0),
+      managerActual: Number($('#fb-actual').value || 0),
+      onDuty: Number($('#fb-onduty').value || 0),
+      overloaded: $('#fb-decision').value === 'too_few',
+      decision: $('#fb-decision').value,
+      reasons,
+      correction: $('#fb-correction').value || undefined,
+    };
+    await api(`/admin/stores/${encodeURIComponent(state.storeId)}/pilot/feedback`, { method: 'POST', body: JSON.stringify(body) });
+    toast('反馈已记录');
+  }
+
+  async function runReplay() {
+    if (!lastImportId) return toast('先导入数据', true);
+    const data = await api(`/admin/stores/${encodeURIComponent(state.storeId)}/data/replay`, {
+      method: 'POST',
+      body: JSON.stringify({ importId: lastImportId }),
+    });
+    $('#replay-result').innerHTML = `<div class="list-item"><div><b>回放完成 · ${esc(data.dataOrigin)}</b><div class="meta">${data.points} 个预测时点 · ${data.runs.length} 个模型变体</div></div></div>` +
+      data.runs.map((r) => `<div class="list-item"><div><b>${esc(r.model)} / ${esc(r.serviceMode)}</b><div class="meta">MAE ${r.metrics.mae ?? '—'} · 偏差 ${r.metrics.bias ?? '—'} · 过度 ${r.metrics.overstaffedPersonHours} 人时 · 不足 ${r.metrics.understaffedPersonHours} 人时 · 高峰缺人 ${r.metrics.peakMissCount}</div></div><span class="pill">${r.metrics.evaluatedCount} 评估</span></div>`).join('');
+  }
+
   async function loadLogs() {
     const logs = await api('/admin/logs?limit=100');
     $('#log-list').innerHTML = logs.map((l) => `<div class="log-row"><span>${fmtDateTime(l.createdAt)}</span><span>${esc(l.actorRole || 'system')}</span><span><b>${esc(l.action)}</b> ${esc(l.entity || '')} ${esc(l.entityId || '')}</span></div>`).join('') || '<p class="empty">暂无日志。</p>';
@@ -395,6 +452,9 @@
     } catch (err) { toast(err.message, true); }
   });
   $('#refresh-data').addEventListener('click', () => loadData().catch((e) => toast(e.message, true)));
+  $('#import-data').addEventListener('click', () => importData().catch((e) => toast(e.message, true)));
+  $('#run-replay').addEventListener('click', () => runReplay().catch((e) => toast(e.message, true)));
+  $('#submit-feedback').addEventListener('click', () => submitFeedback().catch((e) => toast(e.message, true)));
 
   $('#change-password').addEventListener('click', async () => {
     const currentPassword = window.prompt('当前管理员密码');

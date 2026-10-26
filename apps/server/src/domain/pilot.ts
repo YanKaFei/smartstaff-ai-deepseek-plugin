@@ -162,14 +162,14 @@ export function recordPilotFeedback(
   db: Db,
   storeId: string,
   actorId: string,
-  input: { shadowRunId?: string; recommended: number; managerActual: number; onDuty: number; overloaded: boolean; noShow?: number; notes?: string },
+  input: { shadowRunId?: string; recommended: number; managerActual: number; onDuty: number; overloaded: boolean; noShow?: number; decision?: string; reasons?: string[]; correction?: string; notes?: string },
 ): { id: string; error: number } {
   const feedbackId = id('pfb');
   const error = input.recommended - input.managerActual;
   run(
     db,
-    `INSERT INTO pilot_feedback(id, store_id, shadow_run_id, recommended, manager_actual, on_duty, overloaded, no_show, notes, created_by, created_at)
-     VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO pilot_feedback(id, store_id, shadow_run_id, recommended, manager_actual, on_duty, overloaded, no_show, decision, reasons_json, correction, notes, created_by, created_at)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       feedbackId,
       storeId,
@@ -179,6 +179,9 @@ export function recordPilotFeedback(
       input.onDuty,
       input.overloaded ? 1 : 0,
       input.noShow ?? 0,
+      input.decision ?? null,
+      JSON.stringify(input.reasons ?? []),
+      input.correction ?? null,
       input.notes ?? null,
       actorId,
       Date.now(),
@@ -219,8 +222,8 @@ export function pilotSummary(db: Db, storeId: string) {
     .prepare('SELECT id, plan_id, forecast_id, recommendations_json, total_cost, created_at FROM shadow_runs WHERE store_id = ? ORDER BY created_at DESC LIMIT 20')
     .all(storeId) as Array<Record<string, unknown>>;
   const feedback = db
-    .prepare('SELECT recommended, manager_actual, on_duty, overloaded, no_show, created_at FROM pilot_feedback WHERE store_id = ? ORDER BY created_at DESC LIMIT 100')
-    .all(storeId) as Array<{ recommended: number; manager_actual: number; on_duty: number; overloaded: number; no_show: number; created_at: number }>;
+    .prepare('SELECT recommended, manager_actual, on_duty, overloaded, no_show, decision, reasons_json, created_at FROM pilot_feedback WHERE store_id = ? ORDER BY created_at DESC LIMIT 100')
+    .all(storeId) as Array<{ recommended: number; manager_actual: number; on_duty: number; overloaded: number; no_show: number; decision: string | null; reasons_json: string | null; created_at: number }>;
   const mae = feedback.length
     ? Math.round((feedback.reduce((sum, f) => sum + Math.abs(f.recommended - f.manager_actual), 0) / feedback.length) * 100) / 100
     : null;
@@ -238,6 +241,27 @@ export function pilotSummary(db: Db, storeId: string) {
       recommendations: JSON.parse(String(r.recommendations_json)),
       createdAt: r.created_at,
     })),
-    feedback: { count: feedback.length, mae, bias, overloaded: feedback.filter((f) => f.overloaded).length, noShow: feedback.reduce((sum, f) => sum + f.no_show, 0) },
+    feedback: {
+      count: feedback.length,
+      mae,
+      bias,
+      overloaded: feedback.filter((f) => f.overloaded).length,
+      noShow: feedback.reduce((sum, f) => sum + f.no_show, 0),
+      decisions: feedback.reduce<Record<string, number>>((acc, f) => {
+        const key = f.decision ?? 'unclassified';
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      }, {}),
+    },
+    feedbackItems: feedback.map((f) => ({
+      recommended: f.recommended,
+      managerActual: f.manager_actual,
+      onDuty: f.on_duty,
+      overloaded: Boolean(f.overloaded),
+      noShow: f.no_show,
+      decision: f.decision,
+      reasons: f.reasons_json ? JSON.parse(f.reasons_json) : [],
+      createdAt: f.created_at,
+    })),
   };
 }

@@ -63,7 +63,7 @@ curl -s -X POST http://127.0.0.1:8787/api/auth/mini-login \
 | GET | `/manager/pilot/summary` | 试点控制、影子记录、反馈 MAE/偏差 |
 | POST | `/manager/pilot/pause` | 紧急暂停：停止新调配并取消待回复邀约 `{ reason?, cancelPending? }` |
 | POST | `/manager/pilot/resume` | 恢复调配 |
-| POST | `/manager/pilot/feedback` | 店长实际需求/在岗/超载反馈 `{ recommended, managerActual, onDuty, overloaded, notes? }` |
+| POST | `/manager/pilot/feedback` | 店长实际需求/在岗/超载反馈 `{ recommended, managerActual, onDuty, overloaded, noShow?, decision?, reasons?, correction?, notes? }` |
 | POST | `/manager/pilot/ux-metric` | 记录操作次数/耗时 `{ flow, actionCount, elapsedMs, planId?, shadow? }` |
 | GET | `/manager/ingest/status` | 数据源、最近事件、陈旧状态、已应用/异常计数 |
 | GET | `/manager/ingest/events` | 最近 100 条摄取事件 |
@@ -136,6 +136,12 @@ curl -s -X POST http://127.0.0.1:8787/api/auth/mini-login \
 | GET | `/admin/stores/:id/service-calibrations` | 服务分钟模型真实样本校准记录 |
 | POST | `/admin/stores/:id/service-calibration` | 提交 ≥30 个真实样本/证据后校准参数；不得用模拟数据 |
 | POST | `/admin/stores/:id/service-calibration/analyze` | 仅做描述性 MAE/偏差分析，不改变校准状态 |
+| POST | `/admin/stores/:id/data/import` | 导入 CSV/XLSX 经营观察；必须声明 `REAL`/`SIMULATED` |
+| GET | `/admin/stores/:id/data/imports` | 导入批次与质量摘要 |
+| GET | `/admin/data/imports/:id/quality` | 单批次质量报告 |
+| POST | `/admin/stores/:id/data/replay` | 历史回放 `{ importId }`；运行 4 个模型变体 |
+| GET | `/admin/stores/:id/data/replays?importId=` | 回放运行与指标 |
+| POST | `/admin/stores/:id/pilot/feedback` | 内部人员代录店长线下反馈 |
 | POST | `/admin/users/:id/revoke-sessions` | 强制撤销用户全部会话 |
 | GET | `/admin/sim/status?storeId=` | 模拟器状态 |
 | POST | `/admin/sim/control` | `{ storeId?, running?, speed? }`，speed 1–600 |
@@ -328,3 +334,54 @@ x-signature: sha256=<hex hmac>
 - Webhook 密钥轮换：`POST /api/admin/stores/:id/webhook-secret`，返回一次明文；旧签名立即失效。
 - `RATE_LIMIT_BACKEND=db`（默认）：共享 `rate_limit_buckets` 表；`memory` 仅单进程开发。
 - 生产启动检查拒绝缺 Key、演示登录、弱管理员密码、通配 CORS 与非 HTTPS。
+
+
+---
+
+## R4 影子数据导入与历史回放
+
+### 导入
+
+`POST /api/admin/stores/:id/data/import`（管理员近期登录）
+
+```jsonc
+{
+  "filename": "2026-10-26.csv",
+  "format": "csv",              // csv | xlsx
+  "content": "...",             // CSV 原始文本
+  "contentBase64": "...",       // 或 XLSX base64（二选一）
+  "dataOrigin": "SIMULATED"     // REAL | SIMULATED，必须显式声明
+}
+```
+
+CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size, seat_at, leave_at`。可选：`queue_at, checkout_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency`。支持中文表头别名。
+
+质量结果写 `data_imports.quality_json` 与 `import_observations`：
+
+- `valid/invalid/duplicate`；
+- 缺失字段计数；
+- 时间顺序异常；
+- 重复键：门店+日期+桌型+入座时间+人数；
+- 不插值、不伪造缺失测量。
+
+### 回放
+
+`POST /api/admin/stores/:id/data/replay` `{ "importId": "..." }`
+
+- 从最早入座后下一个 30 分钟开始，每 30 分钟预测未来 3 小时；
+- 输入快照只含截至预测时点已发生的桌台/排队/在岗；
+- 未来观测只写 `actual_json`；
+- 运行 A/B/C1/C2：legacy partial、minutes partial、minutes full、minutes self；
+- 输出 MAE、偏差、过度/不足人时、高峰缺人、桌型表现、平均提前量、数据质量；
+- 只支持 SIMULATED 或已授权 REAL；不会自动改 `calibrationStatus`。
+
+### 店长反馈
+
+`decision`：`accepted | too_many | too_few | timing | no_candidates | other`；可附 `reasons`、`correction`、`noShow`。内部人员可通过管理员接口代录，店长不必进入未批准的生产系统。
+
+### 影子标识
+
+- `assignment_plans.shadow=1`；
+- `shadow_runs` 独立记录；
+- 影子确认返回 `{ shadow:true, offersCreated:0, shifts:[], shadowRunId }`；
+- 不创建 `job_offers/shifts/staffing_demands/notifications`，无支付路径。

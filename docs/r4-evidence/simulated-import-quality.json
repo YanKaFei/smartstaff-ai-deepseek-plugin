@@ -1,0 +1,32 @@
+{
+  "dataOrigin": "SIMULATED",
+  "importId": "imp_5f8f0894614e78e3b7",
+  "quality": {
+    "dataOrigin": "SIMULATED",
+    "rowCount": 8,
+    "validCount": 6,
+    "invalidCount": 1,
+    "duplicateCount": 1,
+    "missing": {
+      "queueAt": 1,
+      "checkoutAt": 0,
+      "cleanAt": 0,
+      "actualWorkMinutes": 0,
+      "managerSufficiency": 0
+    },
+    "timeOrderIssues": 1,
+    "tableTypes": [
+      "small",
+      "medium",
+      "large"
+    ],
+    "serviceModes": [
+      "partial"
+    ],
+    "dateRange": [
+      "2026-10-26",
+      "2026-10-26"
+    ],
+    "note": "SIMULATED data: framework test only; never treated as real calibration evidence."
+  }
+}

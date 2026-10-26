@@ -43,6 +43,9 @@ function migrate(db: Db): void {
   add('stores', 'webhook_secret_rotated_at', 'webhook_secret_rotated_at INTEGER');
   add('assignment_plans', 'shadow', 'shadow INTEGER NOT NULL DEFAULT 0');
   add('pilot_feedback', 'no_show', 'no_show INTEGER NOT NULL DEFAULT 0');
+  add('pilot_feedback', 'decision', 'decision TEXT');
+  add('pilot_feedback', 'reasons_json', 'reasons_json TEXT');
+  add('pilot_feedback', 'correction', 'correction TEXT');
   add('shifts', 'demand_id', 'demand_id TEXT');
   add('shifts', 'is_backfill', 'is_backfill INTEGER NOT NULL DEFAULT 0');
   add('shifts', 'cancelled_at', 'cancelled_at INTEGER');

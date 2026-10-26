@@ -152,6 +152,36 @@
             </article>
           </div>
           <article class="card">
+            <h2>影子数据导入 / 回放</h2>
+            <div class="row wrap">
+              <input id="import-file" type="file" accept=".csv,.xlsx" />
+              <select id="import-origin"><option value="SIMULATED">SIMULATED（模拟/演练）</option><option value="REAL">REAL（已授权真实数据）</option></select>
+              <button id="import-data">导入</button>
+              <button id="run-replay" class="ghost" disabled>运行回放</button>
+            </div>
+            <p class="tiny">CSV/XLSX 至少包含 store_code,business_date,table_type,party_size,seat_at,leave_at；缺失值不会被伪造成测量值。REAL 数据需已去标识化并获授权。</p>
+            <div id="import-result"></div>
+            <div id="replay-result"></div>
+            <h3 style="margin-top:18px">店长线下反馈</h3>
+            <div class="row wrap">
+              <input id="fb-recommended" type="number" placeholder="AI 建议人数" />
+              <input id="fb-actual" type="number" placeholder="店长认为需要" />
+              <input id="fb-onduty" type="number" placeholder="实际在岗" />
+              <select id="fb-decision">
+                <option value="accepted">接受建议</option>
+                <option value="too_many">人数偏多</option>
+                <option value="too_few">人数偏少</option>
+                <option value="timing">时间不合适</option>
+                <option value="no_candidates">没有合适兼职</option>
+                <option value="other">其他</option>
+              </select>
+              <input id="fb-reasons" placeholder="原因，逗号分隔" />
+              <input id="fb-correction" placeholder="修正意见" />
+              <button id="submit-feedback" class="ghost">保存反馈</button>
+            </div>
+          </article>
+
+          <article class="card">
             <h2>最近事件（可重放异常）</h2>
             <div id="ingest-events" class="list"></div>
           </article>
