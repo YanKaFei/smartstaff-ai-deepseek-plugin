@@ -366,7 +366,7 @@ export interface SeedResult {
   simNow: number;
 }
 
-export function seedDemo(db: DatabaseSync, cfg: AppConfig = appConfig, force = false): SeedResult {
+export function seedDemo(db: DatabaseSync, cfg: AppConfig = appConfig, force = false, options: { dateKey?: string } = {}): SeedResult {
   const existing = get<{ id: string }>(db, 'SELECT id FROM stores LIMIT 1');
   if (existing && !force) {
     const store = get<{ id: string; manager_code: string }>(db, 'SELECT id, manager_code FROM stores WHERE id = ?', [existing.id])!;
@@ -379,7 +379,7 @@ export function seedDemo(db: DatabaseSync, cfg: AppConfig = appConfig, force = f
     };
   }
   ensureAdmin(db, cfg.adminPassword);
-  const todayKey = localParts(Date.now()).dateKey;
+  const todayKey = options.dateKey ?? localParts(Date.now()).dateKey;
   const simNow = epochFromLocal(todayKey, 18 * 60);
 
   const store = createStore(db, {

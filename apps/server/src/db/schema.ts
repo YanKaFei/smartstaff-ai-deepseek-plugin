@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 14;
+export const SCHEMA_VERSION = 16;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -548,6 +548,27 @@ CREATE TABLE IF NOT EXISTS service_calibrations (
   active INTEGER NOT NULL DEFAULT 1
 );
 CREATE INDEX IF NOT EXISTS ix_calibration_store ON service_calibrations(store_id, active, created_at);
+
+CREATE TABLE IF NOT EXISTS ai_settings (
+  id TEXT PRIMARY KEY,
+  provider TEXT NOT NULL DEFAULT 'deepseek',
+  base_url TEXT NOT NULL,
+  api_key_enc TEXT,
+  credential_revoked INTEGER NOT NULL DEFAULT 0,
+  model TEXT NOT NULL,
+  timeout_ms INTEGER NOT NULL,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  daily_budget_usd REAL NOT NULL,
+  monthly_budget_usd REAL NOT NULL,
+  last_success_at INTEGER,
+  last_test_at INTEGER,
+  last_test_status TEXT,
+  last_test_error TEXT,
+  last_test_latency_ms INTEGER,
+  last_test_model TEXT,
+  updated_by TEXT,
+  updated_at INTEGER NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS ai_usage (
   id TEXT PRIMARY KEY,

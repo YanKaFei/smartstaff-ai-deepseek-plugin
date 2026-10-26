@@ -124,3 +124,12 @@ label.inline select { padding: 8px; border-radius: 8px; background: var(--panel-
   .main { padding: 20px 16px 50px; }
   .slot { grid-template-columns: 1fr 1fr; }
 }
+
+.nav-label { margin: 14px 10px 6px; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.ai-status { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.ai-status b { font-size: 18px; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.form-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+.form-grid input, .form-grid select { width: 100%; box-sizing: border-box; }
+.form-grid label:last-child { grid-column: 1 / -1; }
+@media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }

@@ -1,0 +1,19 @@
+{
+  "steps": [
+    {
+      "step": "settings",
+      "text": "DeepSeek 连接\n未配置\n凭据：未配置 · 来源 none\n模型 deepseek-flash · 超时 12000ms · 最近成功 —\n最近测试 — · —\n计价：$0.27/M input · $1.1/M output · 未标注更新日期\n测试连接\n撤销已保存 Key\n\n测试使用后端已保存的 Key 发送真实 HTTPS 请求；未配置 Key 时会明确返回未配置，不会用 Mock 冒充成功。\n\n配置\n服务提供商\nDeepSeek\nAPI Base URL\n默认模型\ndeepseek-flash\ndeepseek-v4-pro\n请求超时（毫秒）\nAI 功能\n启用\n停用\n单店每日预算（USD）\n全平台 30 日预算（USD）\nAPI Key（只写）\n保存非敏感配置\n保存 / 替换 Key\n\nKey 仅加密保存在服务端；页面只显示已配置状态，不返回原始 Key。第一版仅允许官方 https://api.deepseek.com。\n\n最近用量\n最近调用记录\n\n暂无调用记录。"
+    },
+    {
+      "step": "saved",
+      "text": "未配置\n凭据：未配置 · 来源 none\n模型 deepseek-v4-pro · 超时 20000ms · 最近成功 —\n最近测试 — · —\n计价：$0.27/M input · $1.1/M output · 未标注更新日期"
+    },
+    {
+      "step": "test_without_key",
+      "text": " 来源 none\n模型 deepseek-v4-pro · 超时 20000ms · 最近成功 —\n最近测试 10/27 00:11 · error · AI_NOT_CONFIGURED\n计价：$0.27/M input · $1.1/M output · 未标注更新日期\n测试连接\n撤销已保存 Key\n\n测试使用后端已保存的 Key 发送真实 HTTPS 请求；未配置 Key 时会明确返回未配置，不会用 Mock 冒充成功。\n\n配置\n服务提供商\nDeepSeek\nAPI Base URL\n默认模型\ndeepseek-flash\ndeepseek-v4-pro\n请求超时（毫秒）\nAI 功能\n启用\n停用\n单店每日预算（USD）\n全平台 30 日预算（USD）\nAPI Key（只写）\n保存非敏感配置\n保存 / 替换 Key\n\nKey 仅加密保存在服务端；页面只显示已配置状态，不返回原始 Key。第一版仅允许官方 https://api.deepseek.com。\n\n最近用量\n最近调用记录\n\n暂无调用记录。\n\n未配置 API Key，真实连接测试未执行；状态 REAL_API_BLOCKED"
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  ]
+}

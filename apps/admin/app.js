@@ -141,6 +141,7 @@
     orders: ['订单与异常', '工作邀约、班次状态与异常处理'],
     simulator: ['门店模拟器', '真实写入业务状态；可加速观察预测、补员与接单链路。'],
     data: ['数据接入 / AI', '经营事件、Webhook 签名、AI 用量与预算'],
+    ai: ['AI 模型与 API', 'DeepSeek 业务推理设置、凭据、连接测试和用量'],
     logs: ['审计日志', '系统操作与状态变更追踪'],
   };
   function setPageMeta(tab) {
@@ -400,6 +401,83 @@
       data.runs.map((r) => `<div class="list-item"><div><b>${esc(r.model)} / ${esc(r.serviceMode)}</b><div class="meta">MAE ${r.metrics.mae ?? '—'} · 偏差 ${r.metrics.bias ?? '—'} · 过度 ${r.metrics.overstaffedPersonHours} 人时 · 不足 ${r.metrics.understaffedPersonHours} 人时 · 高峰缺人 ${r.metrics.peakMissCount}</div></div><span class="pill">${r.metrics.evaluatedCount} 评估</span></div>`).join('');
   }
 
+  async function loadAi() {
+    const [settings, status, usage] = await Promise.all([
+      api('/admin/ai/settings'),
+      api('/admin/ai/status'),
+      api('/admin/ai/usage?storeId=' + encodeURIComponent(state.storeId)),
+    ]);
+    state.ai = { settings, status, usage };
+    $('#ai-provider').value = 'DeepSeek';
+    $('#ai-base-url').value = settings.baseUrl;
+    $('#ai-model').value = settings.model;
+    $('#ai-timeout').value = settings.timeoutMs;
+    $('#ai-enabled').value = String(settings.enabled);
+    $('#ai-daily-budget').value = settings.dailyBudgetUsd;
+    $('#ai-monthly-budget').value = settings.monthlyBudgetUsd;
+    $('#ai-key').value = '';
+    $('#ai-key').placeholder = settings.credentialConfigured ? '已配置；输入新 Key 替换' : '未配置；请输入 DeepSeek API Key';
+    const lastSuccess = settings.lastSuccessAt ? fmtDateTime(settings.lastSuccessAt) : '—';
+    const lastTest = settings.lastTestAt ? fmtDateTime(settings.lastTestAt) : '—';
+    const statusLabel = settings.credentialConfigured
+      ? (settings.enabled ? (settings.lastTestStatus === 'ok' ? '连接成功' : '已配置，未验证') : '已停用')
+      : '未配置';
+    $('#ai-status').innerHTML = `
+      <b>${esc(statusLabel)}</b>
+      <span class="meta">凭据：${esc(settings.credentialHint)} · 来源 ${esc(settings.credentialSource)}</span>
+      <span class="meta">模型 ${esc(settings.model)} · 超时 ${settings.timeoutMs}ms · 最近成功 ${esc(lastSuccess)}</span>
+      <span class="meta">最近测试 ${esc(lastTest)} · ${esc(settings.lastTestStatus || '—')}${settings.lastTestError ? ' · ' + esc(settings.lastTestError) : ''}</span>
+      <span class="meta">计价：$${settings.pricing.inputPerMTokUsd}/M input · $${settings.pricing.outputPerMTokUsd}/M output · ${esc(settings.pricing.updatedAt || '未标注更新日期')}</span>`;
+    $('#ai-usage').innerHTML = `
+      <div class="list-item"><div><b>${usage.total}</b> 次调用 · 成功 ${usage.successes} · 失败 ${usage.failures}<div class="meta">成功率 ${usage.successRate === null ? '—' : Math.round(usage.successRate * 100) + '%'} · 平均 ${usage.averageLatencyMs ?? '—'}ms · 今日预算 $${usage.budget.dailyUsedUsd}/$${usage.budget.dailyBudgetUsd}</div></div><span class="pill ${usage.budget.allowed ? 'ok' : 'warn'}">${usage.budget.allowed ? '预算可用' : '预算用尽'}</span></div>
+      <div class="list-item"><div>tokens：input ${usage.inputTokens} / output ${usage.outputTokens}<div class="meta">估算费用 $${usage.estimatedCostUsd} · ${esc(usage.costBasis)} · 价格更新 ${esc(usage.pricingUpdatedAt || '未标注')}</div></div><span class="pill">${usage.lastFailure ? '最近失败 ' + esc(usage.lastFailure.errorCode || usage.lastFailure.status) : '无失败'}</span></div>`;
+    $('#ai-recent').innerHTML = usage.recent.length ? usage.recent.map((r) => `
+      <div class="list-item"><div>${esc(r.status)} · ${esc(r.model)}<div class="meta">${r.totalTokens} tokens · ${r.latencyMs}ms · $${r.costUsd} · ${fmtDateTime(r.createdAt)}</div></div><span class="pill ${r.status === 'ok' ? 'ok' : r.status === 'cache_hit' ? '' : 'warn'}">${esc(r.errorCode || r.status)}</span></div>`).join('') : '<p class="empty">暂无调用记录。</p>';
+  }
+
+  async function saveAiSettings() {
+    const data = await api('/admin/ai/settings', {
+      method: 'PUT',
+      body: JSON.stringify({
+        model: $('#ai-model').value,
+        timeoutMs: Number($('#ai-timeout').value),
+        enabled: $('#ai-enabled').value === 'true',
+        dailyBudgetUsd: Number($('#ai-daily-budget').value),
+        monthlyBudgetUsd: Number($('#ai-monthly-budget').value),
+      }),
+    });
+    toast('AI 配置已保存');
+    await loadAi();
+    return data;
+  }
+
+  async function saveAiKey() {
+    const apiKey = $('#ai-key').value.trim();
+    if (!apiKey) return toast('请输入新 API Key', true);
+    await api('/admin/ai/credential', { method: 'PUT', body: JSON.stringify({ apiKey }) });
+    $('#ai-key').value = '';
+    toast('API Key 已加密保存；页面不会显示原始 Key');
+    await loadAi();
+  }
+
+  async function testAi() {
+    try {
+      const data = await api('/admin/ai/test', { method: 'POST', body: JSON.stringify({}) });
+      toast(data.status === 'CONNECTED' ? '连接成功' : `连接失败：${data.errorCode || ''} ${data.message || ''}`);
+      await loadAi();
+    } catch (err) {
+      toast(err.message, true);
+      await loadAi().catch(() => undefined);
+    }
+  }
+
+  async function revokeAiKey() {
+    if (!window.confirm('撤销服务端已保存的 DeepSeek Key？不会影响环境变量中的 Key（如有）。')) return;
+    await api('/admin/ai/credential', { method: 'DELETE', body: JSON.stringify({}) });
+    toast('已撤销服务端保存的 Key');
+    await loadAi();
+  }
+
   async function loadLogs() {
     const logs = await api('/admin/logs?limit=100');
     $('#log-list').innerHTML = logs.map((l) => `<div class="log-row"><span>${fmtDateTime(l.createdAt)}</span><span>${esc(l.actorRole || 'system')}</span><span><b>${esc(l.action)}</b> ${esc(l.entity || '')} ${esc(l.entityId || '')}</span></div>`).join('') || '<p class="empty">暂无日志。</p>';
@@ -415,6 +493,7 @@
     if (tab === 'orders') loadOrders().catch((e) => toast(e.message, true));
     if (tab === 'logs') loadLogs().catch((e) => toast(e.message, true));
     if (tab === 'data') loadData().catch((e) => toast(e.message, true));
+    if (tab === 'ai') loadAi().catch((e) => toast(e.message, true));
     setPageMeta(tab);
     renderOverview();
     if (tab === 'simulator') renderSimulator();
@@ -452,6 +531,10 @@
     } catch (err) { toast(err.message, true); }
   });
   $('#refresh-data').addEventListener('click', () => loadData().catch((e) => toast(e.message, true)));
+  $('#ai-save').addEventListener('click', () => saveAiSettings().catch((e) => toast(e.message, true)));
+  $('#ai-save-key').addEventListener('click', () => saveAiKey().catch((e) => toast(e.message, true)));
+  $('#ai-test').addEventListener('click', () => testAi().catch((e) => toast(e.message, true)));
+  $('#ai-revoke').addEventListener('click', () => revokeAiKey().catch((e) => toast(e.message, true)));
   $('#import-data').addEventListener('click', () => importData().catch((e) => toast(e.message, true)));
   $('#run-replay').addEventListener('click', () => runReplay().catch((e) => toast(e.message, true)));
   $('#submit-feedback').addEventListener('click', () => submitFeedback().catch((e) => toast(e.message, true)));

@@ -9,6 +9,10 @@ import { createStaff, getStaff, listStaff, reviewStaff, serializeStaff } from '.
 import { listPlans } from '../domain/plans.js';
 import { listForecasts, serializeForecast } from '../domain/forecast.js';
 import { aiBudgetStatus, listAiUsage } from '../domain/aiUsage.js';
+import {
+  aiUsageSummary, publicAiSettings, recordAiTestResult, resolveAiRuntime, revokeAiCredential, saveAiCredential, updateAiSettings,
+} from '../domain/aiSettings.js';
+import { probeDeepSeek } from '../ai/deepseek.js';
 import { ingestStatus } from '../domain/ingest.js';
 import { listServiceCalibrations, recordServiceCalibration } from '../domain/calibration.js';
 import { analyzeCalibrationSamples, type CalibrationSample } from '../domain/calibrationAnalysis.js';
@@ -354,6 +358,80 @@ export function registerAdminRoutes(): void {
       at: Date.now(),
     });
     return { revoked: count };
+  });
+
+  route('GET', '/api/admin/ai/settings', { roles: ['admin'] }, (ctx) => publicAiSettings(ctx.db, ctx.config));
+
+  route('PUT', '/api/admin/ai/settings', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const body = z.object({
+      baseUrl: z.string().trim().max(200).optional(),
+      model: z.enum(['deepseek-flash', 'deepseek-v4-pro']).optional(),
+      timeoutMs: z.number().int().min(5000).max(60000).optional(),
+      enabled: z.boolean().optional(),
+      dailyBudgetUsd: z.number().min(0).max(100000).optional(),
+      monthlyBudgetUsd: z.number().min(0).max(1000000).optional(),
+    }).parse(ctx.body ?? {});
+    return updateAiSettings(ctx.db, ctx.config, body, ctx.auth!.userId);
+  });
+
+  route('PUT', '/api/admin/ai/credential', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const body = z.object({ apiKey: z.string().min(8).max(300) }).parse(ctx.body ?? {});
+    return saveAiCredential(ctx.db, ctx.config, body.apiKey, ctx.auth!.userId);
+  });
+
+  route('DELETE', '/api/admin/ai/credential', { roles: ['admin'] }, (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    return revokeAiCredential(ctx.db, ctx.config, ctx.auth!.userId);
+  });
+
+  route('GET', '/api/admin/ai/status', { roles: ['admin'] }, (ctx) => {
+    const settings = publicAiSettings(ctx.db, ctx.config);
+    return {
+      ...settings,
+      status: !settings.credentialConfigured ? 'NOT_CONFIGURED' : settings.enabled ? (settings.lastTestStatus === 'ok' ? 'CONNECTED' : 'CONFIGURED_NOT_VERIFIED') : 'DISABLED',
+      realApiBlocked: !settings.credentialConfigured || settings.lastTestStatus !== 'ok',
+    };
+  });
+
+  route('POST', '/api/admin/ai/test', { roles: ['admin'] }, async (ctx) => {
+    requireRecentAuth(ctx.auth!, ctx.config);
+    const runtime = resolveAiRuntime(ctx.db, ctx.config);
+    if (!runtime.cfg.deepseek.apiKey) {
+      recordAiTestResult(ctx.db, ctx.config, { status: 'error', error: 'AI_NOT_CONFIGURED', latencyMs: 0 });
+      audit(ctx.db, { storeId: null, actorId: ctx.auth!.userId, actorRole: 'admin', action: 'ai.test', entity: 'ai_settings', entityId: 'global', detail: { status: 'blocked', error: 'AI_NOT_CONFIGURED' }, at: Date.now() });
+      throw new AppError(400, 'AI_NOT_CONFIGURED', '未配置 API Key，真实连接测试未执行；状态 REAL_API_BLOCKED');
+    }
+    const result = await probeDeepSeek(runtime.cfg);
+    recordAiTestResult(ctx.db, ctx.config, {
+      status: result.status === 'ok' ? 'ok' : 'error',
+      error: result.errorCode,
+      latencyMs: result.latencyMs,
+      model: result.model,
+      successAt: result.status === 'ok' ? Date.now() : undefined,
+    });
+    audit(ctx.db, {
+      storeId: null, actorId: ctx.auth!.userId, actorRole: 'admin', action: 'ai.test', entity: 'ai_settings', entityId: 'global',
+      detail: { status: result.status, error: result.errorCode ?? null, latencyMs: result.latencyMs, model: result.model ?? null, httpStatus: result.httpStatus ?? null },
+      at: Date.now(),
+    });
+    return {
+      status: result.status === 'ok' ? 'CONNECTED' : 'FAILED',
+      errorCode: result.errorCode ?? null,
+      message: result.message ?? (result.status === 'ok' ? '连接成功' : '连接失败'),
+      httpStatus: result.httpStatus ?? null,
+      latencyMs: result.latencyMs,
+      model: result.model ?? null,
+      finishReason: result.finishReason ?? null,
+      usage: result.usage ?? null,
+    };
+  });
+
+  route('GET', '/api/admin/ai/usage', { roles: ['admin'] }, (ctx) => {
+    const store = requireStore(ctx.db, adminStoreQuery(ctx));
+    const runtime = resolveAiRuntime(ctx.db, ctx.config);
+    return aiUsageSummary(ctx.db, store.id, runtime.cfg);
   });
 
   route('GET', '/api/admin/ai-usage', { roles: ['admin'] }, (ctx) => {

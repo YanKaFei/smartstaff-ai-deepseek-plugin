@@ -420,3 +420,26 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - `POST /api/manager/pilot/feedback`：店长本人录入。
 
 真实数据缺失时返回 `REAL_DATA_PENDING` 或 `SIMULATED_ONLY`。
+
+
+---
+
+## AI 模型与 API 设置（R6）
+
+所有接口需要管理员角色；修改、凭据和测试操作需要最近登录复验。
+
+- `GET /api/admin/ai/settings`：读取安全摘要（模型、超时、预算、启用状态、凭据是否已配置；不返回 Key）。
+- `PUT /api/admin/ai/settings` `{ baseUrl?, model?, timeoutMs?, enabled?, dailyBudgetUsd?, monthlyBudgetUsd? }`：保存非敏感配置；Base URL 仅允许 `https://api.deepseek.com`。
+- `PUT /api/admin/ai/credential` `{ apiKey }`：服务端加密保存/替换，只返回配置状态。
+- `DELETE /api/admin/ai/credential`：撤销数据库 Key，并持久化阻止环境变量 Key 回退。
+- `POST /api/admin/ai/test`：使用服务端已保存/环境变量凭据发送真实 HTTPS 请求；无 Key 返回 `AI_NOT_CONFIGURED`，不伪装成功。
+- `GET /api/admin/ai/status`：当前连接状态、最近成功/测试时间和 `realApiBlocked`。
+- `GET /api/admin/ai/usage?storeId=...`：调用次数、成功率、平均延迟、tokens、估算费用、预算和最近调用。
+- 原有 `GET /api/admin/ai-usage` 保留兼容。
+
+安全约束：
+
+- Key 使用 AES-256-GCM 加密后存入 `ai_settings.api_key_enc`，AAD 为 `smartstaff:ai-api-key:v1`；
+- 前端只看到 `credentialConfigured` / `credentialHint` / `credentialSource`；
+- 审计记录操作人、动作、模型、状态和延迟，不记录 Key/Authorization；
+- 业务 `generateForecast` 通过 `resolveAiRuntime` 使用统一 AI Service；配置更新只影响下一次请求。

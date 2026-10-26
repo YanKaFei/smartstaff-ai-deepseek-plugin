@@ -66,17 +66,17 @@ export function resetSecretKeyCache(): void {
   keyCache.clear();
 }
 
-export function encryptSecret(plaintext: string, cfg: AppConfig): string {
+export function encryptSecretWithPurpose(plaintext: string, cfg: AppConfig, purpose: string): string {
   const key = getSecretEncryptionKey(cfg);
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', key, iv);
-  cipher.setAAD(Buffer.from('smartstaff:webhook-secret:v1'));
+  cipher.setAAD(Buffer.from(`smartstaff:${purpose}:v1`));
   const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
   return [PREFIX, iv.toString('base64'), tag.toString('base64'), ciphertext.toString('base64')].join(':');
 }
 
-export function decryptSecret(payload: string, cfg: AppConfig): string {
+export function decryptSecretWithPurpose(payload: string, cfg: AppConfig, purpose: string): string {
   const parts = payload.split(':');
   if (parts.length !== 4 || parts[0] !== PREFIX) {
     throw new AppError(500, 'SECRET_FORMAT_INVALID', '加密密钥格式无效');
@@ -86,7 +86,15 @@ export function decryptSecret(payload: string, cfg: AppConfig): string {
   const tag = Buffer.from(parts[2], 'base64');
   const ciphertext = Buffer.from(parts[3], 'base64');
   const decipher = createDecipheriv('aes-256-gcm', key, iv);
-  decipher.setAAD(Buffer.from('smartstaff:webhook-secret:v1'));
+  decipher.setAAD(Buffer.from(`smartstaff:${purpose}:v1`));
   decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
+}
+
+export function encryptSecret(plaintext: string, cfg: AppConfig): string {
+  return encryptSecretWithPurpose(plaintext, cfg, 'webhook-secret');
+}
+
+export function decryptSecret(payload: string, cfg: AppConfig): string {
+  return decryptSecretWithPurpose(payload, cfg, 'webhook-secret');
 }

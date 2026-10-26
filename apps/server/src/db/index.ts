@@ -54,6 +54,7 @@ function migrate(db: Db): void {
   add('pilot_events', 'manager_required', 'manager_required INTEGER');
   add('import_observations', 'manager_required_reason', 'manager_required_reason TEXT');
   add('pilot_events', 'manager_required_reason', 'manager_required_reason TEXT');
+  add('ai_settings', 'credential_revoked', 'credential_revoked INTEGER NOT NULL DEFAULT 0');
   add('shifts', 'demand_id', 'demand_id TEXT');
   add('shifts', 'is_backfill', 'is_backfill INTEGER NOT NULL DEFAULT 0');
   add('shifts', 'cancelled_at', 'cancelled_at INTEGER');

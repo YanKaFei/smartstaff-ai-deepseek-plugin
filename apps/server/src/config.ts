@@ -84,6 +84,7 @@ export const config = {
     inputPricePerMTok: Number(env.DEEPSEEK_INPUT_PRICE_PER_MTOK ?? 0.27),
     outputPricePerMTok: Number(env.DEEPSEEK_OUTPUT_PRICE_PER_MTOK ?? 1.1),
     cacheTtlMinutes: Number(env.DEEPSEEK_CACHE_TTL_MINUTES ?? 30),
+    priceUpdatedAt: env.DEEPSEEK_PRICE_UPDATED_AT ?? '',
   },
   ingestStaleMinutes: Number(env.INGEST_STALE_MINUTES ?? 15),
   rateLimitBackend: (env.RATE_LIMIT_BACKEND === 'memory' ? 'memory' : 'db') as 'memory' | 'db',

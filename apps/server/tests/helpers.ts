@@ -24,7 +24,7 @@ export async function freshApp(overrides: Partial<AppConfig> = {}): Promise<Test
     deepseek: { apiKey: '', baseUrl: 'http://127.0.0.1:1', model: 'deepseek-flash', timeoutMs: 500 },
     ...overrides,
   });
-  const seeded = seedDemo(handle.db, cfg);
+  const seeded = seedDemo(handle.db, cfg, false, { dateKey: '2026-10-26' });
   const server: Server = buildApp(handle.db, cfg);
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();

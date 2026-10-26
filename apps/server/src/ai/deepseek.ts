@@ -255,3 +255,77 @@ export async function analyzeForecast(
 export function aiPromptDebug(forecast: ForecastResult, config: StoreConfig): string {
   return `门店 ${config.basic.name}｜${formatDateTime(forecast.horizonStart)}｜需求 ${forecast.peakRequiredStaff} 人｜缺口 ${forecast.peakGap}｜${forecast.bottleneckReason}`;
 }
+
+export interface DeepSeekProbeResult {
+  status: 'ok' | 'error';
+  errorCode?: string;
+  message?: string;
+  httpStatus?: number;
+  latencyMs: number;
+  model?: string;
+  finishReason?: string;
+  usage?: { promptTokens: number; completionTokens: number; totalTokens: number };
+}
+
+/**
+ * Minimal real HTTPS probe. No mock fallback: an unconfigured key returns a
+ * blocked result and a 401 is reported as an auth failure.
+ */
+export async function probeDeepSeek(cfg: AppConfig, fetchImpl: typeof fetch = fetch): Promise<DeepSeekProbeResult> {
+  if (!cfg.deepseek.apiKey) {
+    return { status: 'error', errorCode: 'AI_NOT_CONFIGURED', message: '未配置 API Key', latencyMs: 0 };
+  }
+  const startedAt = performance.now();
+  try {
+    const response = await fetchImpl(`${cfg.deepseek.baseUrl.replace(/\/$/, '')}/chat/completions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.deepseek.apiKey}` },
+      body: JSON.stringify({
+        model: cfg.deepseek.model,
+        messages: [
+          { role: 'system', content: '只输出 JSON：{"summary":"连接测试通过","riskLevel":"low","bottleneckExplanation":"连接测试","slotNotes":[],"cautions":[]}' },
+          { role: 'user', content: '返回最小 JSON 健康检查结果。' },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0,
+        max_tokens: 80,
+      }),
+      signal: AbortSignal.timeout(cfg.deepseek.timeoutMs),
+    });
+    const latencyMs = Math.round(performance.now() - startedAt);
+    if (!response.ok) {
+      const code = response.status === 401 || response.status === 403 ? 'AI_AUTH_FAILED' : 'AI_UPSTREAM_ERROR';
+      return {
+        status: 'error', errorCode: code, httpStatus: response.status, latencyMs,
+        message: code === 'AI_AUTH_FAILED' ? 'API Key 无效或认证失败' : `DeepSeek HTTP ${response.status}`,
+      };
+    }
+    const json = (await response.json()) as {
+      model?: string;
+      choices?: Array<{ finish_reason?: string; message?: { content?: string } }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+    };
+    const content = json.choices?.[0]?.message?.content;
+    const finishReason = json.choices?.[0]?.finish_reason;
+    if (!json.model || !json.usage || !content || finishReason !== 'stop') {
+      return { status: 'error', errorCode: 'AI_RESPONSE_INVALID', httpStatus: response.status, latencyMs, model: json.model, finishReason, message: '响应缺少模型/usage、内容或 finish_reason 不合法' };
+    }
+    try {
+      aiAnalysisSchema.parse(JSON.parse(content));
+    } catch {
+      return { status: 'error', errorCode: 'AI_RESPONSE_INVALID', httpStatus: response.status, latencyMs, model: json.model, finishReason, message: '响应 JSON 结构校验失败' };
+    }
+    return {
+      status: 'ok', httpStatus: response.status, latencyMs, model: json.model, finishReason,
+      usage: {
+        promptTokens: json.usage?.prompt_tokens ?? 0,
+        completionTokens: json.usage?.completion_tokens ?? 0,
+        totalTokens: json.usage?.total_tokens ?? 0,
+      },
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const code = /timeout|abort|TimeoutError/i.test(message) ? 'AI_TIMEOUT' : 'AI_UPSTREAM_ERROR';
+    return { status: 'error', errorCode: code, message: code === 'AI_TIMEOUT' ? '请求超时' : 'DeepSeek 请求失败', latencyMs: Math.round(performance.now() - startedAt) };
+  }
+}

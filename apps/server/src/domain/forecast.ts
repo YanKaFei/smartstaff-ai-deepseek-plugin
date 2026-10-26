@@ -12,6 +12,7 @@ import type { BusinessDayRow, QueueRow, TableRow } from './ops.js';
 import type { ForecastResult, TableType } from './types.js';
 import { analyzeForecast, deterministicAnalysis, forecastCacheKey, type AiAnalysis } from '../ai/deepseek.js';
 import { aiBudgetStatus, getCachedAnalysis, putCachedAnalysis, recordAiUsage } from './aiUsage.js';
+import { recordAiBusinessSuccess, resolveAiRuntime } from './aiSettings.js';
 import { audit } from './notify.js';
 
 export interface ForecastRow {
@@ -194,23 +195,45 @@ export async function generateForecast(
   });
 
   const useAi = opts.useAi ?? true;
+  const runtime = resolveAiRuntime(db, cfg);
+  const aiCfg = runtime.cfg;
+  const aiModel = aiCfg.deepseek.model;
   const forecastId = id('fc');
-  const cacheKey = forecastCacheKey(result, config, cfg.deepseek.model);
+  const cacheKey = forecastCacheKey(result, config, aiModel);
   let aiCached = false;
   let aiResult: Awaited<ReturnType<typeof analyzeForecast>> = {
     status: 'fallback',
     analysis: deterministicAnalysis(result, config),
     error: '本次仅使用确定性引擎',
   };
-  if (useAi) {
+  if (useAi && !runtime.enabled) {
+    aiResult = {
+      status: 'fallback',
+      analysis: deterministicAnalysis(result, config),
+      error: 'AI_DISABLED',
+      latencyMs: 0,
+      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+    };
+    recordAiUsage(db, aiCfg, {
+      storeId,
+      forecastId,
+      model: aiModel,
+      promptTokens: 0,
+      completionTokens: 0,
+      totalTokens: 0,
+      latencyMs: 0,
+      status: 'disabled',
+      errorCode: 'AI_DISABLED',
+    });
+  } else if (useAi) {
     const cached = getCachedAnalysis(db, cacheKey);
     if (cached) {
       aiCached = true;
-      aiResult = { status: 'ok', analysis: cached, model: cfg.deepseek.model, latencyMs: 0, usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 } };
-      recordAiUsage(db, cfg, {
+      aiResult = { status: 'ok', analysis: cached, model: aiModel, latencyMs: 0, usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 } };
+      recordAiUsage(db, aiCfg, {
         storeId,
         forecastId,
-        model: cfg.deepseek.model,
+        model: aiModel,
         promptTokens: 0,
         completionTokens: 0,
         totalTokens: 0,
@@ -219,7 +242,7 @@ export async function generateForecast(
         cacheHit: true,
       });
     } else {
-      const budget = aiBudgetStatus(db, storeId, cfg);
+      const budget = aiBudgetStatus(db, storeId, aiCfg);
       if (!budget.allowed) {
         aiResult = {
           status: 'fallback',
@@ -228,10 +251,10 @@ export async function generateForecast(
           latencyMs: 0,
           usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
         };
-        recordAiUsage(db, cfg, {
+        recordAiUsage(db, aiCfg, {
           storeId,
           forecastId,
-          model: cfg.deepseek.model,
+          model: aiModel,
           promptTokens: 0,
           completionTokens: 0,
           totalTokens: 0,
@@ -248,12 +271,15 @@ export async function generateForecast(
           at: now,
         });
       } else {
-        aiResult = await analyzeForecast(result, config, cfg, { fetchImpl: opts.fetchImpl });
-        if (aiResult.status === 'ok') putCachedAnalysis(db, cacheKey, cfg.deepseek.model, aiResult.analysis, cfg);
-        recordAiUsage(db, cfg, {
+        aiResult = await analyzeForecast(result, config, aiCfg, { fetchImpl: opts.fetchImpl });
+        if (aiResult.status === 'ok') {
+          putCachedAnalysis(db, cacheKey, aiModel, aiResult.analysis, aiCfg);
+          recordAiBusinessSuccess(db, aiModel, aiResult.latencyMs ?? 0);
+        }
+        recordAiUsage(db, aiCfg, {
           storeId,
           forecastId,
-          model: cfg.deepseek.model,
+          model: aiModel,
           promptTokens: aiResult.usage?.promptTokens ?? 0,
           completionTokens: aiResult.usage?.completionTokens ?? 0,
           totalTokens: aiResult.usage?.totalTokens ?? 0,
