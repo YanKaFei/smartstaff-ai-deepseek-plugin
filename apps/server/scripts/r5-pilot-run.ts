@@ -12,7 +12,7 @@ const cfg = makeConfig({ nodeEnv: 'test' });
 const handle = openDatabase(':memory:');
 function iso(date: string, time: string) { return `${date}T${time}:00+08:00`; }
 function eventsCsv() {
-  const lines = ['pilot_id,store_code,business_date,event_id,event_type,occurred_at,table_label,table_type,party_size,staff_role,staff_anonymous_id,call_no,service_mode,on_duty_staff,manager_sufficiency'];
+  const lines = ['pilot_id,store_code,business_date,event_id,event_type,occurred_at,table_label,table_type,party_size,staff_role,staff_anonymous_id,call_no,service_mode,on_duty_staff,manager_required,manager_sufficiency'];
   for (let d = 0; d < 14; d += 1) {
     const date = `2026-10-${String(1 + d).padStart(2, '0')}`;
     for (const [idx, table, type, party, leave, suff] of [
@@ -20,11 +20,11 @@ function eventsCsv() {
       [2, 'M1', 'medium', 4, '22:20', 'adequate'],
     ] as Array<[number, string, string, number, string, string]>) {
       const p = `${date}-${idx}`;
-      lines.push(`R5-PILOT-001,K001,${date},${p}-q,queue_join,${iso(date, '18:00')},${table},${type},${party},server,S01,1,partial,3,${suff}`);
-      lines.push(`R5-PILOT-001,K001,${date},${p}-seat,seat,${iso(date, idx === 1 ? '18:10' : '18:20')},${table},${type},${party},server,S01,,partial,3,${suff}`);
-      lines.push(`R5-PILOT-001,K001,${date},${p}-out,checkout,${iso(date, '21:50')},${table},${type},${party},server,S01,,partial,3,${suff}`);
-      lines.push(`R5-PILOT-001,K001,${date},${p}-leave,leave,${iso(date, leave)},${table},${type},${party},server,S01,,partial,3,${suff}`);
-      lines.push(`R5-PILOT-001,K001,${date},${p}-clean,clean,${iso(date, '22:30')},${table},${type},${party},server,S01,,partial,3,${suff}`);
+      lines.push(`R5-PILOT-001,K001,${date},${p}-q,queue_join,${iso(date, '18:00')},${table},${type},${party},server,S01,1,partial,3,4,${suff}`);
+      lines.push(`R5-PILOT-001,K001,${date},${p}-seat,seat,${iso(date, idx === 1 ? '18:10' : '18:20')},${table},${type},${party},server,S01,,partial,3,4,${suff}`);
+      lines.push(`R5-PILOT-001,K001,${date},${p}-out,checkout,${iso(date, '21:50')},${table},${type},${party},server,S01,,partial,3,4,${suff}`);
+      lines.push(`R5-PILOT-001,K001,${date},${p}-leave,leave,${iso(date, leave)},${table},${type},${party},server,S01,,partial,3,4,${suff}`);
+      lines.push(`R5-PILOT-001,K001,${date},${p}-clean,clean,${iso(date, '22:30')},${table},${type},${party},server,S01,,partial,3,4,${suff}`);
     }
   }
   return lines.join('\n');
@@ -77,7 +77,7 @@ try {
       predictedShortageCount: replay.runs[0].metrics.predictedShortageCount,
       actualShortageCount: replay.runs[0].metrics.actualShortageCount,
       peakShortageDetectionRate: replay.runs[0].metrics.peakShortageDetectionRate,
-      explanation: 'Every simulated point has only two concurrent tables but on-duty=3 and the label adds +1 for short. The model predicts no gap (required 2 <= on-duty 3), so no actual-shortage point can be detected. This is a scenario/label inconsistency and model underprediction, not a threshold that should be lowered.',
+      explanation: 'Every simulated point has only two concurrent tables; the explicit manager_required label is 4 while only 3 staff are on duty. The model predicts required=2 and gap=0, so no actual-shortage point can be detected. This is a scenario/label inconsistency and model underprediction, not a threshold that should be lowered. The label is an explicit manager value, not short+1.',
     },
   }, null, 2));
   console.log(JSON.stringify({ dataOrigin: 'SIMULATED', pilotId: pilot.id, sessions: events.sessionCount, workload: workload.sampleCount, runs: replay.runs.map((r) => ({ model: r.model, mode: r.serviceMode, metrics: r.metrics })) }, null, 2));

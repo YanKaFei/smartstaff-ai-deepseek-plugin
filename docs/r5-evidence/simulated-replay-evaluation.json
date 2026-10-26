@@ -1,13 +1,13 @@
 {
   "dataOrigin": "SIMULATED",
-  "pilotId": "pilot_527b70608a1b52cd29",
+  "pilotId": "pilot_0533a61d269c21087d",
   "replay": {
-    "importId": "imp_2015c61783cabbd19c",
+    "importId": "imp_798eb7f7c494a07e50",
     "dataOrigin": "SIMULATED",
     "points": 28,
     "runs": [
       {
-        "runId": "rpl_70a3ca7746d4ecc61e",
+        "runId": "rpl_4c9d001c517b08508f",
         "model": "legacy",
         "serviceMode": "partial",
         "metrics": {
@@ -18,8 +18,12 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 28,
           "peakMissCount": 28,
+          "notEvaluableCount": 0,
           "actualShortageCount": 28,
           "predictedShortageCount": 0,
+          "shortageRiskDetectionRate": 0,
+          "shortageRiskMissCount": 28,
+          "qualitativeShortageCount": 28,
           "peakShortageDetectionRate": 0,
           "tableCounts": {
             "small": 28,
@@ -60,8 +64,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,
@@ -102,8 +110,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,
@@ -174,7 +186,7 @@
         }
       },
       {
-        "runId": "rpl_874eb8c654c6e889ab",
+        "runId": "rpl_36a0fee206a80d0dc3",
         "model": "service_minutes",
         "serviceMode": "partial",
         "metrics": {
@@ -185,8 +197,12 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 28,
           "peakMissCount": 28,
+          "notEvaluableCount": 0,
           "actualShortageCount": 28,
           "predictedShortageCount": 0,
+          "shortageRiskDetectionRate": 0,
+          "shortageRiskMissCount": 28,
+          "qualitativeShortageCount": 28,
           "peakShortageDetectionRate": 0,
           "tableCounts": {
             "small": 28,
@@ -227,8 +243,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,
@@ -269,8 +289,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,
@@ -341,7 +365,7 @@
         }
       },
       {
-        "runId": "rpl_da21279173b82eafff",
+        "runId": "rpl_3a68152ceba3720777",
         "model": "service_minutes",
         "serviceMode": "full",
         "metrics": {
@@ -352,8 +376,12 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 14,
           "peakMissCount": 28,
+          "notEvaluableCount": 0,
           "actualShortageCount": 28,
           "predictedShortageCount": 0,
+          "shortageRiskDetectionRate": 0,
+          "shortageRiskMissCount": 28,
+          "qualitativeShortageCount": 28,
           "peakShortageDetectionRate": 0,
           "tableCounts": {
             "small": 28,
@@ -394,8 +422,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 7,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,
@@ -436,8 +468,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 7,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,
@@ -508,7 +544,7 @@
         }
       },
       {
-        "runId": "rpl_862df425f93dea3579",
+        "runId": "rpl_a37ea7d7ae031c85b9",
         "model": "service_minutes",
         "serviceMode": "self",
         "metrics": {
@@ -519,8 +555,12 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 42,
           "peakMissCount": 28,
+          "notEvaluableCount": 0,
           "actualShortageCount": 28,
           "predictedShortageCount": 0,
+          "shortageRiskDetectionRate": 0,
+          "shortageRiskMissCount": 28,
+          "qualitativeShortageCount": 28,
           "peakShortageDetectionRate": 0,
           "tableCounts": {
             "small": 28,
@@ -561,8 +601,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 21,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,
@@ -603,8 +647,12 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 21,
               "peakMissCount": 14,
+              "notEvaluableCount": 0,
               "actualShortageCount": 14,
               "predictedShortageCount": 0,
+              "shortageRiskDetectionRate": 0,
+              "shortageRiskMissCount": 14,
+              "qualitativeShortageCount": 14,
               "peakShortageDetectionRate": 0,
               "tableCounts": {
                 "small": 14,

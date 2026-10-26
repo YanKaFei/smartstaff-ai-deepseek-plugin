@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -398,6 +398,7 @@ CREATE TABLE IF NOT EXISTS import_observations (
   service_mode TEXT,
   actual_work_minutes REAL,
   manager_sufficiency TEXT,
+  manager_required INTEGER,
   data_origin TEXT NOT NULL CHECK (data_origin IN ('REAL','SIMULATED')),
   quality_status TEXT NOT NULL CHECK (quality_status IN ('valid','invalid','duplicate')),
   issues_json TEXT NOT NULL DEFAULT '[]',
@@ -481,6 +482,7 @@ CREATE TABLE IF NOT EXISTS pilot_events (
   service_mode TEXT,
   on_duty_staff INTEGER,
   manager_sufficiency TEXT,
+  manager_required INTEGER,
   source_row INTEGER NOT NULL,
   data_origin TEXT NOT NULL CHECK (data_origin IN ('REAL','SIMULATED')),
   quality_status TEXT NOT NULL CHECK (quality_status IN ('valid','invalid','duplicate')),

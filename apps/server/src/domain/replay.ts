@@ -33,19 +33,20 @@ interface Observation {
   onDutyStaff: number;
   actualWorkMinutes: number | null;
   managerSufficiency: 'short' | 'adequate' | 'over' | 'unknown' | null;
+  managerRequired: number | null;
 }
 
 function metricsFor(rows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase?: string; predictedGap: number; actualShortage: boolean; tableCounts: Record<string, number> }>, hourlyRate: number) {
   const evaluated = rows.filter((r) => r.evaluated && r.actual !== null);
   const mae = evaluated.length ? evaluated.reduce((s, r) => s + Math.abs(r.recommended - (r.actual ?? 0)), 0) / evaluated.length : null;
   const bias = evaluated.length ? evaluated.reduce((s, r) => s + (r.recommended - (r.actual ?? 0)), 0) / evaluated.length : null;
-  const overHours = evaluated.reduce((s, r) => s + Math.max(0, r.recommended - (r.actual ?? 0)) * 0.5, 0);
-  const underHours = evaluated.reduce((s, r) => s + Math.max(0, (r.actual ?? 0) - r.recommended) * 0.5, 0);
+  const overHours = evaluated.length ? evaluated.reduce((s, r) => s + Math.max(0, r.recommended - (r.actual ?? 0)) * 0.5, 0) : null;
+  const underHours = evaluated.length ? evaluated.reduce((s, r) => s + Math.max(0, (r.actual ?? 0) - r.recommended) * 0.5, 0) : null;
   const peakMiss = evaluated.filter((r) => (r.actual ?? 0) > r.recommended).length;
-  const actualShortageRows = evaluated.filter((r) => r.actualShortage);
-  const detectedShortageRows = actualShortageRows.filter((r) => r.predictedGap > 0);
-  const peakShortageDetectionRate = actualShortageRows.length
-    ? Math.round((detectedShortageRows.length / actualShortageRows.length) * 1000) / 1000
+  const qualitativeShortageRows = rows.filter((r) => r.actualShortage);
+  const detectedShortageRows = qualitativeShortageRows.filter((r) => r.predictedGap > 0);
+  const peakShortageDetectionRate = qualitativeShortageRows.length
+    ? Math.round((detectedShortageRows.length / qualitativeShortageRows.length) * 1000) / 1000
     : null;
   const tableCounts = evaluated.reduce<Record<string, number>>((acc, r) => {
     for (const [k, v] of Object.entries(r.tableCounts)) acc[k] = (acc[k] ?? 0) + v;
@@ -65,14 +66,18 @@ function metricsFor(rows: Array<{ recommended: number; actual: number | null; ta
     evaluatedCount: evaluated.length,
     mae: mae === null ? null : Math.round(mae * 100) / 100,
     bias: bias === null ? null : Math.round(bias * 100) / 100,
-    overstaffedPersonHours: Math.round(overHours * 100) / 100,
-    understaffedPersonHours: Math.round(underHours * 100) / 100,
+    overstaffedPersonHours: overHours === null ? null : Math.round(overHours * 100) / 100,
+    understaffedPersonHours: underHours === null ? null : Math.round(underHours * 100) / 100,
     peakMissCount: peakMiss,
-    actualShortageCount: actualShortageRows.length,
-    predictedShortageCount: evaluated.filter((r) => r.predictedGap > 0).length,
+    notEvaluableCount: rows.filter((r) => !r.evaluated).length,
+    actualShortageCount: qualitativeShortageRows.length,
+    predictedShortageCount: rows.filter((r) => r.predictedGap > 0).length,
+    shortageRiskDetectionRate: peakShortageDetectionRate,
+    shortageRiskMissCount: qualitativeShortageRows.filter((r) => r.predictedGap <= 0).length,
+    qualitativeShortageCount: qualitativeShortageRows.length,
     peakShortageDetectionRate,
     tableCounts,
-    estimatedExtraLaborCost: Math.round(overHours * hourlyRate * 100) / 100,
+    estimatedExtraLaborCost: overHours === null ? null : Math.round(overHours * hourlyRate * 100) / 100,
     averageLeadMinutes: evaluated.length ? Math.round((evaluated.reduce((s, r) => s + r.leadMinutes, 0) / evaluated.length) * 10) / 10 : null,
     byTableType: byType,
     labelNote: 'actualRequired uses manager sufficiency + on-duty; work minutes when available. It is a human-reviewed label, not only actual on-duty.',
@@ -92,6 +97,7 @@ function observationsFor(db: Db, importId: string): Observation[] {
     onDutyStaff: Number(o.onDutyStaff),
     actualWorkMinutes: o.actualWorkMinutes === null ? null : Number(o.actualWorkMinutes),
     managerSufficiency: (o.managerSufficiency as Observation['managerSufficiency']) ?? null,
+    managerRequired: o.managerRequired === null || o.managerRequired === undefined ? null : Number(o.managerRequired),
   }));
 }
 
@@ -166,15 +172,20 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
       const future = rows.filter((r) => r.seatAt < horizonEnd && r.leaveAt > t);
       const futureOnDuty = Math.max(1, ...future.map((r) => r.onDutyStaff));
       const sufficiency = future.map((r) => r.managerSufficiency).filter((s) => s && s !== 'unknown') as string[];
-      const hasReview = sufficiency.length > 0;
+      const qualitativeShortage = sufficiency.includes('short');
+      const managerRequiredValues = future.map((r) => r.managerRequired).filter((v): v is number => v !== null && Number.isFinite(v));
+      const uniqueManagerRequired = [...new Set(managerRequiredValues)];
       const workMinutes = future.map((r) => r.actualWorkMinutes).filter((v): v is number => v !== null && Number.isFinite(v));
-      const labelMethod = hasReview ? 'manager_sufficiency_on_duty' : workMinutes.length ? 'actual_work_minutes' : 'unlabeled';
+      const workMinuteEstimate = workMinutes.length
+        ? Math.max(1, Math.ceil(workMinutes.reduce((s, v) => s + v, 0) / (cfg.staffing.effectiveServiceMinutesPerSlot * 6)))
+        : null;
       let actual: number | null = null;
-      if (hasReview) {
-        const adjustment = sufficiency.includes('short') ? 1 : sufficiency.every((s) => s === 'over') ? -1 : 0;
-        actual = futureOnDuty + adjustment;
-      } else if (workMinutes.length) {
-        actual = Math.max(1, Math.ceil(workMinutes.reduce((s, v) => s + v, 0) / (cfg.staffing.effectiveServiceMinutesPerSlot * 6)));
+      let labelStatus: 'MANAGER_EXPLICIT' | 'CONFLICTING_MANAGER_REQUIRED' | 'NOT_EVALUABLE' = 'NOT_EVALUABLE';
+      if (uniqueManagerRequired.length === 1) {
+        actual = uniqueManagerRequired[0];
+        labelStatus = 'MANAGER_EXPLICIT';
+      } else if (uniqueManagerRequired.length > 1) {
+        labelStatus = 'CONFLICTING_MANAGER_REQUIRED';
       }
       const evaluated = actual !== null;
       const tableCounts = active.reduce<Record<string, number>>((acc, r) => { acc[r.tableType] = (acc[r.tableType] ?? 0) + 1; return acc; }, { small: 0, medium: 0, large: 0 });
@@ -193,12 +204,16 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
         dataQuality: { observationCount: active.length + queued.length, historyPoints: history.length },
       };
       const actualJson = {
-        method: labelMethod,
+        method: labelStatus,
         onDuty: futureOnDuty,
         managerSufficiency: sufficiency,
         required: actual,
+        actualOnDuty: futureOnDuty,
+        managerRequiredValues,
+        labelStatus,
+        workMinuteEstimate,
+        qualitativeShortage,
         predictedGap,
-        actualShortage: actual !== null && actual > onDuty,
         futureObservationIds: future.map((r) => r.id),
         futureObservationCount: future.length,
       };
@@ -214,7 +229,7 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
       const max = Math.max(0, ...types.map(([, n]) => n));
       const top = types.filter(([, n]) => n === max);
       const tableType = (top.length !== 1 || types.length > 1 ? 'mixed' : (top[0]?.[0] ?? 'small')) as TableType | 'mixed';
-      metricsRows.push({ recommended: forecast.peakRequiredStaff, actual, tableType, leadMinutes: Math.round((forecast.horizonStart - t) / MINUTE_MS), evaluated, phase, predictedGap, actualShortage: actual !== null && actual > onDuty, tableCounts });
+      metricsRows.push({ recommended: forecast.peakRequiredStaff, actual, tableType, leadMinutes: Math.round((forecast.horizonStart - t) / MINUTE_MS), evaluated, phase, predictedGap, actualShortage: qualitativeShortage, tableCounts });
     }
     const baseMetrics = metricsFor(metricsRows, base.basic.hourlyRate);
     const metrics = {

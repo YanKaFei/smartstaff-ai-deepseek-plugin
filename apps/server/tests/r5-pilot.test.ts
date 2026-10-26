@@ -6,7 +6,7 @@ import { get } from '../src/lib/db.js';
 function iso(date: string, time: string) { return `${date}T${time}:00+08:00`; }
 
 function eventsCsv(): string {
-  const lines = ['pilot_id,store_code,business_date,event_id,event_type,occurred_at,table_label,table_type,party_size,staff_role,staff_anonymous_id,call_no,service_mode,on_duty_staff,manager_sufficiency'];
+  const lines = ['pilot_id,store_code,business_date,event_id,event_type,occurred_at,table_label,table_type,party_size,staff_role,staff_anonymous_id,call_no,service_mode,on_duty_staff,manager_required,manager_sufficiency'];
   for (let d = 0; d < 14; d += 1) {
     const date = `2026-10-${String(1 + d).padStart(2, '0')}`;
     for (const [idx, table, type, party, leave, sufficiency] of [
@@ -14,15 +14,15 @@ function eventsCsv(): string {
       [2, 'M1', 'medium', 4, '22:20', 'adequate'],
     ] as Array<[number, string, string, number, string, string]>) {
       const prefix = `${date}-${idx}`;
-      lines.push(`R5-PILOT-001,K001,${date},${prefix}-q,queue_join,${iso(date, '18:00')},${table},${type},${party},server,S01,1,partial,3,${sufficiency}`);
-      lines.push(`R5-PILOT-001,K001,${date},${prefix}-seat,seat,${iso(date, idx === 1 ? '18:10' : '18:20')},${table},${type},${party},server,S01,,partial,3,${sufficiency}`);
-      lines.push(`R5-PILOT-001,K001,${date},${prefix}-checkout,checkout,${iso(date, '21:50')},${table},${type},${party},server,S01,,partial,3,${sufficiency}`);
-      lines.push(`R5-PILOT-001,K001,${date},${prefix}-leave,leave,${iso(date, leave)},${table},${type},${party},server,S01,,partial,3,${sufficiency}`);
-      lines.push(`R5-PILOT-001,K001,${date},${prefix}-clean,clean,${iso(date, '22:30')},${table},${type},${party},server,S01,,partial,3,${sufficiency}`);
+      lines.push(`R5-PILOT-001,K001,${date},${prefix}-q,queue_join,${iso(date, '18:00')},${table},${type},${party},server,S01,1,partial,3,4,${sufficiency}`);
+      lines.push(`R5-PILOT-001,K001,${date},${prefix}-seat,seat,${iso(date, idx === 1 ? '18:10' : '18:20')},${table},${type},${party},server,S01,,partial,3,4,${sufficiency}`);
+      lines.push(`R5-PILOT-001,K001,${date},${prefix}-checkout,checkout,${iso(date, '21:50')},${table},${type},${party},server,S01,,partial,3,4,${sufficiency}`);
+      lines.push(`R5-PILOT-001,K001,${date},${prefix}-leave,leave,${iso(date, leave)},${table},${type},${party},server,S01,,partial,3,4,${sufficiency}`);
+      lines.push(`R5-PILOT-001,K001,${date},${prefix}-clean,clean,${iso(date, '22:30')},${table},${type},${party},server,S01,,partial,3,4,${sufficiency}`);
     }
   }
   // duplicate event: should be counted but not inserted twice
-  lines.push(`R5-PILOT-001,K001,2026-10-01,2026-10-01-1-seat,seat,${iso('2026-10-01', '18:10')},S1,small,2,server,S01,,partial,3,short`);
+  lines.push(`R5-PILOT-001,K001,2026-10-01,2026-10-01-1-seat,seat,${iso('2026-10-01', '18:10')},S1,small,2,server,S01,,partial,3,4,short`);
   return lines.join('\n');
 }
 

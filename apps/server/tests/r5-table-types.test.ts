@@ -6,17 +6,17 @@ import { get } from '../src/lib/db.js';
 function iso(date: string, time: string) { return `${date}T${time}:00+08:00`; }
 
 function eventCsv(types: Array<'small' | 'medium' | 'large'>): string {
-  const lines = ['pilot_id,store_code,business_date,event_id,event_type,occurred_at,table_label,table_type,party_size,staff_role,staff_anonymous_id,call_no,service_mode,on_duty_staff,manager_sufficiency'];
+  const lines = ['pilot_id,store_code,business_date,event_id,event_type,occurred_at,table_label,table_type,party_size,staff_role,staff_anonymous_id,call_no,service_mode,on_duty_staff,manager_required,manager_sufficiency'];
   const date = '2026-10-01';
   types.forEach((type, idx) => {
     const table = `${type.toUpperCase()}-${idx}`;
     const party = type === 'large' ? 8 : type === 'medium' ? 4 : 2;
     const prefix = `${date}-${idx}`;
-    lines.push(`R5-TYPES,K001,${date},${prefix}-q,queue_join,${iso(date, '18:00')},${table},${type},${party},server,S01,1,partial,3,adequate`);
-    lines.push(`R5-TYPES,K001,${date},${prefix}-seat,seat,${iso(date, '18:10')},${table},${type},${party},server,S01,,partial,3,adequate`);
-    lines.push(`R5-TYPES,K001,${date},${prefix}-out,checkout,${iso(date, '21:50')},${table},${type},${party},server,S01,,partial,3,adequate`);
-    lines.push(`R5-TYPES,K001,${date},${prefix}-leave,leave,${iso(date, '22:20')},${table},${type},${party},server,S01,,partial,3,adequate`);
-    lines.push(`R5-TYPES,K001,${date},${prefix}-clean,clean,${iso(date, '22:30')},${table},${type},${party},server,S01,,partial,3,adequate`);
+    lines.push(`R5-TYPES,K001,${date},${prefix}-q,queue_join,${iso(date, '18:00')},${table},${type},${party},server,S01,1,partial,3,4,adequate`);
+    lines.push(`R5-TYPES,K001,${date},${prefix}-seat,seat,${iso(date, '18:10')},${table},${type},${party},server,S01,,partial,3,4,adequate`);
+    lines.push(`R5-TYPES,K001,${date},${prefix}-out,checkout,${iso(date, '21:50')},${table},${type},${party},server,S01,,partial,3,4,adequate`);
+    lines.push(`R5-TYPES,K001,${date},${prefix}-leave,leave,${iso(date, '22:20')},${table},${type},${party},server,S01,,partial,3,4,adequate`);
+    lines.push(`R5-TYPES,K001,${date},${prefix}-clean,clean,${iso(date, '22:30')},${table},${type},${party},server,S01,,partial,3,4,adequate`);
   });
   return lines.join('\n');
 }

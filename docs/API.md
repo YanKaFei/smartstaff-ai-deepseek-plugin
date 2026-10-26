@@ -354,7 +354,7 @@ x-signature: sha256=<hex hmac>
 }
 ```
 
-CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size, seat_at, leave_at`。可选：`queue_at, checkout_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency`。支持中文表头别名。
+CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size, seat_at, leave_at（数值标签另有 `manager_required`）`。可选：`queue_at, checkout_at, clean_at, on_duty_staff, service_mode, actual_work_minutes, manager_sufficiency`。支持中文表头别名。
 
 质量结果写 `data_imports.quality_json` 与 `import_observations`：
 

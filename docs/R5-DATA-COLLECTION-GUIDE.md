@@ -38,7 +38,7 @@
 - `occurred_at` / `start_at` / `end_at` 使用 `YYYY-MM-DDTHH:MM:SS+08:00`（或 CSV 中 `HH:MM` + `business_date`）。
 - 事件按发生时间记录；允许补录，系统按时间排序，不要求手工排序。
 - 员工只记录岗位和匿名工号（如 `S01`），不要记录姓名/手机号。
-- 店长评价 `manager_sufficiency`：`short / adequate / over / unknown`。
+- 店长评价 `manager_sufficiency`：`short / adequate / over / unknown`；若店长能明确填写“合理需求人数”，填 `manager_required`。`short` 不会自动换算为人数。
 
 ## 4. 采集节奏
 

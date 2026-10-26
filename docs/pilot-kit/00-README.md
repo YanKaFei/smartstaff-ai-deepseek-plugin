@@ -10,6 +10,7 @@
 | `04-server-work-minute-observation.md` | 服务员工作分钟观察表 | 观察员 |
 | `05-manager-daily-feedback.md` | 店长每日反馈表 | 店长（内部代录） |
 | `06-14-day-calendar.md` | 14 天执行日历 | 试点负责人 |
+| `07-2-3-hour-trial.md` | 2–3 小时首店试采方案 | 试点负责人/观察员 |
 | `R5-PILOT-EVENTS-TEMPLATE.csv/.xlsx` | 经营事件导入模板 | 观察员 |
 | `R5-WORKLOAD-TEMPLATE.csv/.xlsx` | 工作量导入模板 | 观察员 |
 
