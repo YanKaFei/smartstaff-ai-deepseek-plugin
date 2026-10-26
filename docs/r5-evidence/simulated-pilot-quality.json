@@ -1,8 +1,8 @@
 {
   "dataOrigin": "SIMULATED",
   "pilot": {
-    "id": "pilot_b6f14b94a7905fd4fb",
-    "storeId": "store_c348e42af42763420d",
+    "id": "pilot_527b70608a1b52cd29",
+    "storeId": "store_5d13f714072bdb4b5e",
     "anonymousCode": "R5-PILOT-001",
     "serviceMode": "partial",
     "hours": {
@@ -32,8 +32,8 @@
     "owner": "pilot-owner",
     "startDate": "2026-10-01",
     "endDate": "2026-10-14",
-    "createdAt": 1792987585937,
-    "updatedAt": 1792987585937
+    "createdAt": 1793003656483,
+    "updatedAt": 1793003656484
   },
   "eventQuality": {
     "dataOrigin": "SIMULATED",

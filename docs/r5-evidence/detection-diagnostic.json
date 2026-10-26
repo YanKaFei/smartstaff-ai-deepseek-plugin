@@ -1,0 +1,28 @@
+{
+  "dataOrigin": "SIMULATED",
+  "status": "SIMULATED_ONLY",
+  "note": "This diagnostic explains the 0% detection rate; it does not relax the evaluation threshold.",
+  "firstPrediction": {
+    "onDutyStaff": 3,
+    "activeTableCounts": {
+      "small": 1,
+      "medium": 1,
+      "large": 0
+    },
+    "predictedRequired": 2,
+    "predictedGap": 0,
+    "actualRequired": 4,
+    "actualShortage": true,
+    "managerSufficiency": [
+      "short",
+      "adequate"
+    ],
+    "labelMethod": "manager_sufficiency_on_duty"
+  },
+  "cause": {
+    "predictedShortageCount": 0,
+    "actualShortageCount": 28,
+    "peakShortageDetectionRate": 0,
+    "explanation": "Every simulated point has only two concurrent tables but on-duty=3 and the label adds +1 for short. The model predicts no gap (required 2 <= on-duty 3), so no actual-shortage point can be detected. This is a scenario/label inconsistency and model underprediction, not a threshold that should be lowered."
+  }
+}

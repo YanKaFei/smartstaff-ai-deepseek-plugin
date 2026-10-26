@@ -35,15 +35,22 @@ interface Observation {
   managerSufficiency: 'short' | 'adequate' | 'over' | 'unknown' | null;
 }
 
-function metricsFor(rows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase?: string }>, hourlyRate: number) {
+function metricsFor(rows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase?: string; predictedGap: number; actualShortage: boolean; tableCounts: Record<string, number> }>, hourlyRate: number) {
   const evaluated = rows.filter((r) => r.evaluated && r.actual !== null);
   const mae = evaluated.length ? evaluated.reduce((s, r) => s + Math.abs(r.recommended - (r.actual ?? 0)), 0) / evaluated.length : null;
   const bias = evaluated.length ? evaluated.reduce((s, r) => s + (r.recommended - (r.actual ?? 0)), 0) / evaluated.length : null;
   const overHours = evaluated.reduce((s, r) => s + Math.max(0, r.recommended - (r.actual ?? 0)) * 0.5, 0);
   const underHours = evaluated.reduce((s, r) => s + Math.max(0, (r.actual ?? 0) - r.recommended) * 0.5, 0);
   const peakMiss = evaluated.filter((r) => (r.actual ?? 0) > r.recommended).length;
-  const shortageCount = evaluated.filter((r) => (r.actual ?? 0) > r.recommended).length;
-  const peakShortageDetectionRate = shortageCount ? Math.round((1 - peakMiss / shortageCount) * 1000) / 1000 : null;
+  const actualShortageRows = evaluated.filter((r) => r.actualShortage);
+  const detectedShortageRows = actualShortageRows.filter((r) => r.predictedGap > 0);
+  const peakShortageDetectionRate = actualShortageRows.length
+    ? Math.round((detectedShortageRows.length / actualShortageRows.length) * 1000) / 1000
+    : null;
+  const tableCounts = evaluated.reduce<Record<string, number>>((acc, r) => {
+    for (const [k, v] of Object.entries(r.tableCounts)) acc[k] = (acc[k] ?? 0) + v;
+    return acc;
+  }, { small: 0, medium: 0, large: 0 });
   const byType: Record<string, { count: number; mae: number | null; bias: number | null }> = {};
   for (const type of ['small', 'medium', 'large', 'mixed']) {
     const subset = evaluated.filter((r) => r.tableType === type);
@@ -61,7 +68,10 @@ function metricsFor(rows: Array<{ recommended: number; actual: number | null; ta
     overstaffedPersonHours: Math.round(overHours * 100) / 100,
     understaffedPersonHours: Math.round(underHours * 100) / 100,
     peakMissCount: peakMiss,
+    actualShortageCount: actualShortageRows.length,
+    predictedShortageCount: evaluated.filter((r) => r.predictedGap > 0).length,
     peakShortageDetectionRate,
+    tableCounts,
     estimatedExtraLaborCost: Math.round(overHours * hourlyRate * 100) / 100,
     averageLeadMinutes: evaluated.length ? Math.round((evaluated.reduce((s, r) => s + r.leadMinutes, 0) / evaluated.length) * 10) / 10 : null,
     byTableType: byType,
@@ -126,7 +136,7 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
        VALUES(?,?,?,?,?,?,?,?)`,
       [runId, importId, storeId, cfg.staffing.capacityModel, cfg.staffing.serviceMode, 'running', actorId, now],
     );
-    const metricsRows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase: string }> = [];
+    const metricsRows: Array<{ recommended: number; actual: number | null; tableType: TableType | 'mixed'; leadMinutes: number; evaluated: boolean; phase: string; predictedGap: number; actualShortage: boolean; tableCounts: Record<string, number> }> = [];
     for (const t of points) {
       const active = rows.filter((r) => r.seatAt <= t && r.leaveAt > t);
       const queued = rows.filter((r) => r.queueAt !== null && r.queueAt <= t && r.seatAt > t);
@@ -167,10 +177,13 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
         actual = Math.max(1, Math.ceil(workMinutes.reduce((s, v) => s + v, 0) / (cfg.staffing.effectiveServiceMinutesPerSlot * 6)));
       }
       const evaluated = actual !== null;
+      const tableCounts = active.reduce<Record<string, number>>((acc, r) => { acc[r.tableType] = (acc[r.tableType] ?? 0) + 1; return acc; }, { small: 0, medium: 0, large: 0 });
+      const predictedGap = forecast.peakGap;
       const snapshot = {
         at: t,
         atLabel: formatDateTime(t),
         onDutyStaff: onDuty,
+        activeTableCounts: tableCounts,
         activeObservationIds: active.map((r) => r.id),
         queuedObservationIds: queued.map((r) => r.id),
         tables: active.map((r) => ({ id: r.id, type: r.tableType, seatedAt: r.seatAt, status: r.checkoutAt && t >= r.checkoutAt ? 'checkout' : 'dining' })),
@@ -184,6 +197,8 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
         onDuty: futureOnDuty,
         managerSufficiency: sufficiency,
         required: actual,
+        predictedGap,
+        actualShortage: actual !== null && actual > onDuty,
         futureObservationIds: future.map((r) => r.id),
         futureObservationCount: future.length,
       };
@@ -199,7 +214,7 @@ export function runReplay(db: Db, storeId: string, importId: string, actorId: st
       const max = Math.max(0, ...types.map(([, n]) => n));
       const top = types.filter(([, n]) => n === max);
       const tableType = (top.length !== 1 || types.length > 1 ? 'mixed' : (top[0]?.[0] ?? 'small')) as TableType | 'mixed';
-      metricsRows.push({ recommended: forecast.peakRequiredStaff, actual, tableType, leadMinutes: Math.round((forecast.horizonStart - t) / MINUTE_MS), evaluated, phase });
+      metricsRows.push({ recommended: forecast.peakRequiredStaff, actual, tableType, leadMinutes: Math.round((forecast.horizonStart - t) / MINUTE_MS), evaluated, phase, predictedGap, actualShortage: actual !== null && actual > onDuty, tableCounts });
     }
     const baseMetrics = metricsFor(metricsRows, base.basic.hourlyRate);
     const metrics = {

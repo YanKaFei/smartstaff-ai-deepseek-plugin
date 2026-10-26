@@ -1,13 +1,13 @@
 {
   "dataOrigin": "SIMULATED",
-  "pilotId": "pilot_b6f14b94a7905fd4fb",
+  "pilotId": "pilot_527b70608a1b52cd29",
   "replay": {
-    "importId": "imp_c9df0d6dac6c27b0b3",
+    "importId": "imp_2015c61783cabbd19c",
     "dataOrigin": "SIMULATED",
     "points": 28,
     "runs": [
       {
-        "runId": "rpl_a2803c7748c12c93c8",
+        "runId": "rpl_70a3ca7746d4ecc61e",
         "model": "legacy",
         "serviceMode": "partial",
         "metrics": {
@@ -18,7 +18,14 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 28,
           "peakMissCount": 28,
+          "actualShortageCount": 28,
+          "predictedShortageCount": 0,
           "peakShortageDetectionRate": 0,
+          "tableCounts": {
+            "small": 28,
+            "medium": 28,
+            "large": 0
+          },
           "estimatedExtraLaborCost": 0,
           "averageLeadMinutes": 30,
           "byTableType": {
@@ -53,7 +60,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {
@@ -88,7 +102,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {
@@ -153,7 +174,7 @@
         }
       },
       {
-        "runId": "rpl_8d706b9422608bf2e7",
+        "runId": "rpl_874eb8c654c6e889ab",
         "model": "service_minutes",
         "serviceMode": "partial",
         "metrics": {
@@ -164,7 +185,14 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 28,
           "peakMissCount": 28,
+          "actualShortageCount": 28,
+          "predictedShortageCount": 0,
           "peakShortageDetectionRate": 0,
+          "tableCounts": {
+            "small": 28,
+            "medium": 28,
+            "large": 0
+          },
           "estimatedExtraLaborCost": 0,
           "averageLeadMinutes": 30,
           "byTableType": {
@@ -199,7 +227,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {
@@ -234,7 +269,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 14,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {
@@ -299,7 +341,7 @@
         }
       },
       {
-        "runId": "rpl_21ae6e21f1492da19b",
+        "runId": "rpl_da21279173b82eafff",
         "model": "service_minutes",
         "serviceMode": "full",
         "metrics": {
@@ -310,7 +352,14 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 14,
           "peakMissCount": 28,
+          "actualShortageCount": 28,
+          "predictedShortageCount": 0,
           "peakShortageDetectionRate": 0,
+          "tableCounts": {
+            "small": 28,
+            "medium": 28,
+            "large": 0
+          },
           "estimatedExtraLaborCost": 0,
           "averageLeadMinutes": 30,
           "byTableType": {
@@ -345,7 +394,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 7,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {
@@ -380,7 +436,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 7,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {
@@ -445,7 +508,7 @@
         }
       },
       {
-        "runId": "rpl_eb6dc4fcc547ec3e19",
+        "runId": "rpl_862df425f93dea3579",
         "model": "service_minutes",
         "serviceMode": "self",
         "metrics": {
@@ -456,7 +519,14 @@
           "overstaffedPersonHours": 0,
           "understaffedPersonHours": 42,
           "peakMissCount": 28,
+          "actualShortageCount": 28,
+          "predictedShortageCount": 0,
           "peakShortageDetectionRate": 0,
+          "tableCounts": {
+            "small": 28,
+            "medium": 28,
+            "large": 0
+          },
           "estimatedExtraLaborCost": 0,
           "averageLeadMinutes": 30,
           "byTableType": {
@@ -491,7 +561,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 21,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {
@@ -526,7 +603,14 @@
               "overstaffedPersonHours": 0,
               "understaffedPersonHours": 21,
               "peakMissCount": 14,
+              "actualShortageCount": 14,
+              "predictedShortageCount": 0,
               "peakShortageDetectionRate": 0,
+              "tableCounts": {
+                "small": 14,
+                "medium": 14,
+                "large": 0
+              },
               "estimatedExtraLaborCost": 0,
               "averageLeadMinutes": 30,
               "byTableType": {

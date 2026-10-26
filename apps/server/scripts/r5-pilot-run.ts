@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { get } from '../src/lib/db.js';
 import path from 'node:path';
 import { openDatabase } from '../src/db/index.js';
 import { makeConfig, serverRoot } from '../src/config.js';
@@ -51,6 +52,34 @@ try {
   mkdirSync(out, { recursive: true });
   writeFileSync(path.join(out, 'simulated-pilot-quality.json'), JSON.stringify({ dataOrigin: 'SIMULATED', pilot: getPilot(handle.db, pilot.id), eventQuality: events.quality, sessionCount: events.sessionCount, workloadQuality: workloads.quality, totals: quality.totals, workload }, null, 2));
   writeFileSync(path.join(out, 'simulated-replay-evaluation.json'), JSON.stringify({ dataOrigin: 'SIMULATED', pilotId: pilot.id, replay }, null, 2));
+  const first = get<{ recommended: number; actual_json: string; input_snapshot_json: string }>(
+    handle.db,
+    'SELECT recommended, actual_json, input_snapshot_json FROM replay_predictions WHERE run_id = ? ORDER BY prediction_time LIMIT 1',
+    [replay.runs[0].runId],
+  )!;
+  const actual = JSON.parse(first.actual_json);
+  const snapshot = JSON.parse(first.input_snapshot_json);
+  writeFileSync(path.join(out, 'detection-diagnostic.json'), JSON.stringify({
+    dataOrigin: 'SIMULATED',
+    status: 'SIMULATED_ONLY',
+    note: 'This diagnostic explains the 0% detection rate; it does not relax the evaluation threshold.',
+    firstPrediction: {
+      onDutyStaff: snapshot.onDutyStaff,
+      activeTableCounts: snapshot.activeTableCounts,
+      predictedRequired: first.recommended,
+      predictedGap: actual.predictedGap,
+      actualRequired: actual.required,
+      actualShortage: actual.actualShortage,
+      managerSufficiency: actual.managerSufficiency,
+      labelMethod: actual.method,
+    },
+    cause: {
+      predictedShortageCount: replay.runs[0].metrics.predictedShortageCount,
+      actualShortageCount: replay.runs[0].metrics.actualShortageCount,
+      peakShortageDetectionRate: replay.runs[0].metrics.peakShortageDetectionRate,
+      explanation: 'Every simulated point has only two concurrent tables but on-duty=3 and the label adds +1 for short. The model predicts no gap (required 2 <= on-duty 3), so no actual-shortage point can be detected. This is a scenario/label inconsistency and model underprediction, not a threshold that should be lowered.',
+    },
+  }, null, 2));
   console.log(JSON.stringify({ dataOrigin: 'SIMULATED', pilotId: pilot.id, sessions: events.sessionCount, workload: workload.sampleCount, runs: replay.runs.map((r) => ({ model: r.model, mode: r.serviceMode, metrics: r.metrics })) }, null, 2));
 } finally {
   handle.close();
