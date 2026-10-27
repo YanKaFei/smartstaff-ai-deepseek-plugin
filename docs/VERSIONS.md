@@ -20,6 +20,7 @@
 | R8 tag | `r8-saas-account-foundation` (local; no remote push) |
 | R9 tag | `r9-saas-org-invites` (local; no remote push) |
 | R9.1 tag | `r9-saas-tenant-sessions` (local; no remote push) |
+| R9.2 tag | `r9-saas-owner-sessions` (local; no remote push) |
 | R3 tests | 82/82 (`docs/r3-evidence/test-output-r3.txt`) |
 | R4 tests | 85/85 (`docs/r4-evidence/test-output-r4.txt`) |
 | R5 tests | 87/87 (`docs/r5-evidence/test-output-r5.txt`) |
@@ -27,7 +28,7 @@
 | R5.2 tests | 95/95 (`docs/r5.2-evidence/test-output-r5.2.txt`) |
 | R6 tests | 105/105 (`docs/r6-evidence/test-output-r6.txt`) |
 | R7 tests | 109/109 (`docs/r7-evidence/test-output-r7.txt`) |
-| R8 tests | 119/119 (`docs/r8-evidence/test-output-r8.txt`) |
+| R8 tests | 120/120 (`docs/r8-evidence/test-output-r8.txt`) |
 | Dependency locks | `apps/server/package-lock.json`, `apps/miniapp/package-lock.json` |
 
 Reproduce:

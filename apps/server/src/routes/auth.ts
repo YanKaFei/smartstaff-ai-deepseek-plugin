@@ -22,7 +22,7 @@ import { code2Session } from '../lib/wechat.js';
 import { issueManagerClaim, consumeManagerClaim } from '../lib/managerClaim.js';
 import { isStrongPassword } from '../config.js';
 import { accountMe, emailLogin, forgotPassword, registerAccount, resetPassword, verifyEmail } from '../domain/accounts.js';
-import { acceptInvitation, createOrgStore, inviteMember, orgOverview, revokeInvitation, updateMember } from '../domain/org.js';
+import { acceptInvitation, createOrgStore, inviteMember, orgOverview, removeMember, revokeInvitation, switchAccountStore, transferOwnership, updateMember } from '../domain/org.js';
 import { all, get, run } from '../lib/db.js';
 import { id, sha256 } from '../lib/ids.js';
 import { createStore, getStore, serializeStore } from '../domain/stores.js';
@@ -343,6 +343,22 @@ export function registerAuthRoutes(): void {
     return createOrgStore(ctx.db, ctx.auth!.userId, body, body.orgId);
   });
 
+
+
+  route('DELETE', '/api/org/members/:id', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const orgId = typeof ctx.query.get('orgId') === 'string' ? ctx.query.get('orgId')! : undefined;
+    return removeMember(ctx.db, ctx.auth!.userId, ctx.params.id, orgId);
+  });
+
+  route('POST', '/api/org/transfer-owner', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const body = z.object({ memberId: z.string().trim().min(1).max(100), orgId: z.string().trim().max(100).optional() }).parse(ctx.body ?? {});
+    return transferOwnership(ctx.db, ctx.auth!.userId, body.memberId, body.orgId);
+  });
+
+  route('POST', '/api/account/switch-store', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const body = z.object({ storeId: z.string().trim().min(1).max(100) }).parse(ctx.body ?? {});
+    return switchAccountStore(ctx.db, ctx.config, ctx.auth!.userId, body.storeId);
+  });
 
   route('GET', '/api/account/sessions', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
     const rows = all<{ token_hash: string; role: string; store_id: string | null; created_at: number; last_auth_at: number | null; access_expires_at: number | null; expires_at: number; refresh_expires_at: number | null }>(

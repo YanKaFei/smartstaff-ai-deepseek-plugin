@@ -3,7 +3,7 @@ import type { AppConfig } from '../config.js';
 import { isStrongPassword } from '../config.js';
 import { all, get, run, transaction } from '../lib/db.js';
 import { AppError, conflict } from '../lib/errors.js';
-import { hashPassword } from '../lib/auth.js';
+import { createSession, hashPassword } from '../lib/auth.js';
 import { id, sha256 } from '../lib/ids.js';
 import { audit } from './notify.js';
 import { createStore, finishOnboarding, getStore } from './stores.js';
@@ -141,4 +141,41 @@ export function createOrgStore(db: Db, userId: string, input: { name: string; ma
   run(db, "UPDATE memberships SET store_id = ?, updated_at = ? WHERE organization_id = ? AND user_id = ? AND store_id IS NULL", [store.id, now, org.organization_id, userId]);
   audit(db, { storeId: store.id, actorId: userId, actorRole: 'manager', action: 'org.store.create', entity: 'store', entityId: store.id, detail: {}, at: now });
   return { store: { id: store.id, name: store.name, managerCode: store.manager_code } };
+}
+
+export function removeMember(db: Db, userId: string, memberId: string, orgId?: string, now = Date.now()) {
+  const org = resolveOrg(db, userId, orgId);
+  const member = get<OrgMembershipRow>(db, 'SELECT * FROM memberships WHERE id = ? AND organization_id = ?', [memberId, org.organization_id]);
+  if (!member) throw new AppError(404, 'MEMBER_NOT_FOUND', '成员不存在');
+  if (member.user_id === userId) throw conflict('不能移除自己');
+  if (member.role === 'owner') throw conflict('不能移除组织 owner，请先转移所有权');
+  run(db, "UPDATE memberships SET status='suspended', updated_at=? WHERE id=?", [now, member.id]);
+  audit(db, { storeId: member.store_id, actorId: userId, actorRole: 'manager', action: 'org.member.remove', entity: 'membership', entityId: member.id, detail: { targetUserId: member.user_id }, at: now });
+  return { removed: true };
+}
+
+export function transferOwnership(db: Db, userId: string, memberId: string, orgId?: string, now = Date.now()) {
+  const org = resolveOrg(db, userId, orgId);
+  if (org.role !== 'owner') throw new AppError(403, 'ORG_OWNER_REQUIRED', '只有 owner 可以转移所有权');
+  const target = get<OrgMembershipRow>(db, 'SELECT * FROM memberships WHERE id = ? AND organization_id = ?', [memberId, org.organization_id]);
+  if (!target) throw new AppError(404, 'MEMBER_NOT_FOUND', '成员不存在');
+  if (target.user_id === userId || target.status !== 'active') throw conflict('目标成员不可成为 owner');
+  transaction(db, () => {
+    run(db, "UPDATE memberships SET role='admin', updated_at=? WHERE id=?", [now, org.id]);
+    run(db, "UPDATE memberships SET role='owner', updated_at=? WHERE id=?", [now, target.id]);
+  });
+  audit(db, { storeId: null, actorId: userId, actorRole: 'manager', action: 'org.owner.transfer', entity: 'organization', entityId: org.organization_id, detail: { from: org.id, to: target.id }, at: now });
+  return { transferred: true, newOwnerMembershipId: target.id };
+}
+
+export function switchAccountStore(db: Db, cfg: AppConfig, userId: string, storeId: string) {
+  const store = get<{ organization_id: string | null; owner_user_id: string | null }>(db, 'SELECT organization_id, owner_user_id FROM stores WHERE id = ?', [storeId]);
+  if (!store) throw new AppError(404, 'STORE_NOT_FOUND', '门店不存在');
+  const member = store.organization_id
+    ? get<OrgMembershipRow>(db, "SELECT * FROM memberships WHERE user_id = ? AND organization_id = ? AND status = 'active'", [userId, store.organization_id])
+    : undefined;
+  if (!member && store.owner_user_id !== userId) throw new AppError(403, 'TENANT_FORBIDDEN', '当前账户不属于该门店组织');
+  const user = get<{ id: string; role: 'manager' | 'staff' | 'admin' }>(db, 'SELECT id, role FROM users WHERE id = ?', [userId])!;
+  const tokens = createSession(db, { id: user.id, role: user.role }, storeId, cfg);
+  return { ...tokens, token: tokens.accessToken, storeId };
 }

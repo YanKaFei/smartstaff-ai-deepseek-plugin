@@ -11,7 +11,8 @@
     "reset": "tsx src/seed.ts --reset",
     "test": "tsx --test tests/*.test.ts",
     "test:report": "tsx tests/report.ts",
-    "demo:marketplace": "tsx scripts/r7-marketplace-demo.ts"
+    "demo:marketplace": "tsx scripts/r7-marketplace-demo.ts",
+    "migrate:tenants": "tsx scripts/r9-backfill-tenants.ts"
   },
   "dependencies": {
     "zod": "^3.23.8"

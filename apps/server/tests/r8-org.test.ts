@@ -61,3 +61,35 @@ test('R8 org: owner can change member role and revoke a pending invitation', asy
     assert.equal(revoked.status, 200);
   } finally { await app.close(); }
 });
+
+test('R8 org: owner suspends a member, transfers ownership, and switches into a store session', async () => {
+  const app = await freshApp();
+  try {
+    const admin = await owner(app, 'org-owner-4@example.com');
+    const invite = await api<{ inviteToken: string }>(app.base, 'POST', '/api/org/invitations', { email: 'second@example.com', role: 'admin' }, admin.token);
+    await api(app.base, 'POST', '/api/auth/accept-invitation', { token: invite.data.inviteToken, name: '第二管理员', password: strong });
+    const org = await api<{ members: Array<{ id: string; userId: string; role: string; email: string | null }> }>(app.base, 'GET', '/api/org', undefined, admin.token);
+    const second = org.data.members.find((m) => m.email === 'second@example.com')!;
+    const transferred = await api(app.base, 'POST', '/api/org/transfer-owner', { memberId: second.id }, admin.token);
+    assert.equal(transferred.status, 200);
+    const after = await api<{ members: Array<{ email: string | null; role: string }> }>(app.base, 'GET', '/api/org', undefined, admin.token);
+    assert.equal(after.data.members.find((m) => m.email === 'second@example.com')!.role, 'owner');
+    assert.equal(after.data.members.find((m) => m.email === 'org-owner-4@example.com')!.role, 'admin');
+
+    const invite2 = await api<{ inviteToken: string }>(app.base, 'POST', '/api/org/invitations', { email: 'remove-me@example.com', role: 'staff' }, admin.token);
+    await api(app.base, 'POST', '/api/auth/accept-invitation', { token: invite2.data.inviteToken, name: '待移除', password: strong });
+    const org2 = await api<{ members: Array<{ id: string; email: string | null }> }>(app.base, 'GET', '/api/org', undefined, admin.token);
+    const target = org2.data.members.find((m) => m.email === 'remove-me@example.com')!;
+    const removed = await api(app.base, 'DELETE', `/api/org/members/${target.id}`, undefined, admin.token);
+    assert.equal(removed.status, 200);
+    const blocked = await api(app.base, 'POST', '/api/auth/email-login', { email: 'remove-me@example.com', password: strong });
+    assert.equal(blocked.status, 403);
+
+    const store = await api<{ store: { id: string } }>(app.base, 'POST', '/api/org/stores', { name: '切换门店', managerCode: 'K101', address: '切换路 1 号' }, admin.token);
+    const switched = await api<{ token: string; storeId: string }>(app.base, 'POST', '/api/account/switch-store', { storeId: store.data.store.id }, admin.token);
+    assert.equal(switched.status, 200);
+    assert.equal(switched.data.storeId, store.data.store.id);
+    const manager = await api(app.base, 'GET', '/api/manager/today', undefined, switched.data.token);
+    assert.equal(manager.status, 200);
+  } finally { await app.close(); }
+});

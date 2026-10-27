@@ -474,6 +474,9 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - `GET /api/account/me`：用户与组织成员身份。
 - `GET /api/account/sessions` / `DELETE /api/account/sessions/:id`：会话列表/撤销指定会话；`DELETE /api/account/sessions` 撤销其他会话。
 - `GET/POST/PATCH/DELETE /api/org...`：组织成员、邀请和门店管理（owner/admin）。
+- `DELETE /api/org/members/:id`：软移除成员（suspended）。
+- `POST /api/org/transfer-owner`：转移 owner。
+- `POST /api/account/switch-store`：切换到组织内门店并签发新会话。
 - `POST /api/auth/accept-invitation`：接受邀请。
 - UI：`/admin/account.html`
 

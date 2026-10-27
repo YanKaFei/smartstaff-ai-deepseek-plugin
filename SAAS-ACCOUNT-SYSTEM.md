@@ -66,17 +66,18 @@ Part-time marketplace now filters open demands by the staff member's active orga
 
 ## Tests
 
-- **119/119** passed.
+- **120/120** passed.
 - 5 account tests:
   - register → verify → login → account/me
   - duplicate email + weak password
   - password reset invalidates old sessions
   - forgot password does not disclose account existence
   - staff marketplace tenant isolation
-- 3 organization tests:
+- 4 organization tests:
   - invite → accept → member login
   - owner-only member/store management
   - role change and invitation revoke
+  - member suspension, ownership transfer, first-store session switch
 - 2 tenant/session tests:
   - revoke one device while preserving current session
   - manager without active store membership is denied
@@ -90,13 +91,17 @@ Screenshots: `docs/screenshots/19-saas-account.png`, `20-saas-account-dashboard.
 ## Known blockers / next steps
 
 1. **Email delivery** — no SMTP/email provider. Dev returns verification/reset token; production cannot complete registration/reset until configured. Status: `EMAIL_DELIVERY_BLOCKED`.
-2. **Tenant enforcement on every business route** — manager routes now checked; admin routes are platform-only; staff routes use staff profile; deeper cross-store invitation rules remain.
-3. **Owner onboarding** — first store binding is done; full guided store setup and manager assignment remain.
+2. **Tenant enforcement** — manager routes and marketplace are checked; admin routes are platform-only; full staff-route checks remain.
+3. **Owner onboarding** — first store binding and store-session switching are done; guided setup/manager assignment UI remains.
 4. **Remove member** — role/status supported; hard removal and ownership transfer need a policy.
 6. **Session/device management** — list and revoke individual sessions.
 7. **Account profile** — name/email change, resend verification, close account.
 8. **Billing/plans** — organization plan exists, no billing integration.
 9. **Email uniqueness migration** — old demo users have null email; invite/claim flow needed.
+
+## Migration
+
+`npm run migrate:tenants` backfills organizations/memberships for legacy stores and users; idempotent.
 
 ## Screenshots
 
