@@ -97,3 +97,42 @@ test('R8 accounts: staff marketplace is tenant-scoped and hides another organiza
     assert.equal(market.data.items.every((o) => o.store.id !== storeB.id), true);
   } finally { await app.close(); }
 });
+
+test('R8 accounts: session list can revoke another device and keeps the current session', async () => {
+  const app = await freshApp();
+  try {
+    const reg = await register(app, 'sessions@example.com');
+    await api(app.base, 'POST', '/api/auth/verify-email', { token: reg.data.verificationToken });
+    const first = await api<{ token: string }>(app.base, 'POST', '/api/auth/email-login', { email: 'sessions@example.com', password: strong });
+    const second = await api<{ token: string }>(app.base, 'POST', '/api/auth/email-login', { email: 'sessions@example.com', password: strong });
+    const list = await api<{ items: Array<{ id: string; current: boolean }>; currentSessionId: string }>(app.base, 'GET', '/api/account/sessions', undefined, first.data.token);
+    assert.equal(list.data.items.length, 2);
+    const other = list.data.items.find((s) => !s.current)!;
+    const revoked = await api<{ revoked: boolean }>(app.base, 'DELETE', `/api/account/sessions/${other.id}`, undefined, first.data.token);
+    assert.equal(revoked.data.revoked, true);
+    const old = await api(app.base, 'GET', '/api/account/me', undefined, second.data.token);
+    assert.equal(old.status, 401);
+    const current = await api(app.base, 'GET', '/api/account/me', undefined, first.data.token);
+    assert.equal(current.status, 200);
+  } finally { await app.close(); }
+});
+
+test('R8 accounts: manager without an active store membership is denied tenant access', async () => {
+  const app = await freshApp();
+  try {
+    const now = Math.floor(storeNow(app.db, app.storeId) / 60_000) * 60_000;
+    setClock(app.db, app.storeId, { at: now });
+    const orgId = id('org');
+    run(app.db, 'INSERT INTO organizations(id, name, slug, plan, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?)', [orgId, '无成员组织', `no-${orgId.slice(-8)}`, 'starter', 'active', Date.now(), Date.now()]);
+    const store = createStore(app.db, { name: '越权门店', managerCode: 'K008', address: '越权路 8 号' });
+    finishOnboarding(app.db, store.id);
+    run(app.db, 'UPDATE stores SET organization_id = ? WHERE id = ?', [orgId, store.id]);
+    const userId = id('usr');
+    run(app.db, 'INSERT INTO users(id, role, name, phone, password_hash, store_id, openid, phone_verified, created_at) VALUES(?,?,?,?,?,?,?,?,?)', [userId, 'manager', '越权经理', null, null, store.id, null, 1, Date.now()]);
+    const { createSession } = await import('../src/lib/auth.js');
+    const token = createSession(app.db, { id: userId, role: 'manager' }, store.id, app.cfg).accessToken;
+    const denied = await api(app.base, 'GET', '/api/manager/today', undefined, token);
+    assert.equal(denied.status, 403);
+    assert.equal(denied.json.error?.code, 'TENANT_FORBIDDEN');
+  } finally { await app.close(); }
+});

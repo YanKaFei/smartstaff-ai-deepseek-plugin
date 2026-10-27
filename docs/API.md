@@ -472,6 +472,9 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - `POST /api/auth/forgot-password` `{email}`：不泄露邮箱是否存在；开发环境返回 reset token。
 - `POST /api/auth/reset-password` `{token,password}`：重置后撤销全部旧 session。
 - `GET /api/account/me`：用户与组织成员身份。
+- `GET /api/account/sessions` / `DELETE /api/account/sessions/:id`：会话列表/撤销指定会话；`DELETE /api/account/sessions` 撤销其他会话。
+- `GET/POST/PATCH/DELETE /api/org...`：组织成员、邀请和门店管理（owner/admin）。
+- `POST /api/auth/accept-invitation`：接受邀请。
 - UI：`/admin/account.html`
 
 Schema v18：`organizations`、`memberships`、`account_tokens`、`users.email/email_verified/status`、`stores.organization_id`。

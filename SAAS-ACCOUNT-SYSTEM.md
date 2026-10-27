@@ -3,7 +3,12 @@
 > Status: **ACCOUNT_ORG_READY / EMAIL_DELIVERY_BLOCKED**  
 > Steps 1–2 of the SaaS account work are implemented; not the final account product.
 
-## Step 2 — organization administration
+## Step 2 — organization administration and tenant guards
+
+Implemented tenant enforcement for manager routes: a manager session must have an active membership in the store organization, or be the store owner. Marketplace remains organization-scoped. Organization first-store creation now assigns the owner, owner membership store, and allows the owner to enter the store manager flow after re-login.
+
+Session management is available at `GET /api/account/sessions` and `DELETE /api/account/sessions/:id`; the account dashboard lists sessions and can revoke other devices.
+
 
 Schema v19 adds `org_invitations`.
 
@@ -61,7 +66,7 @@ Part-time marketplace now filters open demands by the staff member's active orga
 
 ## Tests
 
-- **117/117** passed.
+- **119/119** passed.
 - 5 account tests:
   - register → verify → login → account/me
   - duplicate email + weak password
@@ -72,6 +77,9 @@ Part-time marketplace now filters open demands by the staff member's active orga
   - invite → accept → member login
   - owner-only member/store management
   - role change and invitation revoke
+- 2 tenant/session tests:
+  - revoke one device while preserving current session
+  - manager without active store membership is denied
 - Existing 109 tests preserved.
 - H5 and mini-program builds pass.
 
@@ -82,8 +90,8 @@ Screenshots: `docs/screenshots/19-saas-account.png`, `20-saas-account-dashboard.
 ## Known blockers / next steps
 
 1. **Email delivery** — no SMTP/email provider. Dev returns verification/reset token; production cannot complete registration/reset until configured. Status: `EMAIL_DELIVERY_BLOCKED`.
-2. **Tenant enforcement on every business route** — marketplace is scoped; manager/admin routes need membership-aware checks.
-3. **Store onboarding inside a tenant** — org can create stores; assigning a manager and opening the store setup flow is next.
+2. **Tenant enforcement on every business route** — manager routes now checked; admin routes are platform-only; staff routes use staff profile; deeper cross-store invitation rules remain.
+3. **Owner onboarding** — first store binding is done; full guided store setup and manager assignment remain.
 4. **Remove member** — role/status supported; hard removal and ownership transfer need a policy.
 6. **Session/device management** — list and revoke individual sessions.
 7. **Account profile** — name/email change, resend verification, close account.

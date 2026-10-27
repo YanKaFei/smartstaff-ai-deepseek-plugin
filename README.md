@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-117%2F117-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-119%2F119-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -140,7 +140,7 @@ admin workspace / manager UI
 npm test
 ```
 
-Current: **117/117** tests. The original 95-test R5.2 baseline is preserved; 10 AI settings, 4 cross-store marketplace, 5 account and 3 organization tests cover credentials, RBAC, provider failures, marketplace, registration, verification, reset, invitations and member management.
+Current: **119/119** tests. The original 95-test R5.2 baseline is preserved; 10 AI settings, 4 cross-store marketplace, 5 account and 3 organization tests cover credentials, RBAC, provider failures, marketplace, registration, verification, reset, invitations and member management.
 
 Real API success requires a real key. Without one the project intentionally reports **REAL_API_BLOCKED** and never claims a mock connection.
 

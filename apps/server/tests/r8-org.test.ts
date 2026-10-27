@@ -42,6 +42,7 @@ test('R8 org: only owner/admin can list members and create stores', async () => 
     const org = await api<{ stores: Array<{ id: string }>; members: Array<{ role: string }> }>(app.base, 'GET', '/api/org', undefined, admin.token);
     assert.ok(org.data.stores.some((s) => s.id === store.data.store.id));
     assert.equal(org.data.members[0].role, 'owner');
+    assert.equal(org.data.members[0].storeId, store.data.store.id);
   } finally { await app.close(); }
 });
 

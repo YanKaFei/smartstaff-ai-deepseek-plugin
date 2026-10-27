@@ -137,7 +137,8 @@ export function createOrgStore(db: Db, userId: string, input: { name: string; ma
   const org = resolveOrg(db, userId, orgId);
   const store = createStore(db, { name: input.name, managerCode: input.managerCode, address: input.address });
   finishOnboarding(db, store.id);
-  run(db, 'UPDATE stores SET organization_id = ? WHERE id = ?', [org.organization_id, store.id]);
+  run(db, 'UPDATE stores SET organization_id = ?, owner_user_id = ? WHERE id = ?', [org.organization_id, userId, store.id]);
+  run(db, "UPDATE memberships SET store_id = ?, updated_at = ? WHERE organization_id = ? AND user_id = ? AND store_id IS NULL", [store.id, now, org.organization_id, userId]);
   audit(db, { storeId: store.id, actorId: userId, actorRole: 'manager', action: 'org.store.create', entity: 'store', entityId: store.id, detail: {}, at: now });
   return { store: { id: store.id, name: store.name, managerCode: store.manager_code } };
 }

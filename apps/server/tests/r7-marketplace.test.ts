@@ -16,6 +16,7 @@ function secondStore(app: TestApp, now: number) {
   setClock(app.db, store.id, { at: now });
   const userId = id('usr');
   run(app.db, "INSERT INTO users(id, role, name, phone, password_hash, store_id, openid, phone_verified, created_at) VALUES(?,?,?,?,?,?,?,?,?)", [userId, 'manager', '跨店店长', null, null, store.id, null, 1, Date.now()]);
+  run(app.db, 'INSERT INTO memberships(id, organization_id, user_id, role, store_id, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?)', [id('mem'), org.organization_id, userId, 'manager', store.id, 'active', Date.now(), Date.now()]);
   const token = createSession(app.db, { id: userId, role: 'manager' }, store.id, app.cfg).accessToken;
   return { store, token };
 }

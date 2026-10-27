@@ -37,8 +37,17 @@
         <p class="tiny">下一步：组织管理员邀请成员、创建门店并分配角色。</p>\n        <a class="primary" style="display:block;text-align:center;text-decoration:none;padding:10px;border-radius:9px;margin:10px 0" href="./org.html">进入组织管理</a>
         <button class="ghost" type="button" id="account-logout">退出登录</button>`;
       $('#account-logout').addEventListener('click', () => { token = ''; localStorage.removeItem(tokenKey); location.reload(); });
+      await loadSessions();
       msg('');
     } catch (err) { token = ''; localStorage.removeItem(tokenKey); msg(err.message, 'error'); }
+  }
+
+  async function loadSessions() {
+    try {
+      const data = await api('/account/sessions');
+      $('#session-list').innerHTML = data.items.map((s) => `<div class="membership"><b>${s.current ? '当前会话' : '其他会话'}</b><span class="tiny">${s.role} · ${new Date(s.lastAuthAt).toLocaleString()}</span>${s.current ? '' : ` <button class="ghost" data-revoke-session="${s.id}">撤销</button>`}</div>`).join('');
+      document.querySelectorAll('[data-revoke-session]').forEach((b) => b.addEventListener('click', async () => { try { await api('/account/sessions/' + b.dataset.revokeSession, { method: 'DELETE' }); await loadSessions(); } catch (e) { msg(e.message, 'error'); } }));
+    } catch (err) { $('#session-list').textContent = err.message; }
   }
 
   $('#login-form').addEventListener('submit', async (e) => {

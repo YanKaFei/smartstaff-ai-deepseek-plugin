@@ -343,6 +343,37 @@ export function registerAuthRoutes(): void {
     return createOrgStore(ctx.db, ctx.auth!.userId, body, body.orgId);
   });
 
+
+  route('GET', '/api/account/sessions', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const rows = all<{ token_hash: string; role: string; store_id: string | null; created_at: number; last_auth_at: number | null; access_expires_at: number | null; expires_at: number; refresh_expires_at: number | null }>(
+      ctx.db,
+      'SELECT token_hash, role, store_id, created_at, last_auth_at, access_expires_at, expires_at, refresh_expires_at FROM sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+      [ctx.auth!.userId],
+    );
+    return {
+      currentSessionId: ctx.auth!.sessionId,
+      items: rows.map((r) => ({
+        id: r.token_hash, role: r.role, storeId: r.store_id, createdAt: r.created_at,
+        lastAuthAt: r.last_auth_at ?? r.created_at,
+        accessExpiresAt: r.access_expires_at ?? r.expires_at,
+        refreshExpiresAt: r.refresh_expires_at,
+        current: r.token_hash === ctx.auth!.sessionId,
+      })),
+    };
+  });
+
+  route('DELETE', '/api/account/sessions/:id', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const row = get<{ token_hash: string }>(ctx.db, 'SELECT token_hash FROM sessions WHERE token_hash = ? AND user_id = ?', [ctx.params.id, ctx.auth!.userId]);
+    if (!row) throw new AppError(404, 'SESSION_NOT_FOUND', '会话不存在');
+    run(ctx.db, 'DELETE FROM sessions WHERE token_hash = ?', [row.token_hash]);
+    return { revoked: true, current: row.token_hash === ctx.auth!.sessionId };
+  });
+
+  route('DELETE', '/api/account/sessions', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    run(ctx.db, 'DELETE FROM sessions WHERE user_id = ? AND token_hash != ?', [ctx.auth!.userId, ctx.auth!.sessionId]);
+    return { revokedOthers: true };
+  });
+
   route('GET', '/api/account/me', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
     return accountMe(ctx.db, ctx.auth!.userId);
   });
