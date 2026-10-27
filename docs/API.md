@@ -459,4 +459,4 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - `POST /api/manager/applications/:id/approve` `{ note? }`：通过并创建 confirmed 班次，回填 demand。
 - `POST /api/manager/applications/:id/reject` `{ note? }`：拒绝，不创建班次。
 
-约束：兼职需 approved；目标门店 `requireQualified`；可用时间、最短通知、跨店时间冲突在申请和审批时各校验一次；满员后关闭 demand 并拒绝其他 pending 申请；所有操作进入审计与通知。
+约束：影子模式或已暂停门店不能创建真实班次（`SHADOW_MODE_NO_REAL_SHIFT` / `PILOT_DISPATCH_PAUSED`）；兼职需 approved；目标门店 `requireQualified`；可用时间、最短通知、跨店时间冲突在申请和审批时各校验一次；满员后关闭 demand 并拒绝其他 pending 申请；所有操作进入审计与通知。

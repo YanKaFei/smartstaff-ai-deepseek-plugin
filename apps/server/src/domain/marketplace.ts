@@ -6,6 +6,7 @@ import { formatDateTime } from '../lib/time.js';
 import { audit, notifyStoreManagers, notifyUser } from './notify.js';
 import { demandApi, reconcileDemand, staffAvailableForShift } from './dispatch.js';
 import { getStore, parseConfig } from './stores.js';
+import { assertDispatchAllowed } from './pilot.js';
 import { getStaff } from './staff.js';
 import type { ShiftRow as _ShiftRow } from './types.js';
 
@@ -174,8 +175,10 @@ export function decideApplication(
   if (!demand || demand.status !== 'open') throw conflict('缺位已关闭');
   const view = demandApi(db, demand);
   if (view.unfilled <= 0) throw conflict('岗位已满');
+  assertDispatchAllowed(db, storeId);
   const staff = getStaff(db, app.staff_id);
   const store = getStore(db, storeId);
+  if (parseConfig(store).pilot.shadowMode) throw new AppError(409, 'SHADOW_MODE_NO_REAL_SHIFT', '影子模式不允许创建真实班次');
   const check = staffAvailableForShift(db, staff, demand.start_at, demand.end_at, now, parseConfig(store));
   if (!check.ok) throw conflict(check.reason ?? '该兼职当前不可排班');
   let shiftId: string | null = null;
