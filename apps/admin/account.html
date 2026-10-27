@@ -62,6 +62,13 @@
           <label>新密码<input id="reset-password" type="password" autocomplete="new-password" /></label>
           <button class="ghost" type="button" id="reset-btn">设置新密码</button>
         </form>
+        <div id="account-invite" class="account-form hidden">
+          <h3 style="margin:0 0 6px">接受组织邀请</h3>
+          <p class="tiny">设置姓名和密码后加入组织；邮箱已由邀请 token 验证。</p>
+          <label>姓名<input id="invite-name" maxlength="30" required /></label>
+          <label>密码（12 位以上，含大小写/数字/符号）<input id="invite-password" type="password" required /></label>
+          <button class="primary" type="button" id="invite-accept">接受邀请</button>
+        </div>
         <div id="account-msg" class="account-msg"></div>
         <div id="account-verify" class="hidden">
           <p class="tiny">开发环境验证 token：</p>

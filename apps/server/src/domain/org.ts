@@ -81,7 +81,7 @@ export function inviteMember(db: Db, cfg: AppConfig, userId: string, input: { em
     invitationId, org.organization_id, email, input.role, input.storeId ?? null, sha256(token), 'pending', userId, now + 7 * 24 * 3600_000, now,
   ]);
   audit(db, { storeId: input.storeId ?? null, actorId: userId, actorRole: 'manager', action: 'org.invite', entity: 'organization', entityId: org.organization_id, detail: { email, role: input.role }, at: now });
-  return { invitation: { id: invitationId, email, role: input.role, storeId: input.storeId ?? null, expiresAt: now + 7 * 24 * 3600_000 }, inviteToken: cfg.nodeEnv === 'production' ? undefined : token, emailDelivery: 'NOT_CONFIGURED' };
+  return { invitation: { id: invitationId, email, role: input.role, storeId: input.storeId ?? null, expiresAt: now + 7 * 24 * 3600_000 }, organizationName: org.org_name, inviteToken: cfg.nodeEnv === 'production' ? undefined : token, emailDelivery: 'NOT_CONFIGURED' };
 }
 
 export function revokeInvitation(db: Db, userId: string, invitationId: string, orgId?: string, now = Date.now()) {

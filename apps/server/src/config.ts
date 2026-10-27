@@ -74,6 +74,12 @@ export const config = {
     provider: env.SMS_PROVIDER ?? '',
     apiKey: env.SMS_API_KEY ?? '',
   },
+  email: {
+    provider: env.EMAIL_PROVIDER ?? '',
+    apiKey: env.RESEND_API_KEY ?? '',
+    from: env.EMAIL_FROM ?? '',
+    appUrl: env.PUBLIC_APP_URL || 'http://127.0.0.1:8787',
+  },
   deepseek: {
     apiKey: env.DEEPSEEK_API_KEY ?? '',
     baseUrl: env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
@@ -104,6 +110,7 @@ export function makeConfig(overrides: DeepPartial<AppConfig> = {}): AppConfig {
     auth: { ...config.auth, ...(overrides.auth ?? {}) },
     wechat: { ...config.wechat, ...(overrides.wechat ?? {}) },
     sms: { ...config.sms, ...(overrides.sms ?? {}) },
+    email: { ...config.email, ...(overrides.email ?? {}) },
     deepseek: { ...config.deepseek, ...(overrides.deepseek ?? {}) },
   } as AppConfig;
 }

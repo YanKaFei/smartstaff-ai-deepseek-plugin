@@ -2,6 +2,9 @@
   const $ = (s) => document.querySelector(s);
   const msg = (text, cls = '') => { const el = $('#account-msg'); el.textContent = text; el.className = 'account-msg ' + cls; };
   const tokenKey = 'ss_saas_token';
+  const params = new URLSearchParams(location.search);
+  const inviteToken = params.get('invite') || '';
+  const resetToken = params.get('reset') || '';
   let token = localStorage.getItem(tokenKey) || '';
   let verifyToken = '';
 
@@ -90,5 +93,25 @@
     catch (err) { msg(err.message, 'error'); }
   });
 
+  if (inviteToken) {
+    for (const id of ['login-form', 'register-form', 'forgot-form']) $('#' + id).classList.add('hidden');
+    $('#account-invite').classList.remove('hidden');
+    document.querySelectorAll('.account-tabs button').forEach((b) => b.classList.add('active'));
+    msg('你收到一条组织邀请，请设置姓名和密码。');
+  }
+  if (resetToken) { show('forgot'); $('#reset-token').value = resetToken; msg('请输入新密码。'); }
+  if (params.get('verify')) {
+    api('/auth/verify-email', { method: 'POST', body: { token: params.get('verify') } })
+      .then(() => msg('邮箱验证成功，可以登录。', 'ok'))
+      .catch((err) => msg(err.message, 'error'));
+  }
+  $('#invite-accept').addEventListener('click', async () => {
+    try {
+      await api('/auth/accept-invitation', { method: 'POST', body: { token: inviteToken, name: $('#invite-name').value, password: $('#invite-password').value } });
+      msg('邀请已接受，请用邮箱登录。', 'ok');
+      $('#account-invite').classList.add('hidden');
+      show('login');
+    } catch (err) { msg(err.message, 'error'); }
+  });
   if (token) loadMe();
 })();

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-120%2F120-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-122%2F122-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -128,7 +128,7 @@ npm start
 npm test
 ```
 
-当前 **120/120** 通过。原 R5.2 的 95 项基线全部保留；新增 22 项测试（10 项 AI + 4 项跨店缺位 + 7 项账户 + 4 项组织），覆盖凭据、RBAC、服务商失败、注册、验证、重置、邀请和成员管理。
+当前 **122/122** 通过。原 R5.2 的 95 项基线全部保留；新增 22 项测试（10 项 AI + 4 项跨店缺位 + 7 项账户 + 4 项组织 + 2 项邮件），覆盖凭据、RBAC、服务商失败、注册、验证、重置、邀请和成员管理。
 
 真实 API 成功需要真实 Key。没有 Key 时项目会明确标记 **REAL_API_BLOCKED**，绝不声称 Mock 连接成功。
 

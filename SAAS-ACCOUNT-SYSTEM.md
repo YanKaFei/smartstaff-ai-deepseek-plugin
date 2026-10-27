@@ -1,6 +1,6 @@
 # SaaS Account System — Step 1 Foundation
 
-> Status: **ACCOUNT_ORG_READY / EMAIL_DELIVERY_BLOCKED**  
+> Status: **ACCOUNT_ORG_READY / EMAIL_OUTBOX_READY / PROVIDER_NOT_CONFIGURED**  
 > Steps 1–2 of the SaaS account work are implemented; not the final account product.
 
 ## Step 2 — organization administration and tenant guards
@@ -66,7 +66,7 @@ Part-time marketplace now filters open demands by the staff member's active orga
 
 ## Tests
 
-- **120/120** passed.
+- **122/122** passed.
 - 5 account tests:
   - register → verify → login → account/me
   - duplicate email + weak password
@@ -81,6 +81,7 @@ Part-time marketplace now filters open demands by the staff member's active orga
 - 2 tenant/session tests:
   - revoke one device while preserving current session
   - manager without active store membership is denied
+- 2 email tests: no-provider queued/not_claimed, mocked provider sent/failed
 - Existing 109 tests preserved.
 - H5 and mini-program builds pass.
 
@@ -88,9 +89,13 @@ Evidence: `docs/r8-evidence/test-output-r8.txt`
 
 Screenshots: `docs/screenshots/19-saas-account.png`, `20-saas-account-dashboard.png`, `21-saas-org-console.png`
 
+## Email delivery
+
+Schema v20 adds `email_outbox`. Registration, invitations and password reset now queue mail. With `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` and `EMAIL_FROM`, the server calls Resend over HTTPS. Without a provider, the response explicitly says `not_configured`; the project does not claim delivery. Dev still returns tokens for local testing.
+
 ## Known blockers / next steps
 
-1. **Email delivery** — no SMTP/email provider. Dev returns verification/reset token; production cannot complete registration/reset until configured. Status: `EMAIL_DELIVERY_BLOCKED`.
+1. **Email provider credentials** — adapter exists; no real Resend key/from address is configured, so production delivery is still blocked. Status: `PROVIDER_NOT_CONFIGURED`.
 2. **Tenant enforcement** — manager routes and marketplace are checked; admin routes are platform-only; full staff-route checks remain.
 3. **Owner onboarding** — first store binding and store-session switching are done; guided setup/manager assignment UI remains.
 4. **Remove member** — role/status supported; hard removal and ownership transfer need a policy.

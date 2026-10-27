@@ -23,6 +23,7 @@ import { issueManagerClaim, consumeManagerClaim } from '../lib/managerClaim.js';
 import { isStrongPassword } from '../config.js';
 import { accountMe, emailLogin, forgotPassword, registerAccount, resetPassword, verifyEmail } from '../domain/accounts.js';
 import { acceptInvitation, createOrgStore, inviteMember, orgOverview, removeMember, revokeInvitation, switchAccountStore, transferOwnership, updateMember } from '../domain/org.js';
+import { deliverEmail, invitationEmail, queueEmail, resetEmail, verificationEmail } from '../domain/email.js';
 import { all, get, run } from '../lib/db.js';
 import { id, sha256 } from '../lib/ids.js';
 import { createStore, getStore, serializeStore } from '../domain/stores.js';
@@ -280,7 +281,7 @@ export function registerAuthRoutes(): void {
   });
 
 
-  route('POST', '/api/auth/register-account', {}, (ctx) => {
+  route('POST', '/api/auth/register-account', {}, async (ctx) => {
     guard(ctx, 'register-account', 5, 60 * 60_000);
     const body = z.object({
       email: z.string().trim().email().max(200),
@@ -288,7 +289,13 @@ export function registerAuthRoutes(): void {
       name: z.string().trim().min(1).max(30),
       organizationName: z.string().trim().min(1).max(60),
     }).parse(ctx.body ?? {});
-    return registerAccount(ctx.db, ctx.config, body);
+    const result = registerAccount(ctx.db, ctx.config, body);
+    if (result.verificationToken) {
+      const email = verificationEmail(ctx.config, result.verificationToken);
+      const emailId = queueEmail(ctx.db, { to: body.email, ...email, kind: 'email_verify' });
+      result.emailDelivery = (await deliverEmail(ctx.db, ctx.config, emailId)).status;
+    }
+    return result;
   });
 
   route('POST', '/api/auth/verify-email', {}, (ctx) => {
@@ -302,10 +309,15 @@ export function registerAuthRoutes(): void {
     return emailLogin(ctx.db, ctx.config, body.email, body.password);
   });
 
-  route('POST', '/api/auth/forgot-password', {}, (ctx) => {
+  route('POST', '/api/auth/forgot-password', {}, async (ctx) => {
     guard(ctx, 'forgot-password', 5, 60 * 60_000);
     const body = z.object({ email: z.string().trim().email().max(200) }).parse(ctx.body ?? {});
-    return forgotPassword(ctx.db, ctx.config, body.email);
+    const result = forgotPassword(ctx.db, ctx.config, body.email);
+    if (result.resetToken) {
+      const emailId = queueEmail(ctx.db, { to: body.email, ...resetEmail(ctx.config, result.resetToken), kind: 'password_reset' });
+      result.emailDelivery = (await deliverEmail(ctx.db, ctx.config, emailId)).status;
+    }
+    return result;
   });
 
   route('POST', '/api/auth/reset-password', {}, (ctx) => {
@@ -326,9 +338,14 @@ export function registerAuthRoutes(): void {
     return orgOverview(ctx.db, ctx.auth!.userId, orgId);
   });
 
-  route('POST', '/api/org/invitations', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+  route('POST', '/api/org/invitations', { roles: ['manager', 'staff', 'admin'] }, async (ctx) => {
     const body = z.object({ email: z.string().trim().email().max(200), role: z.enum(['admin', 'manager', 'staff']), storeId: z.string().trim().max(100).optional(), orgId: z.string().trim().max(100).optional() }).parse(ctx.body ?? {});
-    return inviteMember(ctx.db, ctx.config, ctx.auth!.userId, body);
+    const result = inviteMember(ctx.db, ctx.config, ctx.auth!.userId, body);
+    if (result.inviteToken) {
+      const emailId = queueEmail(ctx.db, { to: body.email, ...invitationEmail(ctx.config, result.inviteToken, result.organizationName), kind: 'org_invite' });
+      result.emailDelivery = (await deliverEmail(ctx.db, ctx.config, emailId)).status;
+    }
+    return result;
   });
 
   route('DELETE', '/api/org/invitations/:id', { roles: ['manager', 'staff', 'admin'] }, (ctx) => revokeInvitation(ctx.db, ctx.auth!.userId, ctx.params.id, typeof ctx.query.get('orgId') === 'string' ? ctx.query.get('orgId')! : undefined));

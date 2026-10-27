@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-120%2F120-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-122%2F122-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -140,7 +140,7 @@ npm start
 npm test
 ```
 
-現在 **120/120** 通過。既存 R5.2 の 95 件はすべて保持し、10 件の AI、4 件の空きシフト、7 件のアカウント、4 件の組織テストが、資格情報、RBAC、プロバイダー障害、登録、認証、再設定、招待、メンバー管理を検証します。
+現在 **122/122** 通過。既存 R5.2 の 95 件はすべて保持し、10 件の AI、4 件の空きシフト、7 件のアカウント、4 件の組織、2 件のメールテストが、資格情報、RBAC、プロバイダー障害、登録、認証、再設定、招待、メンバー管理を検証します。
 
 実際の API 成功には実際の Key が必要です。Key がない場合は **REAL_API_BLOCKED** と表示し、Mock 接続を成功と主張しません。
 
