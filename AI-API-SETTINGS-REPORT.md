@@ -13,6 +13,12 @@
 
 ## 2. 实现内容
 
+### 首次安装向导
+
+管理员首次登录且未配置凭据时，自动弹出插件式 API 设置向导；支持 **中文 / English / 한국어 / 日本語**。保存 Key 后立即发送真实连接测试，无需先进入设置页。
+
+![Plugin setup wizard](docs/screenshots/12-plugin-api-setup.png)
+
 ### 管理页面
 
 管理后台新增 **系统设置 → AI 模型与 API**：
@@ -26,7 +32,7 @@
 - API Key：只写输入框，保存后只显示“已配置”；不可回读
 - 连接测试、最后成功时间、当前状态、最近调用与用量
 
-截图：[AI 设置页面](docs/r6-evidence/screenshots/r6-ai-settings-no-key.png)
+截图：[插件首次配置向导](docs/screenshots/12-plugin-api-setup.png) · [AI 设置页面](docs/r6-evidence/screenshots/r6-ai-settings-no-key.png)
 
 ### 存储与密钥
 
