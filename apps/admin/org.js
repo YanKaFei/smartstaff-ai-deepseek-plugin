@@ -19,7 +19,7 @@
     $('#member-rows').innerHTML = data.members.map((m) => `<tr><td><b>${m.name}</b><div class="tiny">${m.email || ''}</div></td>
       <td><select data-member-role="${m.id}"><option ${m.role==='owner'?'selected':''}>owner</option><option ${m.role==='admin'?'selected':''}>admin</option><option ${m.role==='manager'?'selected':''}>manager</option><option ${m.role==='staff'?'selected':''}>staff</option></select></td>
       <td>${m.storeId || '—'}</td><td>${m.status}</td><td><button class="ghost" data-member-save="${m.id}">保存角色</button></td></tr>`).join('');
-    $('#store-rows').innerHTML = data.stores.map((s) => `<tr><td>${s.name}</td><td>${s.managerCode}</td><td class="tiny">${s.id}</td></tr>`).join('') || '<tr><td colspan="3" class="tiny">还没有门店</td></tr>';
+    $('#store-rows').innerHTML = data.stores.map((s) => `<tr><td>${s.name}</td><td>${s.managerCode}</td><td class="tiny">${s.id}</td><td><button class="primary" data-enter-store="${s.id}" data-store-code="${s.managerCode}">进入门店</button></td></tr>`).join('') || '<tr><td colspan="3" class="tiny">还没有门店</td></tr>';
     $('#invite-list').innerHTML = data.invitations.length ? data.invitations.map((i) => `<div class="org-invite">${i.email} · ${i.role} · 待接受 <button class="ghost" data-revoke="${i.id}">撤销</button></div>`).join('') : '<p class="tiny">暂无待处理邀请。</p>';
     bind();
   }
@@ -27,6 +27,13 @@
     document.querySelectorAll('[data-member-save]').forEach((b) => b.addEventListener('click', async () => {
       const id = b.dataset.memberSave; const role = document.querySelector(`[data-member-role="${id}"]`).value;
       try { await api('/org/members/' + id, { method: 'PATCH', body: { role } }); msg('角色已更新'); await load(); } catch (e) { msg(e.message, true); }
+    }));
+    document.querySelectorAll('[data-enter-store]').forEach((b) => b.addEventListener('click', async () => {
+      try {
+        const r = await api('/account/switch-store', { method: 'POST', body: { storeId: b.dataset.enterStore } });
+        localStorage.setItem('smartstaff_session', JSON.stringify({ token: r.token, accessToken: r.token, refreshToken: r.refreshToken, accessExpiresAt: r.accessExpiresAt, refreshExpiresAt: r.refreshExpiresAt, role: 'manager', name: '门店负责人', storeCode: b.dataset.storeCode }));
+        location.href = '/app/#/pages/manager/home';
+      } catch (e) { msg(e.message, true); }
     }));
     document.querySelectorAll('[data-revoke]').forEach((b) => b.addEventListener('click', async () => {
       try { await api('/org/invitations/' + b.dataset.revoke, { method: 'DELETE' }); msg('邀请已撤销'); await load(); } catch (e) { msg(e.message, true); }

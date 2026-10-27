@@ -399,11 +399,13 @@ export function registerAuthRoutes(): void {
     const row = get<{ token_hash: string }>(ctx.db, 'SELECT token_hash FROM sessions WHERE token_hash = ? AND user_id = ?', [ctx.params.id, ctx.auth!.userId]);
     if (!row) throw new AppError(404, 'SESSION_NOT_FOUND', '会话不存在');
     run(ctx.db, 'DELETE FROM sessions WHERE token_hash = ?', [row.token_hash]);
+    auditAuth(ctx, 'account.session.revoke', ctx.auth!.userId, ctx.auth!.role, { sessionId: row.token_hash.slice(0, 12), current: row.token_hash === ctx.auth!.sessionId });
     return { revoked: true, current: row.token_hash === ctx.auth!.sessionId };
   });
 
   route('DELETE', '/api/account/sessions', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
     run(ctx.db, 'DELETE FROM sessions WHERE user_id = ? AND token_hash != ?', [ctx.auth!.userId, ctx.auth!.sessionId]);
+    auditAuth(ctx, 'account.session.revoke_others', ctx.auth!.userId, ctx.auth!.role, {});
     return { revokedOthers: true };
   });
 
