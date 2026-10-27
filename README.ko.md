@@ -1,19 +1,19 @@
 <p align="center">
-  <img src="docs/screenshots/12-plugin-api-setup.png" alt="SmartStaff AI DeepSeek 플러그인 초기 설정 마법사" width="920" />
+  <img src="docs/screenshots/20-saas-account-dashboard.png" alt="SmartStaff AI SaaS 계정 콘솔" width="920" />
 </p>
 
-<h1 align="center">SmartStaff AI · DeepSeek 플러그인</h1>
+<h1 align="center">SmartStaff AI</h1>
 
 <p align="center">
-  <b>첫 실행 시 DeepSeek API 설정 마법사가 열리는 플러그인형 매장 인력 워크스페이스.</b><br />
-  <code>deepseek</code> · <code>deepseek-api</code> · <code>deepseek-plugin</code> · <code>ai-plugin</code> · <code>다국어</code>
+  <b>DeepSeek 분석 레이어를 갖춘 멀티테넌트 레스토랑 인력 SaaS.</b><br />
+  <code>deepseek</code> · <code>restaurant-staffing</code> · <code>multi-tenant</code> · <code>saas</code> · <code>part-time-marketplace</code>
 </p>
 
 <p align="center">
   <img alt="tests" src="https://img.shields.io/badge/tests-124%2F124-9be34b" />
+  <img alt="schema" src="https://img.shields.io/badge/schema-v21-8cd6ff" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
-  <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
 </p>
 
 <p align="center">
@@ -22,49 +22,42 @@
 
 ## 무엇인가요?
 
-SmartStaff AI는 식당 인력 운영을 위한 **테스트 프레임워크 플러그인**입니다. 결정론적 수용량 엔진, DeepSeek 기반 설명 계층, 완성도 높은 관리자 워크스페이스를 결합했습니다.
+SmartStaff AI는 **테스트 프레임워크 레스토랑 인력 SaaS**입니다.
 
-관리자가 처음 로그인했을 때 자격 증명이 없으면 **DeepSeek API 설정 마법사**가 자동으로 열립니다. Key를 저장하고 실제 연결을 테스트하면 비즈니스 AI도 같은 런타임 설정을 사용합니다.
+- 조직, 매장, 매니저, 아르바이트를 하나의 계정 체계로 연결;
+- 매장 간 아르바이트 공석 마켓과 지원/승인 워크플로;
+- 결정론적 인력 예측 엔진;
+- DeepSeek가 인원수 하드 제약을 바꾸지 않고 계획을 설명;
+- 첫 실행 DeepSeek API 설정 마법사가 있는 관리자 콘솔.
 
-완성된 상용 제품이 아니라 **설치·검토·확장 가능한 플러그인 프레임워크**입니다.
+완성된 상용 제품이 아니라 **설치·검토·확장 가능한 테스트 프레임워크**입니다.
 
-## 특징
+## 제품 모듈
 
-- **첫 실행부터 설정**: 로그인 후 API 마법사가 바로 열립니다.
-- **실제 연결 테스트**: 실제 HTTPS 요청으로 상태 코드, JSON, `finish_reason`, 모델, 토큰, 지연 시간을 확인합니다.
-- **쓰기 전용 Key**: 원본 Key는 브라우저나 일반 로그로 돌아오지 않습니다.
-- **결정론적 코어**: DeepSeek는 설명과 제안만 작성하며 인원수와 하드 제약을 결정하지 않습니다.
-- **4개 언어**: 중국어, 영어, 한국어, 일본어를 한 번에 전환합니다.
-- **Shadow 안전**: AI 설정은 실제 초대, 근무, 알림, 인건비를 발생시키지 않습니다.
-
-
-## 아르바이트 공석 마켓
-
-아르바이트 계정은 다른 매장의 공석을 보고 지원하고, 철회하고, 결과를 확인할 수 있습니다. 매장 관리자가 승인하면 동일한 근무 상태 머신으로 확정 근무가 생성됩니다.
-
-자세히: [docs/PART-TIME-MARKETPLACE.md](docs/PART-TIME-MARKETPLACE.md).
-
-<p align="center"><img src="docs/screenshots/16-staff-marketplace.png" alt="매장 간 공석" width="320" /></p>
-
-
-## SaaS 계정 시스템 (1단계)
-
-이메일 가입, 조직 생성, owner 멤버십, 이메일 인증, 이메일 로그인, 비밀번호 재설정을 `/admin/account.html`에 구현했습니다. 이메일 발송은 아직 구성되지 않았습니다. [SAAS-ACCOUNT-SYSTEM.md](SAAS-ACCOUNT-SYSTEM.md) 참고.
+| 모듈 | 기능 |
+| --- | --- |
+| **SaaS 계정** | 이메일 가입, 인증, 로그인, 비밀번호 재설정, 조직, 멤버십, 역할, 초대. |
+| **조직 콘솔** | Owner/Admin이 멤버, 역할, 매장, 초대, 소유권 이전, 첫 매장을 관리. |
+| **아르바이트 마켓** | 조직 내 여러 매장의 공석을 보고 지원·철회·결과 확인. |
+| **매니저 승인** | 지원자를 검토하고 승인 시 confirmed 근무 생성 및 공석 수량 반영. |
+| **AI 인력 예측** | 결정론적 예측 + DeepSeek 설명 + 구조화 JSON 검증. |
+| **DeepSeek 설정** | 첫 API 마법사, 암호화된 쓰기 전용 Key, 모델/시간 초과/예산, 실제 연결 테스트. |
+| **Shadow 안전** | AI 설정과 지원이 shadow/pause 게이트를 우회해 실제 근무를 만들지 않음. |
 
 ## UI
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/12-plugin-api-setup.png" alt="첫 설정 마법사" /><br /><sub><b>첫 설정 마법사</b> — 미설정 시 로그인 후 자동으로 열립니다.</sub></td>
-    <td width="50%"><img src="docs/r6-evidence/screenshots/r6-ai-settings-no-key.png" alt="AI 설정" /><br /><sub><b>AI 설정</b> — 모델, 시간 초과, 예산, 자격 증명 상태, 사용량.</sub></td>
+    <td width="50%"><img src="docs/screenshots/20-saas-account-dashboard.png" alt="SaaS 계정" /><br /><sub><b>계정 콘솔</b> — 조직, 멤버십, 세션.</sub></td>
+    <td width="50%"><img src="docs/screenshots/21-saas-org-console.png" alt="조직 콘솔" /><br /><sub><b>조직 관리</b> — 멤버, 초대, 매장.</sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/09-admin-overview.png" alt="운영 개요" /><br /><sub><b>운영 워크스페이스</b> — 테이블, 대기열, 예측, 예외.</sub></td>
-    <td><img src="docs/screenshots/04-ai-plans.png" alt="AI 분석" /><br /><sub><b>AI 설명</b> — 구조화된 분석이며 인원수를 직접 정하지 않습니다.</sub></td>
+    <td><img src="docs/screenshots/16-staff-marketplace.png" alt="아르바이트 공석" /><br /><sub><b>공석 마켓</b> — 매장 간 지원.</sub></td>
+    <td><img src="docs/screenshots/12-plugin-api-setup.png" alt="DeepSeek 첫 설정" /><br /><sub><b>DeepSeek 첫 설정</b> — 실제 API 연결 테스트.</sub></td>
   </tr>
 </table>
 
-## 설치
+## 빠른 시작
 
 ```bash
 git clone https://github.com/YanKaFei/smartstaff-ai-deepseek-plugin.git
@@ -75,64 +68,63 @@ npm run seed
 npm start
 ```
 
-<http://127.0.0.1:8787/admin/> 를 엽니다.
+- 관리자: <http://127.0.0.1:8787/admin/>
+- SaaS 계정: <http://127.0.0.1:8787/admin/account.html>
+- 조직 콘솔: <http://127.0.0.1:8787/admin/org.html>
+- H5: <http://127.0.0.1:8787/app/>
 
-> `npm run setup`은 서버와 미니프로그램 의존성을 설치합니다. Node.js 24+ 권장.
+Node.js 24+ 권장. 전체 설치 안내: [docs/PLUGIN-INSTALL.md](docs/PLUGIN-INSTALL.md).
 
-### 첫 실행
+## SaaS 계정 흐름
 
-1. 관리자 워크스페이스에 로그인합니다.
-2. 자격 증명이 없으면 **DeepSeek 설정 마법사**가 자동으로 열립니다.
-3. 모델을 선택하고 Key를 붙여 넣은 뒤 **저장 후 연결 테스트**를 클릭합니다.
-4. Key가 없으면 닫아도 됩니다. 결정론적 예측은 계속 동작합니다.
+1. 이메일 + 조직명으로 가입.
+2. 이메일 인증 (개발 token 또는 설정된 메일 제공자).
+3. 로그인 후 계정/조직 콘솔 진입.
+4. `admin` / `manager` / `staff` 초대.
+5. 조직 안에 매장 생성.
+6. Owner가 매장에 진입하거나 매니저에게 배정.
+7. 매니저가 공석을 게시하고 아르바이트가 지원.
 
-전체 설치 안내: [docs/PLUGIN-INSTALL.md](docs/PLUGIN-INSTALL.md)
+메일은 outbox + Resend 어댑터로 처리됩니다. `RESEND_API_KEY`, `EMAIL_FROM`, 검증된 발신 도메인이 없으면 `PROVIDER_NOT_CONFIGURED`로 표시하며 발송 성공을 주장하지 않습니다.
 
-## 설정
+## DeepSeek 설정
 
-| 항목 | 기본값 | 비고 |
-| --- | --- | --- |
-| 제공자 | DeepSeek | 첫 버전만 |
-| Base URL | `https://api.deepseek.com` | 공식 주소만 |
-| 모델 | `deepseek-flash` | `deepseek-v4-pro` 선택 가능 |
-| 시간 초과 | 20초 | 5–60초 |
-| AI 스위치 | 사용 | 중지 가능 |
-| 매장 일일 예산 | $5 | 추정 |
-| 플랫폼 예산 | $80 / 30일 | 추정 |
-| 자격 증명 | 미설정 | 쓰기 전용, 서버 암호화 |
+관리자 첫 로그인 시 자격 증명이 없으면 API 마법사가 열립니다.
 
-요청 시작 시 설정 스냅샷을 한 번 해석합니다. 진행 중인 요청은 기존 스냅샷을 유지하고 다음 요청부터 새 설정을 사용합니다.
+- Base URL: `https://api.deepseek.com`
+- 모델: `deepseek-flash`, `deepseek-v4-pro`
+- Key: AES-256-GCM 서버 암호화, 쓰기 전용
+- 실제 HTTPS 테스트: 상태 코드, JSON, `finish_reason`, 모델, token, 지연
+- 오류: `AI_AUTH_FAILED`, `AI_TIMEOUT`, `AI_RESPONSE_INVALID`, `AI_NOT_CONFIGURED`
+- AI 실패/비활성화/예산 초과 시 결정론적 예측으로 폴백
 
 ## 아키텍처
 
 ```text
-매장 데이터
-   │
-   ▼
-결정론적 수용량 엔진 ── 하드 제약 / 필요 인원
-   │
-   ▼
-통합 AI 서비스 ──► DeepSeek API ──► JSON / Zod 검증
-   │                                      │
-   ▼                                      ▼
-구조화된 분석                         실패 시 폴백
-   │
-   ▼
-관리자 워크스페이스 / 매니저 UI
+조직 / 멤버 / 매장
+        │
+        ▼
+아르바이트 공석 마켓 ── 지원 ──► 매니저 승인 ──► confirmed 근무
+        │
+        ▼
+결정론적 수용량 엔진 ── 인원 하드 제약
+        │
+        ▼
+통합 AI 서비스 ──► DeepSeek API ──► JSON + Zod 검증
+        │
+        ▼
+구조화 설명 / 매니저 UI
 ```
 
-- DeepSeek는 설명, 제안, 위험 알림만 생성합니다.
-- 인원수와 매칭 하드 제약은 결정론적 엔진이 유지합니다.
-- AI 실패, 비활성화, 예산 초과 시 매니저 흐름을 멈추지 않고 폴백합니다.
+## 테넌트와 보안
 
-## 보안
-
-- API Key는 AES-256-GCM으로 암호화 (`smartstaff:ai-api-key:v1` AAD).
-- Key는 브라우저 `localStorage`, 미니프로그램 저장소, 빌드 산출물, 일반 로그에 들어가지 않습니다.
-- 관리자 전용 API이며 민감한 변경은 최근 로그인 재확인이 필요합니다.
-- 자격 증명 철회 시 저장된 Key와 환경 변수 폴백을 모두 차단합니다.
-- 공식 DeepSeek Base URL만 허용하며 임의 URL은 거부합니다.
-- 실제 오류는 `AI_AUTH_FAILED`, `AI_TIMEOUT`, `AI_RESPONSE_INVALID`, `AI_NOT_CONFIGURED`로 매핑됩니다.
+- 매니저는 매장 조직의 active membership이 있어야 접근.
+- 아르바이트 라우트는 active staff membership 필요.
+- 공석 마켓은 직원 조직 기준으로 필터링.
+- Owner/Admin은 초대, 정지, 소유권 이전, 매장 생성 가능.
+- 세션에 UA/IP 저장, 다른 기기 세션 철회 가능.
+- 계정/조직/초대/세션/AI 변경 감사.
+- Shadow 또는 일시정지 매장은 승인으로 실제 근무를 만들 수 없음.
 
 ## 테스트
 
@@ -140,28 +132,33 @@ npm start
 npm test
 ```
 
-현재 **124/124** 통과. 기존 R5.2의 95개 기준선은 모두 유지되며, 10개 AI, 4개 공석, 9개 계정, 4개 조직, 2개 이메일 테스트가 자격 증명, RBAC, 공급자 실패, 가입, 인증, 재설정, 초대, 멤버 관리를 검증합니다.
+현재 **124/124** 통과.
 
-실제 API 성공에는 실제 Key가 필요합니다. Key가 없으면 **REAL_API_BLOCKED**로 표시하며 Mock 연결을 성공이라고 주장하지 않습니다.
+기존 109개 기준선은 유지되며, 계정 가입/인증/재설정, 초대, 조직 역할, 테넌트 격리, 소유권 이전, 세션, 이메일 outbox, 공석 마켓 테스트가 추가되었습니다.
 
-## DeepSeek 검색 태그
+증거: [docs/r8-evidence/test-output-r8.txt](docs/r8-evidence/test-output-r8.txt)
 
-`deepseek` · `deepseek-api` · `deepseek-plugin` · `deepseek-tools` · `ai-plugin` · `ai-settings` · `llm-plugin` · `openai-compatible` · `restaurant-staffing` · `workforce-management` · `smartstaff` · `multilingual` · `typescript` · `vue3` · `nodejs`
+## 현재 제한
 
-## 향후 가능성
+- **실제 메일 Provider 미설정**: 운영 검증/초대/재설정 발송 차단. 개발 token은 동작.
+- 기존 전화번호 데모 계정의 이메일 계정 병합 필요. 마이그레이션 스크립트는 있으나 실제 매장에 실행하지 않음.
+- 요금제/빌링 미구현. `plan`은 데이터 필드일 뿐.
+- 운영 PostgreSQL/KMS/다중 인스턴스/모니터링은 향후.
+- 실제 매장 파일럿 데이터와 매니저 피드백은 대기 중.
 
-- 플러그인 마켓 패키징과 원클릭 설치.
-- 명시적 허용 목록을 통한 추가 DeepSeek 호환 제공자.
-- 관리자 UI로의 실시간 스트리밍 분석.
-- 식당 POS/대기열 어댑터와 더 깊은 수요 신호.
-- 실제 매장 14일 Shadow 평가.
-- 공급자 인보이스와 비용 대사.
-- 역할 기반 팀 워크스페이스와 감사 내보내기.
+## DeepSeek / 검색 태그
 
-## 프로젝트 상태
+`deepseek` · `deepseek-api` · `deepseek-plugin` · `ai-plugin` · `restaurant-staffing` · `workforce-management` · `multi-tenant-saas` · `part-time-marketplace` · `shift-scheduling` · `nodejs` · `typescript` · `vue3` · `multilingual`
 
-**테스트 프레임워크 / 상용화 전.** UI, API 설정, 자격 증명 수명주기, DeepSeek 프로브, 결정론적 폴백은 구현 및 테스트되었습니다. 실제 매장 데이터, 실제 매니저 피드백, 프로덕션 인프라는 향후 작업입니다.
+## 로드맵
+
+- 실제 트랜잭션 메일 제공자와 SPF/DKIM 검증.
+- 기존 전화번호 계정과 이메일 계정 병합.
+- Owner 첫 매장 설정 마법사 완성.
+- 멤버 제거 후 데이터 보존 정책.
+- 요금제와 빌링.
+- 운영 배포 강화와 실제 매장 파일럿.
 
 ## 라이선스
 
-라이선스 미정. 이 저장소는 평가와 확장을 위한 테스트 프레임워크로 공개됩니다.
+라이선스 미정. 평가와 확장을 위한 테스트 프레임워크로 공개됩니다.

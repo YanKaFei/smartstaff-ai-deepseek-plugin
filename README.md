@@ -1,19 +1,19 @@
 <p align="center">
-  <img src="docs/screenshots/12-plugin-api-setup.png" alt="SmartStaff AI DeepSeek plugin setup wizard" width="920" />
+  <img src="docs/screenshots/20-saas-account-dashboard.png" alt="SmartStaff AI SaaS account console" width="920" />
 </p>
 
-<h1 align="center">SmartStaff AI · DeepSeek Plugin</h1>
+<h1 align="center">SmartStaff AI</h1>
 
 <p align="center">
-  <b>A plugin-style restaurant staffing workspace with a first-run DeepSeek API setup wizard.</b><br />
-  <code>deepseek</code> · <code>deepseek-api</code> · <code>deepseek-plugin</code> · <code>ai-plugin</code> · <code>multilingual</code>
+  <b>Multi-tenant restaurant workforce SaaS with a DeepSeek-powered planning layer.</b><br />
+  <code>deepseek</code> · <code>restaurant-staffing</code> · <code>multi-tenant</code> · <code>saas</code> · <code>part-time-marketplace</code>
 </p>
 
 <p align="center">
   <img alt="tests" src="https://img.shields.io/badge/tests-124%2F124-9be34b" />
+  <img alt="schema" src="https://img.shields.io/badge/schema-v21-8cd6ff" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
-  <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
 </p>
 
 <p align="center">
@@ -22,49 +22,42 @@
 
 ## What is this?
 
-SmartStaff AI is a **test-framework plugin** for restaurant workforce planning. It combines a deterministic capacity engine, a DeepSeek-powered explanation layer, and a polished admin workspace.
+SmartStaff AI is a **test-framework restaurant workforce SaaS**. It connects:
 
-The first admin login opens a **DeepSeek API setup wizard** when no credential is configured. Save a key, test the real connection, and the same runtime is used by the business AI path.
+- organizations, stores, managers and part-time staff in one account system;
+- a cross-store part-time marketplace for open shifts and applications;
+- a deterministic capacity engine that forecasts staffing needs;
+- a DeepSeek layer that explains the plan without changing hard headcount constraints;
+- an admin console with first-run DeepSeek API configuration.
 
-This is a **plugin framework**, intentionally not a finished commercial product. The goal is to make the DeepSeek integration, first-run UX, and staffing workflow easy to install, inspect, and extend.
+It is intentionally a **test framework**, not a finished commercial product. The repository is meant to be installed, inspected, evaluated and extended.
 
-## Why it feels different
+## Product modules
 
-- **First-run, not hidden settings** — install, log in, configure DeepSeek immediately.
-- **Real connection test** — a real HTTPS request with status, JSON, `finish_reason`, model, token and latency checks.
-- **Write-only credentials** — the raw key never comes back to the browser or logs.
-- **Deterministic core** — DeepSeek explains; it does not invent headcount or override hard constraints.
-- **Multilingual onboarding** — Chinese, English, Korean and Japanese in one switch.
-- **Shadow-safe** — no real invitations, shifts, notifications or labor costs are triggered by AI setup.
-
-
-## Part-time marketplace
-
-Staff accounts can browse open shifts at other stores, apply, withdraw, and see the manager decision. Approval creates a confirmed shift from the same state machine; the manager only reviews applications for their own store.
-
-See [docs/PART-TIME-MARKETPLACE.md](docs/PART-TIME-MARKETPLACE.md).
-
-<p align="center"><img src="docs/screenshots/16-staff-marketplace.png" alt="Cross-store open shifts" width="320" /></p>
-
-
-## SaaS accounts (step 1)
-
-Email registration, organization creation, owner membership, email verification, email login and password reset are implemented in the account console at `/admin/account.html`. Email delivery is not configured yet; see [SAAS-ACCOUNT-SYSTEM.md](SAAS-ACCOUNT-SYSTEM.md).
+| Module | What it does |
+| --- | --- |
+| **SaaS accounts** | Email registration, verification, login, password reset, organizations, memberships, roles and invitations. |
+| **Organization console** | Owner/admin manage members, roles, stores, invitations, ownership transfer and first-store onboarding. |
+| **Part-time marketplace** | Staff browse open shifts across stores in their organization, apply, withdraw and see manager decisions. |
+| **Manager approval** | Managers review applicants, approve/reject, and approval creates a confirmed shift and reconciles demand. |
+| **AI staffing** | Deterministic forecast + DeepSeek explanation + structured JSON validation. |
+| **DeepSeek setup** | First-run API wizard, encrypted write-only key, model/timeout/budget settings, real connection test and usage. |
+| **Shadow-safe operations** | AI configuration and marketplace applications never bypass shadow/pause gates for real shifts. |
 
 ## UI
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/12-plugin-api-setup.png" alt="First-run API setup" /><br /><sub><b>First-run wizard</b> — opens automatically after login when unconfigured.</sub></td>
-    <td width="50%"><img src="docs/r6-evidence/screenshots/r6-ai-settings-no-key.png" alt="AI settings" /><br /><sub><b>AI settings</b> — model, timeout, budgets, credential state, usage.</sub></td>
+    <td width="50%"><img src="docs/screenshots/20-saas-account-dashboard.png" alt="SaaS account dashboard" /><br /><sub><b>Account console</b> — organizations, memberships, sessions.</sub></td>
+    <td width="50%"><img src="docs/screenshots/21-saas-org-console.png" alt="Organization console" /><br /><sub><b>Organization</b> — members, invitations, stores.</sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/09-admin-overview.png" alt="Admin overview" /><br /><sub><b>Operations workspace</b> — tables, queue, forecast and exceptions.</sub></td>
-    <td><img src="docs/screenshots/04-ai-plans.png" alt="AI plans" /><br /><sub><b>AI explanation</b> — structured analysis, never raw headcount.</sub></td>
+    <td><img src="docs/screenshots/16-staff-marketplace.png" alt="Part-time marketplace" /><br /><sub><b>Part-time marketplace</b> — cross-store open shifts and applications.</sub></td>
+    <td><img src="docs/screenshots/12-plugin-api-setup.png" alt="DeepSeek first-run setup" /><br /><sub><b>DeepSeek first run</b> — configure and test a real API connection.</sub></td>
   </tr>
 </table>
 
-## Install
+## Quick start
 
 ```bash
 git clone https://github.com/YanKaFei/smartstaff-ai-deepseek-plugin.git
@@ -75,93 +68,97 @@ npm run seed
 npm start
 ```
 
-Open <http://127.0.0.1:8787/admin/>.
+- Admin: <http://127.0.0.1:8787/admin/>
+- SaaS account console: <http://127.0.0.1:8787/admin/account.html>
+- Organization console: <http://127.0.0.1:8787/admin/org.html>
+- H5: <http://127.0.0.1:8787/app/>
 
-> `npm run setup` installs the server and mini-program dependencies. Node.js 24+ is recommended.
+Node.js 24+ recommended. Full install notes: [docs/PLUGIN-INSTALL.md](docs/PLUGIN-INSTALL.md).
 
-### First run
+## SaaS account flow
 
-1. Log in to the admin workspace.
-2. The **DeepSeek setup wizard** opens automatically if no credential is configured.
-3. Choose a model, paste a key, click **Save & test connection**.
-4. If there is no key, close the wizard; deterministic forecasting still works.
+1. Register with email + organization name.
+2. Verify email (dev token or configured email provider).
+3. Log in and open the account/org console.
+4. Invite an `admin`, `manager` or `staff` member.
+5. Create a store inside the organization.
+6. Enter the store as owner, or assign a manager.
+7. Manager publishes demand; staff apply through the marketplace.
 
-Full install notes: [docs/PLUGIN-INSTALL.md](docs/PLUGIN-INSTALL.md)
+Email delivery is implemented through an outbox + Resend adapter. Without `RESEND_API_KEY`, `EMAIL_FROM` and a verified sender domain, the system reports `PROVIDER_NOT_CONFIGURED` and does not claim delivery.
 
-## Configuration
+## DeepSeek setup
 
-| Setting | Default | Notes |
-| --- | --- | --- |
-| Provider | DeepSeek | First version only |
-| Base URL | `https://api.deepseek.com` | Official endpoint only |
-| Model | `deepseek-flash` | `deepseek-v4-pro` optional |
-| Timeout | 20 s | 5–60 s |
-| AI switch | Enabled | Can be disabled |
-| Single-store daily budget | $5 | Estimated |
-| Platform budget | $80 / 30 days | Estimated |
-| Credential | Not configured | Write-only, encrypted at rest |
+The first admin login opens the API wizard when no credential exists.
 
-The runtime resolves one configuration snapshot per request. In-flight requests keep their snapshot; the next request sees updates.
+- Base URL: `https://api.deepseek.com`
+- Models: `deepseek-flash`, `deepseek-v4-pro`
+- API key: AES-256-GCM encrypted at rest, write-only
+- Real HTTPS connection test with status, JSON, `finish_reason`, model, tokens and latency
+- Stable errors: `AI_AUTH_FAILED`, `AI_TIMEOUT`, `AI_RESPONSE_INVALID`, `AI_NOT_CONFIGURED`
+- AI failure, disablement or budget exhaustion falls back to deterministic planning
 
 ## Architecture
 
 ```text
-store data
-   │
-   ▼
-deterministic capacity engine ── hard constraints / required headcount
-   │
-   ▼
-unified AI service ──► DeepSeek API ──► JSON / Zod validation
-   │                                      │
-   ▼                                      ▼
-structured analysis                 fallback on failure
-   │
-   ▼
-admin workspace / manager UI
+organization / members / stores
+        │
+        ▼
+part-time marketplace ── apply ──► manager approval ──► confirmed shift
+        │
+        ▼
+deterministic capacity engine ── hard headcount constraints
+        │
+        ▼
+unified AI service ──► DeepSeek API ──► JSON + Zod validation
+        │
+        ▼
+structured explanation / manager UI
 ```
 
-- DeepSeek only writes explanations, recommendations and risk notes.
-- Headcount and matching constraints remain deterministic.
-- AI failure, disablement or budget exhaustion falls back without stopping the manager flow.
+## Tenant and security model
 
-## Security
+- Every manager route checks an active membership in the store organization.
+- Staff routes require an active staff membership.
+- The marketplace filters open shifts by the staff member's organization.
+- Organization owner/admin can invite, suspend, transfer ownership and create stores.
+- Sessions store device metadata (UA/IP); users can revoke other sessions.
+- Account, organization, invitation, session and AI changes are audited.
+- Shadow mode and paused stores cannot create real shifts from marketplace approval.
 
-- API key encrypted with AES-256-GCM (`smartstaff:ai-api-key:v1` AAD).
-- Key never enters browser `localStorage`, mini-program storage, build artifacts or normal logs.
-- Admin-only endpoints; sensitive changes require recent authentication.
-- Credential revoke blocks both the saved key and environment fallback.
-- Only official DeepSeek Base URL accepted; arbitrary URLs are rejected.
-- Real API errors are mapped to stable codes: `AI_AUTH_FAILED`, `AI_TIMEOUT`, `AI_RESPONSE_INVALID`, `AI_NOT_CONFIGURED`.
-
-## Test
+## Tests
 
 ```bash
 npm test
 ```
 
-Current: **124/124** tests. The original 95-test R5.2 baseline is preserved; 10 AI settings, 4 cross-store marketplace, 9 account, 4 organization and 2 email tests cover credentials, RBAC, provider failures, marketplace, registration, verification, reset, invitations and member management.
+Current: **124/124** tests.
 
-Real API success requires a real key. Without one the project intentionally reports **REAL_API_BLOCKED** and never claims a mock connection.
+The original 109-test baseline is preserved; added tests cover account registration/verification/reset, invitations, organization roles, tenant isolation, ownership transfer, session management, email outbox and marketplace workflows.
 
-## DeepSeek search tags
+Evidence: [docs/r8-evidence/test-output-r8.txt](docs/r8-evidence/test-output-r8.txt)
 
-`deepseek` · `deepseek-api` · `deepseek-plugin` · `deepseek-tools` · `ai-plugin` · `ai-settings` · `llm-plugin` · `openai-compatible` · `restaurant-staffing` · `workforce-management` · `smartstaff` · `multilingual` · `typescript` · `vue3` · `nodejs`
+## Current limits
 
-## Roadmap / possibilities
+- **Email provider credentials are not configured**; real production verification/invite/reset delivery is blocked. Dev tokens work.
+- Existing phone-based demo users need an explicit account merge/link operation; a migration script exists but has not been run against a real store.
+- Billing/plans are not implemented; `plan` is a data field only.
+- Production PostgreSQL/KMS/multi-instance/monitoring are future work.
+- Real-store pilot data and real manager feedback remain pending.
 
-- Plugin marketplace packaging and one-click install.
-- More DeepSeek-compatible providers behind an explicit allowlist.
-- Real-time streaming of analysis into the manager UI.
-- Restaurant POS/queue adapters and deeper demand signals.
-- 14-day shadow evaluation at real stores.
-- Billing reconciliation with provider invoices.
-- Role-based team workspaces and audit export.
+## DeepSeek / search tags
 
-## Project status
+`deepseek` · `deepseek-api` · `deepseek-plugin` · `ai-plugin` · `restaurant-staffing` · `workforce-management` · `multi-tenant-saas` · `part-time-marketplace` · `shift-scheduling` · `nodejs` · `typescript` · `vue3` · `multilingual`
 
-**Test-framework / pre-commercial.** The UI, API settings, credential lifecycle, DeepSeek probe and deterministic fallback are implemented and tested. Real-store data, real manager feedback and production-scale infrastructure remain future work.
+## Roadmap
+
+- Configure a real transactional email provider and verify SPF/DKIM.
+- Link legacy phone accounts to email accounts.
+- Complete the owner first-store setup wizard.
+- Member removal/data-retention policy.
+- Billing and subscription plans.
+- Production deployment hardening and real-store pilot.
 
 ## License
 
-License TBD. This repository is published as a test framework for evaluation and extension.
+License TBD. Published as a test framework for evaluation and extension.
