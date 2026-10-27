@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-122%2F122-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-124%2F124-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -140,7 +140,7 @@ npm start
 npm test
 ```
 
-현재 **122/122** 통과. 기존 R5.2의 95개 기준선은 모두 유지되며, 10개 AI, 4개 공석, 7개 계정, 4개 조직, 2개 이메일 테스트가 자격 증명, RBAC, 공급자 실패, 가입, 인증, 재설정, 초대, 멤버 관리를 검증합니다.
+현재 **124/124** 통과. 기존 R5.2의 95개 기준선은 모두 유지되며, 10개 AI, 4개 공석, 9개 계정, 4개 조직, 2개 이메일 테스트가 자격 증명, RBAC, 공급자 실패, 가입, 인증, 재설정, 초대, 멤버 관리를 검증합니다.
 
 실제 API 성공에는 실제 Key가 필요합니다. Key가 없으면 **REAL_API_BLOCKED**로 표시하며 Mock 연결을 성공이라고 주장하지 않습니다.
 

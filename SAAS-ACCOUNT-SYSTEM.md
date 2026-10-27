@@ -66,7 +66,7 @@ Part-time marketplace now filters open demands by the staff member's active orga
 
 ## Tests
 
-- **122/122** passed.
+- **124/124** passed.
 - 5 account tests:
   - register → verify → login → account/me
   - duplicate email + weak password
@@ -82,6 +82,7 @@ Part-time marketplace now filters open demands by the staff member's active orga
   - revoke one device while preserving current session
   - manager without active store membership is denied
 - 2 email tests: no-provider queued/not_claimed, mocked provider sent/failed
+- 2 lifecycle tests: resend verification; suspended staff membership denied
 - Existing 109 tests preserved.
 - H5 and mini-program builds pass.
 
@@ -95,7 +96,7 @@ Schema v20 adds `email_outbox`. Registration, invitations and password reset now
 
 ## Known blockers / next steps
 
-1. **Email provider credentials** — adapter exists; no real Resend key/from address is configured, so production delivery is still blocked. Status: `PROVIDER_NOT_CONFIGURED`.
+1. **Email provider credentials** — adapter exists; no real Resend key/from address is configured, so production delivery is still blocked. Status: `PROVIDER_NOT_CONFIGURED`. Dev tokens/resend remain available.
 2. **Tenant enforcement** — manager routes and marketplace are checked; admin routes are platform-only; full staff-route checks remain.
 3. **Owner onboarding** — first store binding and store-session switching are done; guided setup/manager assignment UI remains.
 4. **Remove member** — role/status supported; hard removal and ownership transfer need a policy.

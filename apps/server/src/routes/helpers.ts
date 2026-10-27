@@ -24,6 +24,8 @@ export function managerContext(ctx: RequestContext) {
 export function staffContext(ctx: RequestContext) {
   const auth = authOf(ctx);
   const profile = getStaffByUser(ctx.db, auth.userId);
+  const membership = get<{ id: string }>(ctx.db, "SELECT id FROM memberships WHERE user_id = ? AND store_id = ? AND status = 'active' LIMIT 1", [auth.userId, profile.store_id]);
+  if (!membership) throw new AppError(403, 'TENANT_FORBIDDEN', '当前兼职不属于该门店组织');
   return { auth, staff: profile, staffId: profile.id, storeId: profile.store_id };
 }
 

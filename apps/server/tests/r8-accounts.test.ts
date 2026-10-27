@@ -136,3 +136,27 @@ test('R8 accounts: manager without an active store membership is denied tenant a
     assert.equal(denied.json.error?.code, 'TENANT_FORBIDDEN');
   } finally { await app.close(); }
 });
+
+test('R8 accounts: resend verification issues a fresh token and queues mail', async () => {
+  const app = await freshApp();
+  try {
+    const reg = await register(app, 'resend@example.com');
+    const again = await api<{ verificationToken?: string; emailDelivery: string }>(app.base, 'POST', '/api/auth/resend-verification', { email: 'resend@example.com' });
+    assert.equal(again.status, 200);
+    assert.ok(again.data.verificationToken);
+    assert.equal(again.data.emailDelivery, 'not_configured');
+    const verified = await api(app.base, 'POST', '/api/auth/verify-email', { token: again.data.verificationToken });
+    assert.equal(verified.status, 200);
+  } finally { await app.close(); }
+});
+
+test('R8 accounts: suspended staff membership cannot access staff routes', async () => {
+  const app = await freshApp();
+  try {
+    const token = await staffLogin(app, '13800000001');
+    run(app.db, "UPDATE memberships SET status='suspended' WHERE user_id = (SELECT user_id FROM staff_profiles WHERE phone = '13800000001')");
+    const denied = await api(app.base, 'GET', '/api/staff/me', undefined, token);
+    assert.equal(denied.status, 403);
+    assert.equal(denied.json.error?.code, 'TENANT_FORBIDDEN');
+  } finally { await app.close(); }
+});

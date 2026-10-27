@@ -21,7 +21,7 @@ import { rateLimit } from '../lib/rateLimit.js';
 import { code2Session } from '../lib/wechat.js';
 import { issueManagerClaim, consumeManagerClaim } from '../lib/managerClaim.js';
 import { isStrongPassword } from '../config.js';
-import { accountMe, emailLogin, forgotPassword, registerAccount, resetPassword, verifyEmail } from '../domain/accounts.js';
+import { accountMe, emailLogin, forgotPassword, registerAccount, resendVerification, resetPassword, verifyEmail } from '../domain/accounts.js';
 import { acceptInvitation, createOrgStore, inviteMember, orgOverview, removeMember, revokeInvitation, switchAccountStore, transferOwnership, updateMember } from '../domain/org.js';
 import { deliverEmail, invitationEmail, queueEmail, resetEmail, verificationEmail } from '../domain/email.js';
 import { all, get, run } from '../lib/db.js';
@@ -162,6 +162,8 @@ function loginStaff(ctx: RequestContext, storeCode: string, phone: string | unde
     });
   }
   ensureMembership(ctx, user.id, organizationId, 'staff', profile.store_id);
+  const membership = get<{ status: string }>(ctx.db, 'SELECT status FROM memberships WHERE organization_id = ? AND user_id = ?', [organizationId, user.id]);
+  if (!membership || membership.status !== 'active') throw new AppError(403, 'MEMBERSHIP_SUSPENDED', '该账号已被移出组织');
   const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config);
   auditAuth(ctx, 'auth.demo_login', user.id, 'staff', { storeId: store.id });
   return {
@@ -258,6 +260,8 @@ async function loginWx(ctx: RequestContext, input: z.infer<typeof wxLoginSchema>
   const profile = get<StaffProfileRow>(ctx.db, 'SELECT * FROM staff_profiles WHERE user_id = ?', [user.id]);
   if (!profile) throw new AppError(403, 'STAFF_PROFILE_MISSING', '兼职资料缺失，请联系门店');
   ensureMembership(ctx, user.id, organizationId, 'staff', profile.store_id);
+  const membership = get<{ status: string }>(ctx.db, 'SELECT status FROM memberships WHERE organization_id = ? AND user_id = ?', [organizationId, user.id]);
+  if (!membership || membership.status !== 'active') throw new AppError(403, 'MEMBERSHIP_SUSPENDED', '该账号已被移出组织');
   const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config);
   auditAuth(ctx, 'auth.wx_login', user.id, 'staff', { storeId: store.id });
   return {
@@ -307,6 +311,17 @@ export function registerAuthRoutes(): void {
     guard(ctx, 'email-login', 10, 15 * 60_000);
     const body = z.object({ email: z.string().trim().email().max(200), password: z.string().min(1).max(200) }).parse(ctx.body ?? {});
     return emailLogin(ctx.db, ctx.config, body.email, body.password);
+  });
+
+  route('POST', '/api/auth/resend-verification', {}, async (ctx) => {
+    guard(ctx, 'resend-verification', 5, 60 * 60_000);
+    const body = z.object({ email: z.string().trim().email().max(200) }).parse(ctx.body ?? {});
+    const result = resendVerification(ctx.db, ctx.config, body.email);
+    if (result.verificationToken) {
+      const emailId = queueEmail(ctx.db, { to: body.email, ...verificationEmail(ctx.config, result.verificationToken), kind: 'email_verify' });
+      result.emailDelivery = (await deliverEmail(ctx.db, ctx.config, emailId)).status;
+    }
+    return result;
   });
 
   route('POST', '/api/auth/forgot-password', {}, async (ctx) => {

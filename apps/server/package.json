@@ -12,7 +12,8 @@
     "test": "tsx --test tests/*.test.ts",
     "test:report": "tsx tests/report.ts",
     "demo:marketplace": "tsx scripts/r7-marketplace-demo.ts",
-    "migrate:tenants": "tsx scripts/r9-backfill-tenants.ts"
+    "migrate:tenants": "tsx scripts/r9-backfill-tenants.ts",
+    "migrate:link-email": "tsx scripts/r10-link-legacy-email.ts"
   },
   "dependencies": {
     "zod": "^3.23.8"

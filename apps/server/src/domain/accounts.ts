@@ -156,3 +156,10 @@ export function accountMe(db: Db, userId: string) {
     })),
   };
 }
+
+export function resendVerification(db: Db, cfg: AppConfig, emailInput: string, now = Date.now()) {
+  const email = normalizeEmail(emailInput);
+  const user = get<{ id: string; email_verified: number }>(db, 'SELECT id, email_verified FROM users WHERE email = ?', [email]);
+  if (!user || user.email_verified) return { accepted: true, verificationToken: undefined, emailDelivery: 'NOT_CONFIGURED' };
+  return { accepted: true, verificationToken: cfg.nodeEnv === 'production' ? undefined : issueToken(db, user.id, 'email_verify', now), emailDelivery: 'NOT_CONFIGURED' };
+}

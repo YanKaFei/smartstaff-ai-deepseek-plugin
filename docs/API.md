@@ -482,7 +482,9 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - 邮件：注册/邀请/重置会写入 `email_outbox`；配置 `EMAIL_PROVIDER=resend`、`RESEND_API_KEY`、`EMAIL_FROM` 后通过 Resend 发送；未配置时明确返回 `not_configured`。
 
 Schema v18：`organizations`、`memberships`、`account_tokens`、`users.email/email_verified/status`、`stores.organization_id`。
-邮件服务未配置；生产环境需接入 SMTP/邮件供应商后才能完成验证/重置流程。
+邮件服务未配置；生产环境需接入 SMTP/Resend 后才能完成验证/重置流程。
+
+补充：`POST /api/auth/resend-verification` 重发验证；`npm run migrate:tenants` 回填组织；`npm run migrate:link-email -- --phone ... --email ...` 为旧手机号账户绑定邮箱。
 
 
 ### 组织成员与邀请
