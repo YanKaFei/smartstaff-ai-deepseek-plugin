@@ -5,6 +5,7 @@ import { staffContext } from './helpers.js';
 import { getStore, serializeStore } from '../domain/stores.js';
 import { profileSchema, setAvailability, serializeStaff, staffWindows, updateStaffProfile, availabilitySchema } from '../domain/staff.js';
 import { acceptOffer, checkIn, checkOut, rejectOffer, shiftApi, staffCancelShift } from '../domain/dispatch.js';
+import { applyToDemand, listMyApplications, listOpenOpportunities, withdrawApplication } from '../domain/marketplace.js';
 import { storeNow } from '../domain/clock.js';
 import type { OfferRow, ShiftRow } from '../domain/types.js';
 
@@ -72,6 +73,30 @@ export function registerStaffRoutes(): void {
     const { staff } = staffContext(ctx);
     const windows = availabilitySchema.parse((ctx.body as { windows?: unknown })?.windows ?? []);
     return { availability: setAvailability(ctx.db, staff.id, windows) };
+  });
+
+  route('GET', '/api/staff/opportunities', { roles: ['staff'] }, (ctx) => {
+    const { staff } = staffContext(ctx);
+    const now = storeNow(ctx.db, staff.store_id);
+    return { items: listOpenOpportunities(ctx.db, staff.id, now), now };
+  });
+
+  route('POST', '/api/staff/opportunities/:id/apply', { roles: ['staff'] }, (ctx) => {
+    const { staff } = staffContext(ctx);
+    const body = z.object({ note: z.string().trim().max(200).optional() }).parse(ctx.body ?? {});
+    const now = storeNow(ctx.db, staff.store_id);
+    return { application: applyToDemand(ctx.db, staff.id, ctx.params.id, body.note ?? '', now) };
+  });
+
+  route('GET', '/api/staff/applications', { roles: ['staff'] }, (ctx) => {
+    const { staff } = staffContext(ctx);
+    return { items: listMyApplications(ctx.db, staff.id) };
+  });
+
+  route('POST', '/api/staff/applications/:id/withdraw', { roles: ['staff'] }, (ctx) => {
+    const { staff } = staffContext(ctx);
+    const now = storeNow(ctx.db, staff.store_id);
+    return { application: withdrawApplication(ctx.db, staff.id, ctx.params.id, now) };
   });
 
   route('GET', '/api/staff/offers', { roles: ['staff'] }, (ctx) => {

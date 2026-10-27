@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-105%2F105-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-109%2F109-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -36,6 +36,15 @@ SmartStaff AI는 식당 인력 운영을 위한 **테스트 프레임워크 플�
 - **결정론적 코어**: DeepSeek는 설명과 제안만 작성하며 인원수와 하드 제약을 결정하지 않습니다.
 - **4개 언어**: 중국어, 영어, 한국어, 일본어를 한 번에 전환합니다.
 - **Shadow 안전**: AI 설정은 실제 초대, 근무, 알림, 인건비를 발생시키지 않습니다.
+
+
+## 아르바이트 공석 마켓
+
+아르바이트 계정은 다른 매장의 공석을 보고 지원하고, 철회하고, 결과를 확인할 수 있습니다. 매장 관리자가 승인하면 동일한 근무 상태 머신으로 확정 근무가 생성됩니다.
+
+자세히: [docs/PART-TIME-MARKETPLACE.md](docs/PART-TIME-MARKETPLACE.md).
+
+<p align="center"><img src="docs/screenshots/16-staff-marketplace.png" alt="매장 간 공석" width="320" /></p>
 
 ## UI
 
@@ -126,7 +135,7 @@ npm start
 npm test
 ```
 
-현재 **105/105** 통과. 기존 R5.2의 95개 기준선은 모두 유지되며, 10개 AI 설정 테스트가 자격 증명 수명주기, RBAC, 401, 시간 초과, 잘못된 JSON, 스키마 실패, AI 비활성화, 예산/사용량, 철회를 검증합니다.
+현재 **109/109** 통과. 기존 R5.2의 95개 기준선은 모두 유지되며, 10개 AI 설정 테스트와 4개 매장 간 공석 테스트가 자격 증명 수명주기, RBAC, 401, 시간 초과, 잘못된 JSON, 스키마 실패, AI 비활성화, 예산/사용량, 철회, 지원, 승인, 거절, 철회를 검증합니다.
 
 실제 API 성공에는 실제 Key가 필요합니다. Key가 없으면 **REAL_API_BLOCKED**로 표시하며 Mock 연결을 성공이라고 주장하지 않습니다.
 

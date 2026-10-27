@@ -443,3 +443,20 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - 前端只看到 `credentialConfigured` / `credentialHint` / `credentialSource`；
 - 审计记录操作人、动作、模型、状态和延迟，不记录 Key/Authorization；
 - 业务 `generateForecast` 通过 `resolveAiRuntime` 使用统一 AI Service；配置更新只影响下一次请求。
+
+
+---
+
+## 兼职缺位广场（R7）
+
+兼职账号可跨门店查看开放缺位、申请、撤回；店长只处理本店申请，通过后生成正式 confirmed 班次。
+
+- `GET /api/staff/opportunities`：开放缺位、门店、时间、时薪、缺口、申请状态、可申请原因。
+- `POST /api/staff/opportunities/:id/apply` `{ note? }`：提交申请；重复/满员/不符合可用时间/跨店冲突会被拒绝。
+- `GET /api/staff/applications`：我的申请及状态。
+- `POST /api/staff/applications/:id/withdraw`：撤回 pending 申请，可重新申请。
+- `GET /api/manager/applications`：本店申请列表（含申请人摘要）。
+- `POST /api/manager/applications/:id/approve` `{ note? }`：通过并创建 confirmed 班次，回填 demand。
+- `POST /api/manager/applications/:id/reject` `{ note? }`：拒绝，不创建班次。
+
+约束：兼职需 approved；目标门店 `requireQualified`；可用时间、最短通知、跨店时间冲突在申请和审批时各校验一次；满员后关闭 demand 并拒绝其他 pending 申请；所有操作进入审计与通知。

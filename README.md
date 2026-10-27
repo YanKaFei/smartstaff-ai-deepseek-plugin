@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-105%2F105-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-109%2F109-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -36,6 +36,15 @@ This is a **plugin framework**, intentionally not a finished commercial product.
 - **Deterministic core** — DeepSeek explains; it does not invent headcount or override hard constraints.
 - **Multilingual onboarding** — Chinese, English, Korean and Japanese in one switch.
 - **Shadow-safe** — no real invitations, shifts, notifications or labor costs are triggered by AI setup.
+
+
+## Part-time marketplace
+
+Staff accounts can browse open shifts at other stores, apply, withdraw, and see the manager decision. Approval creates a confirmed shift from the same state machine; the manager only reviews applications for their own store.
+
+See [docs/PART-TIME-MARKETPLACE.md](docs/PART-TIME-MARKETPLACE.md).
+
+<p align="center"><img src="docs/screenshots/16-staff-marketplace.png" alt="Cross-store open shifts" width="320" /></p>
 
 ## UI
 
@@ -126,7 +135,7 @@ admin workspace / manager UI
 npm test
 ```
 
-Current: **105/105** tests. The original 95-test R5.2 baseline is preserved; 10 AI settings tests cover credential lifecycle, RBAC, 401, timeout, invalid JSON, schema failure, disabled AI, budget/usage and revocation.
+Current: **109/109** tests. The original 95-test R5.2 baseline is preserved; 10 AI settings tests and 4 cross-store marketplace tests cover credential lifecycle, RBAC, 401, timeout, invalid JSON, schema failure, disabled AI, budget/usage, revocation, apply, approve, reject and withdraw.
 
 Real API success requires a real key. Without one the project intentionally reports **REAL_API_BLOCKED** and never claims a mock connection.
 

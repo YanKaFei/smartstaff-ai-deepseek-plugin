@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 16;
+export const SCHEMA_VERSION = 17;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -277,6 +277,24 @@ CREATE TABLE IF NOT EXISTS shifts (
 CREATE INDEX IF NOT EXISTS ix_shifts_store_time ON shifts(store_id, start_at);
 CREATE INDEX IF NOT EXISTS ix_shifts_staff_time ON shifts(staff_id, start_at);
 CREATE INDEX IF NOT EXISTS ix_shifts_status ON shifts(store_id, status);
+
+CREATE TABLE IF NOT EXISTS shift_applications (
+  id TEXT PRIMARY KEY,
+  demand_id TEXT NOT NULL REFERENCES staffing_demands(id),
+  store_id TEXT NOT NULL REFERENCES stores(id),
+  staff_id TEXT NOT NULL REFERENCES staff_profiles(id),
+  status TEXT NOT NULL CHECK (status IN ('pending','approved','rejected','withdrawn')),
+  note TEXT NOT NULL DEFAULT '',
+  decision_note TEXT,
+  decided_by TEXT,
+  decided_at INTEGER,
+  shift_id TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  UNIQUE(demand_id, staff_id)
+);
+CREATE INDEX IF NOT EXISTS ix_app_staff ON shift_applications(staff_id, status, created_at);
+CREATE INDEX IF NOT EXISTS ix_app_store ON shift_applications(store_id, status, created_at);
 
 CREATE TABLE IF NOT EXISTS job_offers (
   id TEXT PRIMARY KEY,

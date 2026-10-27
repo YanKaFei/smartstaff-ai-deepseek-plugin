@@ -8,7 +8,7 @@
 | uni-app | 3.0.0-5030320261023001 |
 | Vue | 3.4.21 |
 | SQLite | Node built-in `node:sqlite` |
-| Schema | 16 (R6 AI settings + revocation) |
+| Schema | 17 (R7 shift applications) |
 | R3 baseline commit | `1e94563d1ff4e9032d53311a19f9af534f73025a` |
 | R3 baseline tag | `r3-baseline` |
 | R4 commit/tag | `see git log` / `r4-engineering-ready` (local; no remote push) |
@@ -16,12 +16,14 @@
 | R5.1 tag | `r5.1-field-ready` (local; no remote push) |
 | R5.2 tag | `r5.2-metric-ready` (local; no remote push) |
 | R6 tag | `r6-ai-settings-ready` (local; no remote push) |
+| R7 tag | `r7-parttime-marketplace` (local; no remote push) |
 | R3 tests | 82/82 (`docs/r3-evidence/test-output-r3.txt`) |
 | R4 tests | 85/85 (`docs/r4-evidence/test-output-r4.txt`) |
 | R5 tests | 87/87 (`docs/r5-evidence/test-output-r5.txt`) |
 | R5.1 tests | 91/91 (`docs/r5.1-evidence/test-output-r5.1.txt`) |
 | R5.2 tests | 95/95 (`docs/r5.2-evidence/test-output-r5.2.txt`) |
 | R6 tests | 105/105 (`docs/r6-evidence/test-output-r6.txt`) |
+| R7 tests | 109/109 (`docs/r7-evidence/test-output-r7.txt`) |
 | Dependency locks | `apps/server/package-lock.json`, `apps/miniapp/package-lock.json` |
 
 Reproduce:

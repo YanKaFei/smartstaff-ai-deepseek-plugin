@@ -2,35 +2,73 @@
   "pages": [
     {
       "path": "pages/login/index",
-      "style": { "navigationStyle": "custom", "navigationBarTitleText": "SmartStaff AI" }
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "SmartStaff AI"
+      }
     },
     {
       "path": "pages/manager/setup",
-      "style": { "navigationBarTitleText": "门店配置", "enablePullDownRefresh": false }
+      "style": {
+        "navigationBarTitleText": "门店配置",
+        "enablePullDownRefresh": false
+      }
     },
     {
       "path": "pages/manager/home",
-      "style": { "navigationBarTitleText": "今日经营", "enablePullDownRefresh": true }
+      "style": {
+        "navigationBarTitleText": "今日经营",
+        "enablePullDownRefresh": true
+      }
     },
     {
       "path": "pages/manager/plans",
-      "style": { "navigationBarTitleText": "AI 调配方案", "enablePullDownRefresh": true }
+      "style": {
+        "navigationBarTitleText": "AI 调配方案",
+        "enablePullDownRefresh": true
+      }
     },
     {
       "path": "pages/manager/records",
-      "style": { "navigationBarTitleText": "调配记录", "enablePullDownRefresh": true }
+      "style": {
+        "navigationBarTitleText": "调配记录",
+        "enablePullDownRefresh": true
+      }
     },
     {
       "path": "pages/staff/offers",
-      "style": { "navigationBarTitleText": "工作邀约", "enablePullDownRefresh": true }
+      "style": {
+        "navigationBarTitleText": "工作邀约",
+        "enablePullDownRefresh": true
+      }
     },
     {
       "path": "pages/staff/shifts",
-      "style": { "navigationBarTitleText": "我的班次", "enablePullDownRefresh": true }
+      "style": {
+        "navigationBarTitleText": "我的班次",
+        "enablePullDownRefresh": true
+      }
     },
     {
       "path": "pages/staff/availability",
-      "style": { "navigationBarTitleText": "我的可用时间", "enablePullDownRefresh": false }
+      "style": {
+        "navigationBarTitleText": "我的可用时间",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/staff/market",
+      "style": {
+        "navigationBarTitleText": "缺位广场",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/manager/applications",
+      "style": {
+        "navigationBarTitleText": "兼职申请",
+        "enablePullDownRefresh": true
+      }
     }
   ],
   "globalStyle": {

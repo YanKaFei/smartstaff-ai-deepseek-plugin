@@ -17,6 +17,7 @@ import { advanceSimulationAndSummarize, simulationStatus } from '../domain/simul
 import { ingestManualCommand } from '../domain/ingest.js';
 import { calibrationMatches } from '../domain/calibration.js';
 import { getPilotControl, pausePilot, pilotSummary, recordPilotFeedback, recordPilotUxMetric, resumePilot } from '../domain/pilot.js';
+import { decideApplication, listStoreApplications } from '../domain/marketplace.js';
 import type { ShiftRow } from '../domain/types.js';
 
 const configSchema = z.object({
@@ -185,6 +186,23 @@ export function registerManagerRoutes(): void {
       })
       .parse(ctx.body ?? {});
     return replacePlanItem(ctx.db, storeId, ctx.params.id, body);
+  });
+
+  route('GET', '/api/manager/applications', { roles: ['manager'] }, (ctx) => {
+    const { storeId } = managerContext(ctx);
+    return { items: listStoreApplications(ctx.db, storeId) };
+  });
+
+  route('POST', '/api/manager/applications/:id/approve', { roles: ['manager'] }, (ctx) => {
+    const { storeId } = managerContext(ctx);
+    const body = z.object({ note: z.string().trim().max(200).optional() }).parse(ctx.body ?? {});
+    return decideApplication(ctx.db, storeId, ctx.params.id, 'approved', ctx.auth!.userId, body.note ?? '门店已通过', storeNow(ctx.db, storeId));
+  });
+
+  route('POST', '/api/manager/applications/:id/reject', { roles: ['manager'] }, (ctx) => {
+    const { storeId } = managerContext(ctx);
+    const body = z.object({ note: z.string().trim().max(200).optional() }).parse(ctx.body ?? {});
+    return decideApplication(ctx.db, storeId, ctx.params.id, 'rejected', ctx.auth!.userId, body.note ?? '岗位暂不匹配', storeNow(ctx.db, storeId));
   });
 
   route('GET', '/api/manager/assignments', { roles: ['manager'] }, (ctx) => {

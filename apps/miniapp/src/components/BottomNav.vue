@@ -24,11 +24,13 @@ const items = computed(() => {
     return [
       { key: 'home', label: '今日经营', icon: '▦', path: '/pages/manager/home', badge: 0 },
       { key: 'plans', label: 'AI 调配', icon: '◈', path: '/pages/manager/plans', badge: props.badges?.plans ?? 0 },
+      { key: 'applications', label: '兼职申请', icon: '↗', path: '/pages/manager/applications', badge: props.badges?.applications ?? 0 },
       { key: 'records', label: '调配记录', icon: '≡', path: '/pages/manager/records', badge: props.badges?.records ?? 0 },
     ];
   }
   return [
     { key: 'offers', label: '工作邀约', icon: '✳', path: '/pages/staff/offers', badge: props.badges?.offers ?? 0 },
+    { key: 'market', label: '缺位广场', icon: '⌖', path: '/pages/staff/market', badge: props.badges?.market ?? 0 },
     { key: 'shifts', label: '我的班次', icon: '◷', path: '/pages/staff/shifts', badge: 0 },
     { key: 'availability', label: '可用时间', icon: '⌘', path: '/pages/staff/availability', badge: 0 },
   ];
