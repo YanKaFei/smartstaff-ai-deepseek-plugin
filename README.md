@@ -12,11 +12,13 @@
 <p align="center">
   <img alt="tests" src="https://img.shields.io/badge/tests-105%2F105-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
-  <img alt="languages" src="https://img.shields.io/badge/languages-中文%20%7C%20EN%20%7C%20한국어%20%7C%20日本語-8cd6ff" />
+  <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
 </p>
 
-> **中文一句话简介：** SmartStaff AI 是一个可安装的 DeepSeek 插件式门店人力预测与 API 设置框架，首次启用即引导配置并测试连接。
+<p align="center">
+  <b>Languages:</b> <a href="README.md">EN</a> · <a href="README.zh-CN.md">ZH</a> · <a href="README.ko.md">KO</a> · <a href="README.ja.md">JA</a>
+</p>
 
 ## What is this?
 
@@ -25,16 +27,6 @@ SmartStaff AI is a **test-framework plugin** for restaurant workforce planning. 
 The first admin login opens a **DeepSeek API setup wizard** when no credential is configured. Save a key, test the real connection, and the same runtime is used by the business AI path.
 
 This is a **plugin framework**, intentionally not a finished commercial product. The goal is to make the DeepSeek integration, first-run UX, and staffing workflow easy to install, inspect, and extend.
-
-### Four-language setup
-
-The setup wizard is localized in:
-
-| 中文 | English | 한국어 | 日本語 |
-| --- | --- | --- | --- |
-| 连接 DeepSeek | Connect DeepSeek | DeepSeek 연결 | DeepSeek に接続 |
-| 保存并测试连接 | Save & test connection | 저장 후 연결 테스트 | 保存して接続テスト |
-| 连接成功 | Connected | 연결 성공 | 接続成功 |
 
 ## Why it feels different
 
