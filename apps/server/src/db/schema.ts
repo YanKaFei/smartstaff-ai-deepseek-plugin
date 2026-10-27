@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 20;
+export const SCHEMA_VERSION = 21;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -105,6 +105,9 @@ CREATE TABLE IF NOT EXISTS sessions (
   access_expires_at INTEGER,
   refresh_expires_at INTEGER,
   last_auth_at INTEGER,
+  user_agent TEXT,
+  ip TEXT,
+  last_seen_at INTEGER,
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_sessions_user ON sessions(user_id);

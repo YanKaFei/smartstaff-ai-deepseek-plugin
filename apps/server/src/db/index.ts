@@ -59,6 +59,9 @@ function migrate(db: Db): void {
   add('users', 'email_verified', 'email_verified INTEGER NOT NULL DEFAULT 0');
   add('users', 'status', "status TEXT NOT NULL DEFAULT 'active'");
   add('stores', 'organization_id', 'organization_id TEXT');
+  add('sessions', 'user_agent', 'user_agent TEXT');
+  add('sessions', 'ip', 'ip TEXT');
+  add('sessions', 'last_seen_at', 'last_seen_at INTEGER');
   add('shifts', 'demand_id', 'demand_id TEXT');
   add('shifts', 'is_backfill', 'is_backfill INTEGER NOT NULL DEFAULT 0');
   add('shifts', 'cancelled_at', 'cancelled_at INTEGER');

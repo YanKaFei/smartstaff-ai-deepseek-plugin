@@ -66,6 +66,10 @@ function auditAuth(ctx: RequestContext, action: string, userId: string | null, r
   );
 }
 
+function deviceMeta(ctx: RequestContext) {
+  return { userAgent: String(ctx.req.headers['user-agent'] ?? '').slice(0, 300) || null, ip: ctx.clientIp || null };
+}
+
 function ensureStoreOrganization(ctx: RequestContext, storeId: string, name: string): string {
   const row = get<{ organization_id: string | null }>(ctx.db, 'SELECT organization_id FROM stores WHERE id = ?', [storeId]);
   if (row?.organization_id) return row.organization_id;
@@ -111,7 +115,7 @@ function loginManager(ctx: RequestContext, storeCode: string, name?: string) {
     run(ctx.db, 'UPDATE stores SET owner_user_id = COALESCE(owner_user_id, ?) WHERE id = ?', [userId, store.id]);
   }
   ensureMembership(ctx, user.id, organizationId, 'owner', store.id);
-  const tokens = createSession(ctx.db, { id: user.id, role: 'manager' }, store.id, ctx.config);
+  const tokens = createSession(ctx.db, { id: user.id, role: 'manager' }, store.id, ctx.config, deviceMeta(ctx));
   auditAuth(ctx, 'auth.demo_login', user.id, 'manager', { storeId: store.id });
   return {
     ...tokenResponse(tokens),
@@ -164,7 +168,7 @@ function loginStaff(ctx: RequestContext, storeCode: string, phone: string | unde
   ensureMembership(ctx, user.id, organizationId, 'staff', profile.store_id);
   const membership = get<{ status: string }>(ctx.db, 'SELECT status FROM memberships WHERE organization_id = ? AND user_id = ?', [organizationId, user.id]);
   if (!membership || membership.status !== 'active') throw new AppError(403, 'MEMBERSHIP_SUSPENDED', '该账号已被移出组织');
-  const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config);
+  const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config, deviceMeta(ctx));
   auditAuth(ctx, 'auth.demo_login', user.id, 'staff', { storeId: store.id });
   return {
     ...tokenResponse(tokens),
@@ -219,7 +223,7 @@ async function loginWx(ctx: RequestContext, input: z.infer<typeof wxLoginSchema>
         phone_verified: 0,
       };
     }
-    const tokens = createSession(ctx.db, { id: user.id, role: 'manager' }, store.id, ctx.config);
+    const tokens = createSession(ctx.db, { id: user.id, role: 'manager' }, store.id, ctx.config, deviceMeta(ctx));
     auditAuth(ctx, 'auth.wx_login', user.id, 'manager', { storeId: store.id });
     return {
       ...tokenResponse(tokens),
@@ -262,7 +266,7 @@ async function loginWx(ctx: RequestContext, input: z.infer<typeof wxLoginSchema>
   ensureMembership(ctx, user.id, organizationId, 'staff', profile.store_id);
   const membership = get<{ status: string }>(ctx.db, 'SELECT status FROM memberships WHERE organization_id = ? AND user_id = ?', [organizationId, user.id]);
   if (!membership || membership.status !== 'active') throw new AppError(403, 'MEMBERSHIP_SUSPENDED', '该账号已被移出组织');
-  const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config);
+  const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config, deviceMeta(ctx));
   auditAuth(ctx, 'auth.wx_login', user.id, 'staff', { storeId: store.id });
   return {
     ...tokenResponse(tokens),
@@ -310,7 +314,7 @@ export function registerAuthRoutes(): void {
   route('POST', '/api/auth/email-login', {}, (ctx) => {
     guard(ctx, 'email-login', 10, 15 * 60_000);
     const body = z.object({ email: z.string().trim().email().max(200), password: z.string().min(1).max(200) }).parse(ctx.body ?? {});
-    return emailLogin(ctx.db, ctx.config, body.email, body.password);
+    return emailLogin(ctx.db, ctx.config, body.email, body.password, Date.now(), deviceMeta(ctx));
   });
 
   route('POST', '/api/auth/resend-verification', {}, async (ctx) => {
@@ -389,13 +393,13 @@ export function registerAuthRoutes(): void {
 
   route('POST', '/api/account/switch-store', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
     const body = z.object({ storeId: z.string().trim().min(1).max(100) }).parse(ctx.body ?? {});
-    return switchAccountStore(ctx.db, ctx.config, ctx.auth!.userId, body.storeId);
+    return switchAccountStore(ctx.db, ctx.config, ctx.auth!.userId, body.storeId, deviceMeta(ctx));
   });
 
   route('GET', '/api/account/sessions', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
-    const rows = all<{ token_hash: string; role: string; store_id: string | null; created_at: number; last_auth_at: number | null; access_expires_at: number | null; expires_at: number; refresh_expires_at: number | null }>(
+    const rows = all<{ token_hash: string; role: string; store_id: string | null; created_at: number; last_auth_at: number | null; access_expires_at: number | null; expires_at: number; refresh_expires_at: number | null; user_agent: string | null; ip: string | null }>(
       ctx.db,
-      'SELECT token_hash, role, store_id, created_at, last_auth_at, access_expires_at, expires_at, refresh_expires_at FROM sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+      'SELECT token_hash, role, store_id, created_at, last_auth_at, access_expires_at, expires_at, refresh_expires_at, user_agent, ip FROM sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
       [ctx.auth!.userId],
     );
     return {
@@ -405,6 +409,8 @@ export function registerAuthRoutes(): void {
         lastAuthAt: r.last_auth_at ?? r.created_at,
         accessExpiresAt: r.access_expires_at ?? r.expires_at,
         refreshExpiresAt: r.refresh_expires_at,
+        userAgent: r.user_agent,
+        ip: r.ip,
         current: r.token_hash === ctx.auth!.sessionId,
       })),
     };
@@ -456,7 +462,7 @@ export function registerAuthRoutes(): void {
     run(ctx.db, 'UPDATE stores SET owner_user_id = ? WHERE id = ?', [userId, store.id]);
     ensureMembership(ctx, userId, organizationId, 'owner', store.id);
     const claim = issueManagerClaim(ctx.db, store.id);
-    const tokens = createSession(ctx.db, { id: userId, role: 'manager' }, store.id, ctx.config);
+    const tokens = createSession(ctx.db, { id: userId, role: 'manager' }, store.id, ctx.config, deviceMeta(ctx));
     auditAuth(ctx, 'auth.demo_register_store', userId, 'manager', { storeId: store.id });
     return {
       ...tokenResponse(tokens),
@@ -530,7 +536,7 @@ export function registerAuthRoutes(): void {
     );
     run(ctx.db, 'UPDATE stores SET owner_user_id = ? WHERE id = ?', [userId, store.id]);
     ensureMembership(ctx, userId, organizationId, 'owner', store.id);
-    const tokens = createSession(ctx.db, { id: userId, role: 'manager' }, store.id, ctx.config);
+    const tokens = createSession(ctx.db, { id: userId, role: 'manager' }, store.id, ctx.config, deviceMeta(ctx));
     auditAuth(ctx, 'auth.wx_register_store', userId, 'manager', { storeId: store.id });
     return {
       ...tokenResponse(tokens),
@@ -555,7 +561,7 @@ export function registerAuthRoutes(): void {
       auditAuth(ctx, 'auth.admin_login_failed', null, 'admin', { ip: ctx.clientIp });
       throw unauthorized('管理员密码错误');
     }
-    const tokens = createSession(ctx.db, { id: admin.id, role: 'admin' }, null, ctx.config);
+    const tokens = createSession(ctx.db, { id: admin.id, role: 'admin' }, null, ctx.config, deviceMeta(ctx));
     auditAuth(ctx, 'auth.admin_login', admin.id, 'admin', { ip: ctx.clientIp });
     return { ...tokenResponse(tokens), user: { id: admin.id, role: 'admin', name: admin.name } };
   });

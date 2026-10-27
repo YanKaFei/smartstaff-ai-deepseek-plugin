@@ -93,7 +93,7 @@ export function verifyEmail(db: Db, token: string, now = Date.now()) {
   return { verified: true };
 }
 
-export function emailLogin(db: Db, cfg: AppConfig, emailInput: string, password: string, now = Date.now()) {
+export function emailLogin(db: Db, cfg: AppConfig, emailInput: string, password: string, now = Date.now(), meta: { userAgent?: string | null; ip?: string | null } = {}) {
   const email = normalizeEmail(emailInput);
   const user = get<{ id: string; name: string; email: string | null; role: 'manager' | 'staff' | 'admin'; password_hash: string | null; email_verified: number; status: string }>(db, 'SELECT * FROM users WHERE email = ?', [email]);
   if (!user || !verifyPassword(password, user.password_hash)) throw unauthorized('邮箱或密码错误');
@@ -102,7 +102,7 @@ export function emailLogin(db: Db, cfg: AppConfig, emailInput: string, password:
   const memberships = all<{ organization_id: string; role: string; store_id: string | null; status: string }>(db, 'SELECT organization_id, role, store_id, status FROM memberships WHERE user_id = ? AND status = ?', [user.id, 'active']);
   if (!memberships.length) throw new AppError(403, 'NO_ACTIVE_MEMBERSHIP', '该账户没有可用的组织成员身份');
   const membership = memberships[0];
-  const tokens = createSession(db, { id: user.id, role: user.role }, membership.store_id, cfg);
+  const tokens = createSession(db, { id: user.id, role: user.role }, membership.store_id, cfg, { userAgent: meta.userAgent, ip: meta.ip });
   audit(db, { storeId: membership.store_id, actorId: user.id, actorRole: user.role, action: 'account.login', entity: 'user', entityId: user.id, detail: { organizationId: membership.organization_id }, at: now });
   return {
     ...tokens,

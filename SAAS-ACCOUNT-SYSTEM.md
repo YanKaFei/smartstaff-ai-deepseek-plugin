@@ -90,6 +90,10 @@ Evidence: `docs/r8-evidence/test-output-r8.txt`
 
 Screenshots: `docs/screenshots/19-saas-account.png`, `20-saas-account-dashboard.png`, `21-saas-org-console.png`
 
+## Session device metadata
+
+Schema v21 stores session `user_agent` / `ip`; the account session list displays device and IP. Session revocation is audited.
+
 ## Email delivery
 
 Schema v20 adds `email_outbox`. Registration, invitations and password reset now queue mail. With `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` and `EMAIL_FROM`, the server calls Resend over HTTPS. Without a provider, the response explicitly says `not_configured`; the project does not claim delivery. Dev still returns tokens for local testing.
@@ -97,7 +101,7 @@ Schema v20 adds `email_outbox`. Registration, invitations and password reset now
 ## Known blockers / next steps
 
 1. **Email provider credentials** — adapter exists; no real Resend key/from address is configured, so production delivery is still blocked. Status: `PROVIDER_NOT_CONFIGURED`. Dev tokens/resend remain available.
-2. **Tenant enforcement** — manager routes and marketplace are checked; admin routes are platform-only; full staff-route checks remain.
+2. **Tenant enforcement** — manager, staff and marketplace routes are checked; admin remains platform-only.
 3. **Owner onboarding** — first store binding and store-session switching are done; guided setup/manager assignment UI remains.
 4. **Remove member** — role/status supported; hard removal and ownership transfer need a policy.
 6. **Session/device management** — list and revoke individual sessions.

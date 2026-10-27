@@ -48,7 +48,7 @@
   async function loadSessions() {
     try {
       const data = await api('/account/sessions');
-      $('#session-list').innerHTML = data.items.map((s) => `<div class="membership"><b>${s.current ? '当前会话' : '其他会话'}</b><span class="tiny">${s.role} · ${new Date(s.lastAuthAt).toLocaleString()}</span>${s.current ? '' : ` <button class="ghost" data-revoke-session="${s.id}">撤销</button>`}</div>`).join('');
+      $('#session-list').innerHTML = data.items.map((s) => `<div class="membership"><b>${s.current ? '当前会话' : '其他会话'}</b><span class="tiny">${s.role} · ${new Date(s.lastAuthAt).toLocaleString()}<br />${(s.userAgent || '未知设备').slice(0, 90)} · ${s.ip || '未知 IP'}</span>${s.current ? '' : ` <button class="ghost" data-revoke-session="${s.id}">撤销</button>`}</div>`).join('');
       document.querySelectorAll('[data-revoke-session]').forEach((b) => b.addEventListener('click', async () => { try { await api('/account/sessions/' + b.dataset.revokeSession, { method: 'DELETE' }); await loadSessions(); } catch (e) { msg(e.message, 'error'); } }));
     } catch (err) { $('#session-list').textContent = err.message; }
   }

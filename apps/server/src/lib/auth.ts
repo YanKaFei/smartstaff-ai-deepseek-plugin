@@ -11,6 +11,8 @@ export interface AuthContext {
   storeId: string | null;
   name: string;
   sessionId: string;
+  userAgent: string | null;
+  ip: string | null;
   lastAuthAt: number;
   accessExpiresAt: number;
 }
@@ -55,13 +57,13 @@ export function createSession(
   user: { id: string; role: 'manager' | 'staff' | 'admin' },
   storeId: string | null,
   cfg: AppConfig = config,
-  options: { lastAuthAt?: number } = {},
+  options: { lastAuthAt?: number; userAgent?: string | null; ip?: string | null } = {},
 ): SessionTokens {
   const t = createTokens(cfg);
   const now = Date.now();
   db.prepare(
-    `INSERT INTO sessions(token_hash, user_id, role, store_id, expires_at, refresh_token_hash, access_expires_at, refresh_expires_at, last_auth_at, created_at)
-     VALUES(?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO sessions(token_hash, user_id, role, store_id, expires_at, refresh_token_hash, access_expires_at, refresh_expires_at, last_auth_at, user_agent, ip, last_seen_at, created_at)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   ).run(
     sha256(t.access),
     user.id,
@@ -72,6 +74,9 @@ export function createSession(
     t.accessExp,
     t.refreshExp,
     options.lastAuthAt ?? now,
+    options.userAgent ?? null,
+    options.ip ?? null,
+    now,
     now,
   );
   return {
@@ -97,12 +102,14 @@ export function resolveSession(
     expires_at: number;
     access_expires_at: number | null;
     last_auth_at: number | null;
+    user_agent: string | null;
+    ip: string | null;
     created_at: number;
     name: string;
   }>(
     db,
     `SELECT s.token_hash, s.user_id, s.role, COALESCE(s.store_id, u.store_id) AS store_id,
-            s.expires_at, s.access_expires_at, s.last_auth_at, s.created_at, u.name
+            s.expires_at, s.access_expires_at, s.last_auth_at, s.user_agent, s.ip, s.created_at, u.name
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = ?`,
     [sha256(rawToken)],
@@ -119,6 +126,8 @@ export function resolveSession(
     storeId: row.store_id,
     name: row.name,
     sessionId: row.token_hash,
+    userAgent: row.user_agent,
+    ip: row.ip,
     lastAuthAt: row.last_auth_at ?? row.created_at,
     accessExpiresAt: expiresAt,
   };

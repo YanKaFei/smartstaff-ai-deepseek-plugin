@@ -168,7 +168,7 @@ export function transferOwnership(db: Db, userId: string, memberId: string, orgI
   return { transferred: true, newOwnerMembershipId: target.id };
 }
 
-export function switchAccountStore(db: Db, cfg: AppConfig, userId: string, storeId: string) {
+export function switchAccountStore(db: Db, cfg: AppConfig, userId: string, storeId: string, meta: { userAgent?: string | null; ip?: string | null } = {}) {
   const store = get<{ organization_id: string | null; owner_user_id: string | null }>(db, 'SELECT organization_id, owner_user_id FROM stores WHERE id = ?', [storeId]);
   if (!store) throw new AppError(404, 'STORE_NOT_FOUND', '门店不存在');
   const member = store.organization_id
@@ -176,6 +176,6 @@ export function switchAccountStore(db: Db, cfg: AppConfig, userId: string, store
     : undefined;
   if (!member && store.owner_user_id !== userId) throw new AppError(403, 'TENANT_FORBIDDEN', '当前账户不属于该门店组织');
   const user = get<{ id: string; role: 'manager' | 'staff' | 'admin' }>(db, 'SELECT id, role FROM users WHERE id = ?', [userId])!;
-  const tokens = createSession(db, { id: user.id, role: user.role }, storeId, cfg);
+  const tokens = createSession(db, { id: user.id, role: user.role }, storeId, cfg, { userAgent: meta.userAgent, ip: meta.ip });
   return { ...tokens, token: tokens.accessToken, storeId };
 }
