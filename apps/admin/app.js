@@ -20,6 +20,13 @@
   };
   const SIM_STATUS = { high: '高', medium: '中', low: '低' };
   const BOTTLENECK = { staff: '人员瓶颈', table: '桌位瓶颈', none: '供需平衡' };
+  const AI_I18N = {
+    zh: { title: '连接 DeepSeek', sub: '首次安装需要配置业务 API。Key 只保存在服务端，不会进入浏览器存储。', step1: '配置', step2: '验证', step3: '开始使用', key: 'DeepSeek API Key', model: '默认模型', timeout: '超时（毫秒）', security: 'AES-256-GCM 服务端加密 · 只写不读 · 不进入日志/前端构建', later: '稍后设置', saveTest: '保存并测试连接', testing: '正在请求 DeepSeek…', saved: 'Key 已加密保存，正在验证连接…', ok: '连接成功，配置已生效。', fail: '连接失败：', noKey: '请输入 DeepSeek API Key。', show: '显示', hide: '隐藏', foot: '没有 Key？可直接关闭；经营预测仍由确定性引擎运行。真实连接测试不会使用 Mock。' },
+    en: { title: 'Connect DeepSeek', sub: 'Configure the business API on first install. The key stays server-side and never enters browser storage.', step1: 'Configure', step2: 'Verify', step3: 'Start', key: 'DeepSeek API Key', model: 'Default model', timeout: 'Timeout (ms)', security: 'AES-256-GCM at rest · write-only · never logged or bundled', later: 'Later', saveTest: 'Save & test connection', testing: 'Calling DeepSeek…', saved: 'Key encrypted. Verifying connection…', ok: 'Connected. Configuration is active.', fail: 'Connection failed: ', noKey: 'Enter a DeepSeek API Key.', show: 'Show', hide: 'Hide', foot: 'No key? Close this and deterministic forecasting still works. The real test never uses a mock.' },
+    ko: { title: 'DeepSeek 연결', sub: '첫 설치 시 비즈니스 API를 설정합니다. Key는 서버에만 저장되며 브라우저 저장소에 남지 않습니다.', step1: '설정', step2: '검증', step3: '시작', key: 'DeepSeek API Key', model: '기본 모델', timeout: '시간 초과(ms)', security: 'AES-256-GCM 서버 암호화 · 쓰기 전용 · 로그/번들에 없음', later: '나중에', saveTest: '저장 후 연결 테스트', testing: 'DeepSeek 호출 중…', saved: 'Key가 암호화되었습니다. 연결 검증 중…', ok: '연결 성공. 설정이 적용되었습니다.', fail: '연결 실패: ', noKey: 'DeepSeek API Key를 입력하세요.', show: '보기', hide: '숨기기', foot: 'Key가 없어도 닫으면 결정론적 예측은 계속 작동합니다. 실제 테스트는 Mock을 쓰지 않습니다.' },
+    ja: { title: 'DeepSeek に接続', sub: '初回インストール時に業務 API を設定します。Key はサーバーにのみ保存され、ブラウザー保存領域には入りません。', step1: '設定', step2: '検証', step3: '開始', key: 'DeepSeek API Key', model: '既定モデル', timeout: 'タイムアウト(ms)', security: 'AES-256-GCM サーバー暗号化 · 書き込み専用 · ログ/バンドルに含めない', later: '後で', saveTest: '保存して接続テスト', testing: 'DeepSeek を呼び出し中…', saved: 'Key を暗号化しました。接続を検証中…', ok: '接続成功。設定が有効になりました。', fail: '接続失敗: ', noKey: 'DeepSeek API Key を入力してください。', show: '表示', hide: '隠す', foot: 'Key がなくても閉じれば決定論的予測は動作します。実テストは Mock を使いません。' },
+  };
+  let aiLang = localStorage.getItem('ss_ai_lang') || 'zh';
 
   function esc(value) {
     return String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -106,6 +113,7 @@
     $('#shell').classList.remove('hidden');
     await loadStores();
     await refresh();
+    await maybeShowAiSetup();
     clearInterval(state.timer);
     state.timer = setInterval(() => {
       if (document.visibilityState === 'visible' && ['overview', 'simulator'].includes(state.tab)) refresh(true);
@@ -401,6 +409,77 @@
       data.runs.map((r) => `<div class="list-item"><div><b>${esc(r.model)} / ${esc(r.serviceMode)}</b><div class="meta">MAE ${r.metrics.mae ?? '—'} · 偏差 ${r.metrics.bias ?? '—'} · 过度 ${r.metrics.overstaffedPersonHours} 人时 · 不足 ${r.metrics.understaffedPersonHours} 人时 · 高峰缺人 ${r.metrics.peakMissCount}</div></div><span class="pill">${r.metrics.evaluatedCount} 评估</span></div>`).join('');
   }
 
+  function applyAiLang() {
+    const dict = AI_I18N[aiLang] || AI_I18N.zh;
+    $('#ai-onboarding-title').textContent = dict.title;
+    $('#ai-onboarding-sub').textContent = dict.sub;
+    $('#setup-step-1').textContent = dict.step1;
+    $('#setup-step-2').textContent = dict.step2;
+    $('#setup-step-3').textContent = dict.step3;
+    $('#setup-label-key').textContent = dict.key;
+    $('#setup-label-model').textContent = dict.model;
+    $('#setup-label-timeout').textContent = dict.timeout;
+    $('#setup-security').textContent = dict.security;
+    $('#setup-later').textContent = dict.later;
+    $('#setup-save').textContent = dict.saveTest;
+    $('#setup-show-key').textContent = $('#setup-key').type === 'password' ? dict.show : dict.hide;
+    $('#setup-foot').textContent = dict.foot;
+    $$('.lang-switch button').forEach((b) => b.classList.toggle('active', b.dataset.lang === aiLang));
+  }
+
+  async function maybeShowAiSetup() {
+    try {
+      const settings = await api('/admin/ai/settings');
+      if (settings.credentialConfigured) return;
+      const modal = $('#ai-onboarding');
+      if (!modal || !modal.classList.contains('hidden')) return;
+      $('#setup-key').value = '';
+      $('#setup-model').value = settings.model;
+      $('#setup-timeout').value = settings.timeoutMs;
+      $('#setup-key').placeholder = 'sk-...';
+      $('#setup-result').textContent = '';
+      $('#setup-result').className = 'setup-result';
+      modal.classList.remove('hidden');
+      applyAiLang();
+      $('#setup-key').focus();
+    } catch {
+      // The AI settings tab remains available if this check fails.
+    }
+  }
+
+  async function setupSave() {
+    const dict = AI_I18N[aiLang] || AI_I18N.zh;
+    const key = $('#setup-key').value.trim();
+    if (!key) {
+      $('#setup-result').textContent = dict.noKey;
+      $('#setup-result').className = 'setup-result error';
+      return;
+    }
+    const save = $('#setup-save');
+    save.disabled = true;
+    $('#setup-result').textContent = dict.saved;
+    $('#setup-result').className = 'setup-result';
+    try {
+      await api('/admin/ai/credential', { method: 'PUT', body: JSON.stringify({ apiKey: key }) });
+      await api('/admin/ai/settings', { method: 'PUT', body: JSON.stringify({ model: $('#setup-model').value, timeoutMs: Number($('#setup-timeout').value) }) });
+      $('#setup-result').textContent = dict.testing;
+      const result = await api('/admin/ai/test', { method: 'POST', body: JSON.stringify({}) });
+      if (result.status === 'CONNECTED') {
+        $('#setup-result').textContent = dict.ok;
+        $('#setup-result').className = 'setup-result ok';
+        setTimeout(() => $('#ai-onboarding').classList.add('hidden'), 900);
+      } else {
+        $('#setup-result').textContent = dict.fail + (result.message || result.errorCode || '');
+        $('#setup-result').className = 'setup-result error';
+      }
+    } catch (err) {
+      $('#setup-result').textContent = dict.fail + err.message;
+      $('#setup-result').className = 'setup-result error';
+    } finally {
+      save.disabled = false;
+    }
+  }
+
   async function loadAi() {
     const [settings, status, usage] = await Promise.all([
       api('/admin/ai/settings'),
@@ -530,6 +609,18 @@
       await loadData();
     } catch (err) { toast(err.message, true); }
   });
+  $$('.lang-switch button').forEach((b) => b.addEventListener('click', () => {
+    aiLang = b.dataset.lang;
+    localStorage.setItem('ss_ai_lang', aiLang);
+    applyAiLang();
+  }));
+  $('#setup-show-key').addEventListener('click', () => {
+    const input = $('#setup-key');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    applyAiLang();
+  });
+  $('#setup-save').addEventListener('click', () => setupSave().catch((e) => toast(e.message, true)));
+  $('#setup-later').addEventListener('click', () => $('#ai-onboarding').classList.add('hidden'));
   $('#refresh-data').addEventListener('click', () => loadData().catch((e) => toast(e.message, true)));
   $('#ai-save').addEventListener('click', () => saveAiSettings().catch((e) => toast(e.message, true)));
   $('#ai-save-key').addEventListener('click', () => saveAiKey().catch((e) => toast(e.message, true)));

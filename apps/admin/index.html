@@ -236,6 +236,49 @@
     </div>
     <div id="toast" class="toast hidden"></div>
   </div>
+
+    <div id="ai-onboarding" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="ai-onboarding-title">
+      <div class="setup-modal">
+        <div class="setup-top">
+          <div class="setup-kicker" id="setup-kicker">SMARTSTAFF AI · PLUGIN SETUP</div>
+          <div class="lang-switch" role="group" aria-label="Language">
+            <button type="button" data-lang="zh" class="active">中文</button>
+            <button type="button" data-lang="en">EN</button>
+            <button type="button" data-lang="ko">한국어</button>
+            <button type="button" data-lang="ja">日本語</button>
+          </div>
+        </div>
+        <div class="setup-hero">
+          <div class="setup-orb">DS</div>
+          <div>
+            <h2 id="ai-onboarding-title">连接 DeepSeek</h2>
+            <p id="ai-onboarding-sub">首次安装需要配置业务 API。Key 只保存在服务端，不会进入浏览器存储。</p>
+          </div>
+        </div>
+        <div class="stepper">
+          <span class="step active"><b>01</b><em id="setup-step-1">配置</em></span>
+          <span class="step"><b>02</b><em id="setup-step-2">验证</em></span>
+          <span class="step"><b>03</b><em id="setup-step-3">开始使用</em></span>
+        </div>
+        <div class="setup-form">
+          <label><span id="setup-label-key">DeepSeek API Key</span>
+            <div class="key-wrap"><input id="setup-key" type="password" placeholder="sk-..." autocomplete="new-password" /><button type="button" id="setup-show-key" class="ghost">显示</button></div>
+          </label>
+          <div class="setup-row">
+            <label><span id="setup-label-model">默认模型</span><select id="setup-model"><option value="deepseek-flash">deepseek-flash</option><option value="deepseek-v4-pro">deepseek-v4-pro</option></select></label>
+            <label><span id="setup-label-timeout">超时（毫秒）</span><input id="setup-timeout" type="number" min="5000" max="60000" value="20000" /></label>
+          </div>
+          <p class="tiny" id="setup-security">AES-256-GCM 服务端加密 · 只写不读 · 不进入日志/前端构建</p>
+        </div>
+        <div id="setup-result" class="setup-result"></div>
+        <div class="setup-actions">
+          <button type="button" id="setup-later" class="ghost" data-i18n="later">稍后设置</button>
+          <button type="button" id="setup-save" class="primary" data-i18n="saveTest">保存并测试连接</button>
+        </div>
+        <p class="tiny setup-foot" id="setup-foot">没有 Key？可直接关闭；经营预测仍由确定性引擎运行。真实连接测试不会使用 Mock。</p>
+      </div>
+    </div>
+
   <script src="./app.js"></script>
 </body>
 </html>

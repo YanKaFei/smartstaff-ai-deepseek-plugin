@@ -78,7 +78,7 @@ export const config = {
     apiKey: env.DEEPSEEK_API_KEY ?? '',
     baseUrl: env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
     model: env.DEEPSEEK_MODEL || 'deepseek-flash',
-    timeoutMs: Number(env.DEEPSEEK_TIMEOUT_MS ?? 12000),
+    timeoutMs: Number(env.DEEPSEEK_TIMEOUT_MS ?? 20000),
     dailyBudgetUsd: Number(env.DEEPSEEK_DAILY_BUDGET_USD ?? 5),
     monthlyBudgetUsd: Number(env.DEEPSEEK_MONTHLY_BUDGET_USD ?? 80),
     inputPricePerMTok: Number(env.DEEPSEEK_INPUT_PRICE_PER_MTOK ?? 0.27),

@@ -1,0 +1,21 @@
+{
+  "id": "smartstaff-ai-deepseek-plugin",
+  "name": "SmartStaff AI · DeepSeek Plugin",
+  "version": "0.1.0-test",
+  "status": "test-framework",
+  "description": "A plugin-style restaurant staffing workspace with a first-run DeepSeek API setup wizard.",
+  "entry": "/admin/",
+  "setup": "First admin login opens the API setup wizard when no credential is configured.",
+  "deepseek": {
+    "apiBase": "https://api.deepseek.com",
+    "models": ["deepseek-flash", "deepseek-v4-pro"],
+    "settingsPath": "/api/admin/ai/settings",
+    "testPath": "/api/admin/ai/test"
+  },
+  "keywords": [
+    "deepseek", "deepseek-api", "deepseek-plugin", "ai-plugin",
+    "restaurant-staffing", "workforce", "smartstaff", "multilingual"
+  ],
+  "languages": ["zh", "en", "ko", "ja"],
+  "license": "TBD"
+}

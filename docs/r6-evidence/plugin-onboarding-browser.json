@@ -1,0 +1,22 @@
+{
+  "steps": [
+    {
+      "step": "auto_modal",
+      "visible": true,
+      "text": "SMARTSTAFF AI · PLUGIN SETUP\n中文\nEN\n한국어\n日本語\nDS\n连接 DeepSeek\n\n首次安装需要配置业务 API。Key 只保存在服务端，不会进入浏览器存储。\n\n01\n配置\n02\n验证\n03\n开始使用\nDeepSeek API Key\n显示\n默认模型\ndeepseek-flash\ndeepseek-v4-pro\n超时（毫秒）\n\nAES-256-GCM 服务端加密 · 只写不读 · 不进入日志/前端构建\n\n稍后设置\n保存并测试连接\n\n没有 Key？可直接关闭；经营预测仍由确定性引擎运行。真实连接测试不会使用 Mock。"
+    },
+    {
+      "step": "english",
+      "text": "SMARTSTAFF AI · PLUGIN SETUP\n中文\nEN\n한국어\n日本語\nDS\nConnect DeepSeek\n\nConfigure the business API on first install. The key stays server-side and never enters browser storage.\n\n01\nConfigure\n02\nVerify\n03\nStart\nDeepSeek API Key\nShow\nDefault model\ndeepseek-flash\ndeepseek-v4-pro\nTimeout (ms)\n\nAES-256-GCM at re"
+    },
+    {
+      "step": "korean",
+      "text": "DeepSeek 연결"
+    },
+    {
+      "step": "japanese",
+      "text": "DeepSeek に接続"
+    }
+  ],
+  "errors": []
+}
