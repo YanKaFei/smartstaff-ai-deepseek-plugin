@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-109%2F109-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-114%2F114-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -45,6 +45,11 @@ SmartStaff AI は、飲食店の人材計画のための**テスト用フレー�
 詳細: [docs/PART-TIME-MARKETPLACE.md](docs/PART-TIME-MARKETPLACE.md).
 
 <p align="center"><img src="docs/screenshots/16-staff-marketplace.png" alt="店舗横断の空きシフト" width="320" /></p>
+
+
+## SaaS アカウント (ステップ1)
+
+メール登録、組織作成、owner メンバーシップ、メール認証、メールログイン、パスワードリセットを `/admin/account.html` に実装しました。メール配信は未設定です。[SAAS-ACCOUNT-SYSTEM.md](SAAS-ACCOUNT-SYSTEM.md) を参照。
 
 ## UI
 
@@ -135,7 +140,7 @@ npm start
 npm test
 ```
 
-現在 **109/109** 通過。既存 R5.2 の 95 件はすべて保持し、10 件の AI 設定テストと 4 件の店舗横断空きシフトテストが、資格情報ライフサイクル、RBAC、401、タイムアウト、不正 JSON、スキーマ失敗、AI 無効化、予算/使用量、失効、応募、承認、拒否、取り下げを検証します。
+現在 **114/114** 通過。既存 R5.2 の 95 件はすべて保持し、10 件の AI 設定テストと 4 件の店舗横断空きシフトテストが、資格情報ライフサイクル、RBAC、401、タイムアウト、不正 JSON、スキーマ失敗、AI 無効化、予算/使用量、失効、応募、承認、拒否、取り下げを検証します。
 
 実際の API 成功には実際の Key が必要です。Key がない場合は **REAL_API_BLOCKED** と表示し、Mock 接続を成功と主張しません。
 

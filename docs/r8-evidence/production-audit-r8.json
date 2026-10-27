@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-27T05:32:24.490Z",
+  "scannedRoots": [
+    "apps/server/dist",
+    "apps/admin",
+    "apps/miniapp/dist/build"
+  ],
+  "findings": [],
+  "envLeaks": [],
+  "productionGate": "PASS",
+  "demoGate": "PASS",
+  "status": "PASS",
+  "note": "This scans built artifacts for demo credentials/backdoors. It is not a substitute for a full SAST or secret scan."
+}

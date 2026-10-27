@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-109%2F109-9be34b" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-114%2F114-9be34b" />
   <img alt="status" src="https://img.shields.io/badge/status-test--framework-d9ff57" />
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20ZH%20%7C%20KO%20%7C%20JA-8cd6ff" />
   <img alt="DeepSeek" src="https://img.shields.io/badge/DeepSeek-api.deepseek.com-4d6bfe" />
@@ -45,6 +45,11 @@ SmartStaff AI는 식당 인력 운영을 위한 **테스트 프레임워크 플�
 자세히: [docs/PART-TIME-MARKETPLACE.md](docs/PART-TIME-MARKETPLACE.md).
 
 <p align="center"><img src="docs/screenshots/16-staff-marketplace.png" alt="매장 간 공석" width="320" /></p>
+
+
+## SaaS 계정 시스템 (1단계)
+
+이메일 가입, 조직 생성, owner 멤버십, 이메일 인증, 이메일 로그인, 비밀번호 재설정을 `/admin/account.html`에 구현했습니다. 이메일 발송은 아직 구성되지 않았습니다. [SAAS-ACCOUNT-SYSTEM.md](SAAS-ACCOUNT-SYSTEM.md) 참고.
 
 ## UI
 
@@ -135,7 +140,7 @@ npm start
 npm test
 ```
 
-현재 **109/109** 통과. 기존 R5.2의 95개 기준선은 모두 유지되며, 10개 AI 설정 테스트와 4개 매장 간 공석 테스트가 자격 증명 수명주기, RBAC, 401, 시간 초과, 잘못된 JSON, 스키마 실패, AI 비활성화, 예산/사용량, 철회, 지원, 승인, 거절, 철회를 검증합니다.
+현재 **114/114** 통과. 기존 R5.2의 95개 기준선은 모두 유지되며, 10개 AI 설정 테스트와 4개 매장 간 공석 테스트가 자격 증명 수명주기, RBAC, 401, 시간 초과, 잘못된 JSON, 스키마 실패, AI 비활성화, 예산/사용량, 철회, 지원, 승인, 거절, 철회를 검증합니다.
 
 실제 API 성공에는 실제 Key가 필요합니다. Key가 없으면 **REAL_API_BLOCKED**로 표시하며 Mock 연결을 성공이라고 주장하지 않습니다.
 

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartStaff AI · SaaS Account</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    body { min-height: 100vh; background: radial-gradient(circle at 20% 0%, rgba(217,255,87,.12), transparent 35%), #080a0c; }
+    .account-shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 72px; }
+    .account-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+    .account-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 20px; align-items: start; }
+    .account-hero h1 { font-size: 48px; line-height: 1.05; margin: 0 0 14px; letter-spacing: -.04em; }
+    .account-hero p { color: var(--muted); line-height: 1.7; max-width: 480px; }
+    .account-card { background: linear-gradient(160deg, #151a1f, #0b0e11); border: 1px solid var(--line); border-radius: 20px; padding: 24px; box-shadow: 0 28px 80px rgba(0,0,0,.35); }
+    .account-tabs { display: flex; gap: 6px; background: #0a0d10; border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+    .account-tabs button { flex: 1; border: 0; background: transparent; color: var(--muted); padding: 9px; border-radius: 9px; cursor: pointer; font: inherit; }
+    .account-tabs button.active { background: var(--accent); color: #0b0d10; font-weight: 800; }
+    .account-card label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .account-card input { background: #080b0e; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 11px 12px; font: inherit; }
+    .account-card .primary, .account-card .ghost { width: 100%; margin-top: 6px; }
+    .account-msg { min-height: 20px; font-size: 12px; line-height: 1.5; color: var(--muted); margin: 8px 0; }
+    .account-msg.error { color: var(--bad); } .account-msg.ok { color: var(--accent); }
+    .account-token { word-break: break-all; background: #080b0e; border: 1px dashed var(--line); padding: 10px; border-radius: 8px; font-size: 11px; margin: 8px 0; }
+    .membership { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 10px; background: #0a0d10; }
+    .membership b { display: block; margin-bottom: 4px; }
+    @media (max-width: 800px) { .account-grid { grid-template-columns: 1fr; } .account-hero h1 { font-size: 36px; } }
+  </style>
+</head>
+<body>
+  <div class="account-shell">
+    <div class="account-brand"><span class="brand-mark">SS</span><div class="brand small">SmartStaff AI<small>SaaS Account Console</small></div></div>
+    <div class="account-grid">
+      <section class="account-hero">
+        <h1>One account.<br />Every store.</h1>
+        <p>组织、门店、店长与兼职在同一个 SaaS 账户体系里。邮箱验证后登录，按成员角色进入对应工作台。</p>
+        <p class="tiny">当前为测试版账户系统；邮件投递未配置时，开发环境会返回验证 token。</p>
+        <p><a href="./index.html" style="color:var(--accent)">← 返回管理后台</a></p>
+      </section>
+      <section class="account-card">
+        <div class="account-tabs">
+          <button type="button" data-tab="login" class="active">登录</button>
+          <button type="button" data-tab="register">注册组织</button>
+          <button type="button" data-tab="forgot">找回密码</button>
+        </div>
+        <form id="login-form" class="account-form">
+          <label>邮箱<input id="login-email" type="email" autocomplete="email" required /></label>
+          <label>密码<input id="login-password" type="password" autocomplete="current-password" required /></label>
+          <button class="primary" type="submit">登录 SaaS 账户</button>
+        </form>
+        <form id="register-form" class="account-form hidden">
+          <label>姓名<input id="reg-name" required maxlength="30" /></label>
+          <label>组织名称<input id="reg-org" required maxlength="60" placeholder="例如：星河餐饮" /></label>
+          <label>邮箱<input id="reg-email" type="email" autocomplete="email" required /></label>
+          <label>密码（12 位以上，含大小写/数字/符号）<input id="reg-password" type="password" autocomplete="new-password" required /></label>
+          <button class="primary" type="submit">创建组织账户</button>
+        </form>
+        <form id="forgot-form" class="account-form hidden">
+          <label>邮箱<input id="forgot-email" type="email" autocomplete="email" required /></label>
+          <button class="primary" type="submit">获取重置 token</button>
+          <label>重置 token<input id="reset-token" /></label>
+          <label>新密码<input id="reset-password" type="password" autocomplete="new-password" /></label>
+          <button class="ghost" type="button" id="reset-btn">设置新密码</button>
+        </form>
+        <div id="account-msg" class="account-msg"></div>
+        <div id="account-verify" class="hidden">
+          <p class="tiny">开发环境验证 token：</p>
+          <div id="verify-token" class="account-token"></div>
+          <button class="ghost" type="button" id="verify-btn">验证邮箱</button>
+        </div>
+        <div id="account-dashboard" class="hidden"></div>
+      </section>
+    </div>
+  </div>
+  <script src="./account.js"></script>
+</body>
+</html>

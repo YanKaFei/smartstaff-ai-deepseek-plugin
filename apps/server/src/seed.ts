@@ -382,6 +382,8 @@ export function seedDemo(db: DatabaseSync, cfg: AppConfig = appConfig, force = f
   const todayKey = options.dateKey ?? localParts(Date.now()).dateKey;
   const simNow = epochFromLocal(todayKey, 18 * 60);
 
+  const organizationId = id('org');
+  run(db, 'INSERT INTO organizations(id, name, slug, plan, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?)', [organizationId, DEMO_CONFIG.basic.name, `demo-${organizationId.slice(-8)}`, 'starter', 'active', Date.now(), Date.now()]);
   const store = createStore(db, {
     name: DEMO_CONFIG.basic.name,
     managerCode: 'K001',
@@ -389,6 +391,7 @@ export function seedDemo(db: DatabaseSync, cfg: AppConfig = appConfig, force = f
     config: DEMO_CONFIG,
   });
   updateStoreConfig(db, store.id, DEMO_CONFIG, 4);
+  run(db, 'UPDATE stores SET organization_id = ? WHERE id = ?', [organizationId, store.id]);
   finishOnboarding(db, store.id);
   const managerId = id('usr');
   run(db, 'INSERT INTO users(id, role, name, phone, password_hash, store_id, openid, phone_verified, created_at) VALUES(?,?,?,?,?,?,?,?,?)', [
@@ -403,6 +406,7 @@ export function seedDemo(db: DatabaseSync, cfg: AppConfig = appConfig, force = f
     Date.now(),
   ]);
   run(db, 'UPDATE stores SET owner_user_id = ? WHERE id = ?', [managerId, store.id]);
+  run(db, 'INSERT INTO memberships(id, organization_id, user_id, role, store_id, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?)', [id('mem'), organizationId, managerId, 'owner', store.id, 'active', Date.now(), Date.now()]);
 
   const todayWeekday = localParts(simNow).weekday;
   for (const s of STAFF_SEEDS) {
@@ -418,6 +422,7 @@ export function seedDemo(db: DatabaseSync, cfg: AppConfig = appConfig, force = f
       1,
       Date.now(),
     ]);
+    run(db, 'INSERT INTO memberships(id, organization_id, user_id, role, store_id, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?)', [id('mem'), organizationId, userId, 'staff', store.id, 'active', Date.now(), Date.now()]);
     const profile = createStaff(db, {
       userId,
       storeId: store.id,

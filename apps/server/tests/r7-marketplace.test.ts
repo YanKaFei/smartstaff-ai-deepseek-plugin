@@ -9,8 +9,10 @@ import { id } from '../src/lib/ids.js';
 import { run, get } from '../src/lib/db.js';
 
 function secondStore(app: TestApp, now: number) {
+  const org = get<{ organization_id: string }>(app.db, 'SELECT organization_id FROM stores WHERE id = ?', [app.storeId])!;
   const store = createStore(app.db, { name: '跨店烤肉 · 南山店', managerCode: 'K002', address: '南山测试路 2 号' });
   finishOnboarding(app.db, store.id);
+  run(app.db, 'UPDATE stores SET organization_id = ? WHERE id = ?', [org.organization_id, store.id]);
   setClock(app.db, store.id, { at: now });
   const userId = id('usr');
   run(app.db, "INSERT INTO users(id, role, name, phone, password_hash, store_id, openid, phone_verified, created_at) VALUES(?,?,?,?,?,?,?,?,?)", [userId, 'manager', '跨店店长', null, null, store.id, null, 1, Date.now()]);

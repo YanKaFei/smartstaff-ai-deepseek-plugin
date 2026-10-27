@@ -460,3 +460,19 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 - `POST /api/manager/applications/:id/reject` `{ note? }`：拒绝，不创建班次。
 
 约束：影子模式或已暂停门店不能创建真实班次（`SHADOW_MODE_NO_REAL_SHIFT` / `PILOT_DISPATCH_PAUSED`）；兼职需 approved；目标门店 `requireQualified`；可用时间、最短通知、跨店时间冲突在申请和审批时各校验一次；满员后关闭 demand 并拒绝其他 pending 申请；所有操作进入审计与通知。
+
+
+---
+
+## SaaS 账户（Step 1）
+
+- `POST /api/auth/register-account` `{email,password,name,organizationName}`：创建用户、组织、owner membership；开发环境返回验证 token。
+- `POST /api/auth/verify-email` `{token}`
+- `POST /api/auth/email-login` `{email,password}`：要求邮箱已验证、账户 active、存在 active membership。
+- `POST /api/auth/forgot-password` `{email}`：不泄露邮箱是否存在；开发环境返回 reset token。
+- `POST /api/auth/reset-password` `{token,password}`：重置后撤销全部旧 session。
+- `GET /api/account/me`：用户与组织成员身份。
+- UI：`/admin/account.html`
+
+Schema v18：`organizations`、`memberships`、`account_tokens`、`users.email/email_verified/status`、`stores.organization_id`。
+邮件服务未配置；生产环境需接入 SMTP/邮件供应商后才能完成验证/重置流程。

@@ -21,6 +21,7 @@ import { rateLimit } from '../lib/rateLimit.js';
 import { code2Session } from '../lib/wechat.js';
 import { issueManagerClaim, consumeManagerClaim } from '../lib/managerClaim.js';
 import { isStrongPassword } from '../config.js';
+import { accountMe, emailLogin, forgotPassword, registerAccount, resetPassword, verifyEmail } from '../domain/accounts.js';
 import { all, get, run } from '../lib/db.js';
 import { id, sha256 } from '../lib/ids.js';
 import { createStore, getStore, serializeStore } from '../domain/stores.js';
@@ -63,6 +64,20 @@ function auditAuth(ctx: RequestContext, action: string, userId: string | null, r
   );
 }
 
+function ensureStoreOrganization(ctx: RequestContext, storeId: string, name: string): string {
+  const row = get<{ organization_id: string | null }>(ctx.db, 'SELECT organization_id FROM stores WHERE id = ?', [storeId]);
+  if (row?.organization_id) return row.organization_id;
+  const orgId = id('org');
+  run(ctx.db, 'INSERT INTO organizations(id, name, slug, plan, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?)', [orgId, name, `store-${orgId.slice(-8)}`, 'starter', 'active', Date.now(), Date.now()]);
+  run(ctx.db, 'UPDATE stores SET organization_id = ? WHERE id = ?', [orgId, storeId]);
+  return orgId;
+}
+
+function ensureMembership(ctx: RequestContext, userId: string, organizationId: string, role: 'owner' | 'staff', storeId: string) {
+  const existing = get(ctx.db, 'SELECT id FROM memberships WHERE organization_id = ? AND user_id = ?', [organizationId, userId]);
+  if (!existing) run(ctx.db, 'INSERT INTO memberships(id, organization_id, user_id, role, store_id, status, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?)', [id('mem'), organizationId, userId, role, storeId, 'active', Date.now(), Date.now()]);
+}
+
 function tokenResponse(tokens: SessionTokens) {
   return {
     token: tokens.accessToken,
@@ -77,6 +92,7 @@ function loginManager(ctx: RequestContext, storeCode: string, name?: string) {
   assertDemoLoginAllowed(ctx.req, ctx.config);
   const store = findStoreByCode(ctx.db, storeCode);
   if (!store) throw new AppError(404, 'STORE_NOT_FOUND', '门店编码不存在');
+  const organizationId = ensureStoreOrganization(ctx, store.id, store.name);
   let user = get<{ id: string; name: string }>(
     ctx.db,
     "SELECT id, name FROM users WHERE role = 'manager' AND store_id = ? ORDER BY created_at LIMIT 1",
@@ -92,6 +108,7 @@ function loginManager(ctx: RequestContext, storeCode: string, name?: string) {
     user = { id: userId, name: name?.trim() || '门店店长' };
     run(ctx.db, 'UPDATE stores SET owner_user_id = COALESCE(owner_user_id, ?) WHERE id = ?', [userId, store.id]);
   }
+  ensureMembership(ctx, user.id, organizationId, 'owner', store.id);
   const tokens = createSession(ctx.db, { id: user.id, role: 'manager' }, store.id, ctx.config);
   auditAuth(ctx, 'auth.demo_login', user.id, 'manager', { storeId: store.id });
   return {
@@ -107,6 +124,7 @@ function loginStaff(ctx: RequestContext, storeCode: string, phone: string | unde
   if (!phone) throw new AppError(400, 'PHONE_REQUIRED', '请输入手机号');
   const store = findStoreByCode(ctx.db, storeCode);
   if (!store) throw new AppError(404, 'STORE_NOT_FOUND', '门店编码不存在');
+  const organizationId = ensureStoreOrganization(ctx, store.id, store.name);
   let user = get<{ id: string; name: string; role: string; store_id: string | null }>(
     ctx.db,
     'SELECT id, name, role, store_id FROM users WHERE phone = ?',
@@ -141,6 +159,7 @@ function loginStaff(ctx: RequestContext, storeCode: string, phone: string | unde
       status: 'pending',
     });
   }
+  ensureMembership(ctx, user.id, organizationId, 'staff', profile.store_id);
   const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config);
   auditAuth(ctx, 'auth.demo_login', user.id, 'staff', { storeId: store.id });
   return {
@@ -156,6 +175,7 @@ async function loginWx(ctx: RequestContext, input: z.infer<typeof wxLoginSchema>
   const session = await code2Session(input.code, ctx.config);
   const store = findStoreByCode(ctx.db, input.storeCode);
   if (!store) throw new AppError(404, 'STORE_NOT_FOUND', '门店编码不存在');
+  const organizationId = ensureStoreOrganization(ctx, store.id, store.name);
   let user = get<{
     id: string;
     role: string;
@@ -235,6 +255,7 @@ async function loginWx(ctx: RequestContext, input: z.infer<typeof wxLoginSchema>
   if (!user.openid) run(ctx.db, 'UPDATE users SET openid = ? WHERE id = ?', [session.openid, user.id]);
   const profile = get<StaffProfileRow>(ctx.db, 'SELECT * FROM staff_profiles WHERE user_id = ?', [user.id]);
   if (!profile) throw new AppError(403, 'STAFF_PROFILE_MISSING', '兼职资料缺失，请联系门店');
+  ensureMembership(ctx, user.id, organizationId, 'staff', profile.store_id);
   const tokens = createSession(ctx.db, { id: user.id, role: 'staff' }, profile.store_id, ctx.config);
   auditAuth(ctx, 'auth.wx_login', user.id, 'staff', { storeId: store.id });
   return {
@@ -257,6 +278,45 @@ export function registerAuthRoutes(): void {
     };
   });
 
+
+  route('POST', '/api/auth/register-account', {}, (ctx) => {
+    guard(ctx, 'register-account', 5, 60 * 60_000);
+    const body = z.object({
+      email: z.string().trim().email().max(200),
+      password: z.string().min(1).max(200),
+      name: z.string().trim().min(1).max(30),
+      organizationName: z.string().trim().min(1).max(60),
+    }).parse(ctx.body ?? {});
+    return registerAccount(ctx.db, ctx.config, body);
+  });
+
+  route('POST', '/api/auth/verify-email', {}, (ctx) => {
+    const body = z.object({ token: z.string().trim().min(8).max(300) }).parse(ctx.body ?? {});
+    return verifyEmail(ctx.db, body.token);
+  });
+
+  route('POST', '/api/auth/email-login', {}, (ctx) => {
+    guard(ctx, 'email-login', 10, 15 * 60_000);
+    const body = z.object({ email: z.string().trim().email().max(200), password: z.string().min(1).max(200) }).parse(ctx.body ?? {});
+    return emailLogin(ctx.db, ctx.config, body.email, body.password);
+  });
+
+  route('POST', '/api/auth/forgot-password', {}, (ctx) => {
+    guard(ctx, 'forgot-password', 5, 60 * 60_000);
+    const body = z.object({ email: z.string().trim().email().max(200) }).parse(ctx.body ?? {});
+    return forgotPassword(ctx.db, ctx.config, body.email);
+  });
+
+  route('POST', '/api/auth/reset-password', {}, (ctx) => {
+    guard(ctx, 'reset-password', 5, 60 * 60_000);
+    const body = z.object({ token: z.string().trim().min(8).max(300), password: z.string().min(12).max(200) }).parse(ctx.body ?? {});
+    return resetPassword(ctx.db, body.token, body.password);
+  });
+
+  route('GET', '/api/account/me', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    return accountMe(ctx.db, ctx.auth!.userId);
+  });
+
   route('POST', '/api/auth/mini-login', {}, (ctx) => {
     guard(ctx, 'mini-login', 20, 5 * 60_000);
     const body = miniLoginSchema.parse(ctx.body ?? {});
@@ -275,6 +335,7 @@ export function registerAuthRoutes(): void {
       })
       .parse(ctx.body ?? {});
     const store = createStore(ctx.db, { name: body.storeName, managerCode: body.managerCode.toUpperCase() });
+    const organizationId = ensureStoreOrganization(ctx, store.id, store.name);
     const userId = id('usr');
     run(
       ctx.db,
@@ -282,6 +343,7 @@ export function registerAuthRoutes(): void {
       [userId, 'manager', body.managerName || '门店店长', null, null, store.id, null, 0, Date.now()],
     );
     run(ctx.db, 'UPDATE stores SET owner_user_id = ? WHERE id = ?', [userId, store.id]);
+    ensureMembership(ctx, userId, organizationId, 'owner', store.id);
     const claim = issueManagerClaim(ctx.db, store.id);
     const tokens = createSession(ctx.db, { id: userId, role: 'manager' }, store.id, ctx.config);
     auditAuth(ctx, 'auth.demo_register_store', userId, 'manager', { storeId: store.id });
@@ -314,6 +376,8 @@ export function registerAuthRoutes(): void {
       'INSERT INTO users(id, role, name, phone, password_hash, store_id, openid, phone_verified, created_at) VALUES(?,?,?,?,?,?,?,?,?)',
       [userId, 'staff', body.name, body.phone, null, store.id, null, 0, Date.now()],
     );
+    const organizationId = ensureStoreOrganization(ctx, store.id, store.name);
+    ensureMembership(ctx, userId, organizationId, 'staff', store.id);
     const profile = createStaff(ctx.db, {
       userId,
       storeId: store.id,
@@ -346,6 +410,7 @@ export function registerAuthRoutes(): void {
     const existing = get<{ id: string }>(ctx.db, 'SELECT id FROM users WHERE openid = ?', [wx.openid]);
     if (existing) throw new AppError(409, 'OPENID_ALREADY_BOUND', '该微信已注册门店或账号');
     const store = createStore(ctx.db, { name: body.storeName, managerCode: body.managerCode.toUpperCase() });
+    const organizationId = ensureStoreOrganization(ctx, store.id, store.name);
     const userId = id('usr');
     run(
       ctx.db,
@@ -353,6 +418,7 @@ export function registerAuthRoutes(): void {
       [userId, 'manager', body.managerName || '门店店长', null, null, store.id, wx.openid, 0, Date.now()],
     );
     run(ctx.db, 'UPDATE stores SET owner_user_id = ? WHERE id = ?', [userId, store.id]);
+    ensureMembership(ctx, userId, organizationId, 'owner', store.id);
     const tokens = createSession(ctx.db, { id: userId, role: 'manager' }, store.id, ctx.config);
     auditAuth(ctx, 'auth.wx_register_store', userId, 'manager', { storeId: store.id });
     return {

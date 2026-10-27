@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 17;
+export const SCHEMA_VERSION = 18;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -21,9 +21,47 @@ CREATE TABLE IF NOT EXISTS users (
   store_id TEXT,
   openid TEXT,
   phone_verified INTEGER NOT NULL DEFAULT 0,
+  email TEXT,
+  email_verified INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active',
   created_at INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_users_phone ON users(phone) WHERE phone IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS organizations (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  plan TEXT NOT NULL DEFAULT 'starter',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','suspended')),
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS memberships (
+  id TEXT PRIMARY KEY,
+  organization_id TEXT NOT NULL REFERENCES organizations(id),
+  user_id TEXT NOT NULL REFERENCES users(id),
+  role TEXT NOT NULL CHECK (role IN ('owner','admin','manager','staff')),
+  store_id TEXT,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','invited','suspended')),
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  UNIQUE(organization_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS ix_memberships_user ON memberships(user_id, status);
+CREATE INDEX IF NOT EXISTS ix_memberships_org ON memberships(organization_id, status);
+
+CREATE TABLE IF NOT EXISTS account_tokens (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  type TEXT NOT NULL CHECK (type IN ('email_verify','password_reset')),
+  token_hash TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  used_at INTEGER,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_account_tokens_hash ON account_tokens(token_hash, type);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_users_openid ON users(openid) WHERE openid IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -58,6 +96,7 @@ CREATE TABLE IF NOT EXISTS stores (
   owner_user_id TEXT,
   manager_claim_hash TEXT,
   manager_claim_expires_at INTEGER,
+  organization_id TEXT REFERENCES organizations(id),
   webhook_secret TEXT,
   webhook_secret_enc TEXT,
   webhook_secret_rotated_at INTEGER,

@@ -10,10 +10,12 @@ const cfg = makeConfig({ nodeEnv: 'test' });
 const h = openDatabase('./data/smartstaff.db');
 try {
   const home = get<{ id: string; name: string }>(h.db, "SELECT id, name FROM stores WHERE manager_code = 'K001'")!;
+  const homeOrg = get<{ organization_id: string }>(h.db, 'SELECT organization_id FROM stores WHERE id = ?', [home.id])!;
   let second = get<{ id: string }>(h.db, "SELECT id FROM stores WHERE manager_code = 'K002'");
   if (!second) {
     const store = createStore(h.db, { name: '焰遇烤肉 · 南山店', managerCode: 'K002', address: '南山区测试路 2 号' });
     finishOnboarding(h.db, store.id);
+    run(h.db, 'UPDATE stores SET organization_id = ? WHERE id = ?', [homeOrg.organization_id, store.id]);
     const managerId = id('usr');
     run(h.db, "INSERT INTO users(id, role, name, phone, password_hash, store_id, openid, phone_verified, created_at) VALUES(?,?,?,?,?,?,?,?,?)", [managerId, 'manager', '南山店长', null, null, store.id, null, 1, Date.now()]);
     second = { id: store.id };

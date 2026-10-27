@@ -55,6 +55,10 @@ function migrate(db: Db): void {
   add('import_observations', 'manager_required_reason', 'manager_required_reason TEXT');
   add('pilot_events', 'manager_required_reason', 'manager_required_reason TEXT');
   add('ai_settings', 'credential_revoked', 'credential_revoked INTEGER NOT NULL DEFAULT 0');
+  add('users', 'email', 'email TEXT');
+  add('users', 'email_verified', 'email_verified INTEGER NOT NULL DEFAULT 0');
+  add('users', 'status', "status TEXT NOT NULL DEFAULT 'active'");
+  add('stores', 'organization_id', 'organization_id TEXT');
   add('shifts', 'demand_id', 'demand_id TEXT');
   add('shifts', 'is_backfill', 'is_backfill INTEGER NOT NULL DEFAULT 0');
   add('shifts', 'cancelled_at', 'cancelled_at INTEGER');
@@ -62,6 +66,7 @@ function migrate(db: Db): void {
   add('shifts', 'cancel_reason', 'cancel_reason TEXT');
   add('shifts', 'cancel_kind', 'cancel_kind TEXT');
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_users_openid ON users(openid) WHERE openid IS NOT NULL');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email ON users(email) WHERE email IS NOT NULL');
   db.exec(
     'CREATE UNIQUE INDEX IF NOT EXISTS ux_sessions_refresh ON sessions(refresh_token_hash) WHERE refresh_token_hash IS NOT NULL',
   );

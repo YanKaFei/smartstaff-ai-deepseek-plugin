@@ -57,10 +57,15 @@ function applicationView(db: Db, app: ShiftApplicationRow) {
 
 export function listOpenOpportunities(db: Db, staffId: string, now: number) {
   const staff = getStaff(db, staffId);
+  const membership = get<{ organization_id: string }>(db, "SELECT organization_id FROM memberships WHERE user_id = ? AND status = 'active' LIMIT 1", [staff.user_id]);
   const rows = all<DemandRow>(
     db,
-    `SELECT * FROM staffing_demands WHERE status = 'open' AND end_at > ? ORDER BY start_at, store_id LIMIT 100`,
-    [now],
+    membership
+      ? `SELECT d.* FROM staffing_demands d JOIN stores s ON s.id = d.store_id
+         WHERE d.status = 'open' AND d.end_at > ? AND s.organization_id = ?
+         ORDER BY d.start_at, d.store_id LIMIT 100`
+      : `SELECT * FROM staffing_demands WHERE status = 'open' AND end_at > ? ORDER BY start_at, store_id LIMIT 100`,
+    membership ? [now, membership.organization_id] : [now],
   );
   return rows
     .map((demand) => {
