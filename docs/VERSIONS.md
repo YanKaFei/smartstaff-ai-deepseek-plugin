@@ -8,7 +8,7 @@
 | uni-app | 3.0.0-5030320261023001 |
 | Vue | 3.4.21 |
 | SQLite | Node built-in `node:sqlite` |
-| Schema | 18 (SaaS organizations, memberships, account tokens) |
+| Schema | 19 (SaaS org invitations) |
 | R3 baseline commit | `1e94563d1ff4e9032d53311a19f9af534f73025a` |
 | R3 baseline tag | `r3-baseline` |
 | R4 commit/tag | `see git log` / `r4-engineering-ready` (local; no remote push) |
@@ -18,6 +18,7 @@
 | R6 tag | `r6-ai-settings-ready` (local; no remote push) |
 | R7 tag | `r7-parttime-marketplace` (local; no remote push) |
 | R8 tag | `r8-saas-account-foundation` (local; no remote push) |
+| R9 tag | `r9-saas-org-invites` (local; no remote push) |
 | R3 tests | 82/82 (`docs/r3-evidence/test-output-r3.txt`) |
 | R4 tests | 85/85 (`docs/r4-evidence/test-output-r4.txt`) |
 | R5 tests | 87/87 (`docs/r5-evidence/test-output-r5.txt`) |
@@ -25,7 +26,7 @@
 | R5.2 tests | 95/95 (`docs/r5.2-evidence/test-output-r5.2.txt`) |
 | R6 tests | 105/105 (`docs/r6-evidence/test-output-r6.txt`) |
 | R7 tests | 109/109 (`docs/r7-evidence/test-output-r7.txt`) |
-| R8 tests | 114/114 (`docs/r8-evidence/test-output-r8.txt`) |
+| R8 tests | 117/117 (`docs/r8-evidence/test-output-r8.txt`) |
 | Dependency locks | `apps/server/package-lock.json`, `apps/miniapp/package-lock.json` |
 
 Reproduce:

@@ -34,7 +34,7 @@
         <h2 style="margin:0 0 6px">${data.user.name}</h2>
         <p class="tiny">${data.user.email || ''} · ${data.user.emailVerified ? '邮箱已验证' : '邮箱未验证'}</p>
         ${data.memberships.map((m) => `<div class="membership"><b>${m.organizationName}</b><span class="ss-pill ok">${m.role}</span><p class="tiny">组织 ${m.organizationId}${m.storeId ? ' · 门店 ' + m.storeId : ' · 尚未绑定门店'}</p></div>`).join('')}
-        <p class="tiny">下一步：组织管理员邀请成员、创建门店并分配角色。</p>
+        <p class="tiny">下一步：组织管理员邀请成员、创建门店并分配角色。</p>\n        <a class="primary" style="display:block;text-align:center;text-decoration:none;padding:10px;border-radius:9px;margin:10px 0" href="./org.html">进入组织管理</a>
         <button class="ghost" type="button" id="account-logout">退出登录</button>`;
       $('#account-logout').addEventListener('click', () => { token = ''; localStorage.removeItem(tokenKey); location.reload(); });
       msg('');

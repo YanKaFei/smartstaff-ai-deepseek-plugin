@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartStaff AI · Organization</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    body { min-height:100vh; background:radial-gradient(circle at 80% 0%, rgba(140,214,255,.10), transparent 35%), #080a0c; }
+    .org-shell { width:min(1180px, calc(100% - 32px)); margin:0 auto; padding:40px 0 72px; }
+    .org-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0; }
+    .org-stat { background:#0e1216; border:1px solid var(--line); border-radius:14px; padding:16px; }
+    .org-stat b { display:block; font-size:28px; }
+    .org-grid { display:grid; grid-template-columns:1.4fr .6fr; gap:18px; align-items:start; }
+    .org-card { background:linear-gradient(160deg,#151a1f,#0b0e11); border:1px solid var(--line); border-radius:18px; padding:20px; margin-bottom:18px; }
+    .org-card h2 { margin:0 0 12px; }
+    .org-card label { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted); margin-bottom:10px; }
+    .org-card input, .org-card select { background:#080b0e; border:1px solid var(--line); color:var(--text); border-radius:9px; padding:10px 11px; font:inherit; }
+    .org-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .org-table th, .org-table td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); }
+    .org-table th { color:var(--muted); font-size:11px; font-weight:600; }
+    .org-table select { padding:6px; }
+    .org-actions { display:flex; gap:6px; }
+    .org-actions button { padding:5px 8px; font-size:11px; }
+    .org-invite { border:1px dashed var(--line); border-radius:10px; padding:10px; margin-top:8px; font-size:12px; }
+    @media(max-width:900px){.org-grid{grid-template-columns:1fr}.org-stats{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div class="org-shell">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="brand small"><span class="brand-mark">SS</span><div>SmartStaff AI<small>Organization Console</small></div></div>
+      <div><a href="./account.html" style="color:var(--accent)">账户</a> · <a href="./index.html" style="color:var(--muted)">管理后台</a></div>
+    </div>
+    <div id="org-msg" class="tiny" style="min-height:20px;margin-top:12px"></div>
+    <section id="org-dashboard" class="hidden">
+      <h1 id="org-name" style="font-size:40px;margin:8px 0 4px"></h1>
+      <p class="tiny" id="org-meta"></p>
+      <div class="org-stats">
+        <div class="org-stat"><span class="tiny">成员</span><b id="stat-members">0</b></div>
+        <div class="org-stat"><span class="tiny">门店</span><b id="stat-stores">0</b></div>
+        <div class="org-stat"><span class="tiny">待处理邀请</span><b id="stat-invites">0</b></div>
+      </div>
+      <div class="org-grid">
+        <div>
+          <div class="org-card"><h2>成员</h2><table class="org-table"><thead><tr><th>成员</th><th>角色</th><th>门店</th><th>状态</th><th></th></tr></thead><tbody id="member-rows"></tbody></table></div>
+          <div class="org-card"><h2>门店</h2><table class="org-table"><thead><tr><th>门店</th><th>编码</th><th>ID</th></tr></thead><tbody id="store-rows"></tbody></table></div>
+        </div>
+        <div>
+          <div class="org-card"><h2>邀请成员</h2>
+            <form id="invite-form">
+              <label>邮箱<input id="invite-email" type="email" required /></label>
+              <label>角色<select id="invite-role"><option value="staff">staff</option><option value="manager">manager</option><option value="admin">admin</option></select></label>
+              <label>绑定门店（可选）<select id="invite-store"><option value="">不绑定</option></select></label>
+              <button class="primary" type="submit">生成邀请</button>
+            </form>
+            <div id="invite-result" class="org-invite hidden"></div>
+            <div id="invite-list"></div>
+          </div>
+          <div class="org-card"><h2>创建门店</h2>
+            <form id="store-form">
+              <label>门店名称<input id="store-name" required maxlength="60" /></label>
+              <label>门店编码<input id="store-code" required maxlength="10" placeholder="K100" /></label>
+              <label>地址<input id="store-address" maxlength="120" /></label>
+              <button class="primary" type="submit">创建门店</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script src="./org.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
  * explicit indexes) so a PostgreSQL migration only needs type + autoincrement
  * adjustments in one place.
  */
-export const SCHEMA_VERSION = 18;
+export const SCHEMA_VERSION = 19;
 
 export const DDL = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -51,6 +51,23 @@ CREATE TABLE IF NOT EXISTS memberships (
 );
 CREATE INDEX IF NOT EXISTS ix_memberships_user ON memberships(user_id, status);
 CREATE INDEX IF NOT EXISTS ix_memberships_org ON memberships(organization_id, status);
+
+CREATE TABLE IF NOT EXISTS org_invitations (
+  id TEXT PRIMARY KEY,
+  organization_id TEXT NOT NULL REFERENCES organizations(id),
+  email TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('admin','manager','staff')),
+  store_id TEXT,
+  token_hash TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','revoked','expired')),
+  invited_by TEXT NOT NULL,
+  accepted_by TEXT,
+  expires_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  accepted_at INTEGER
+);
+CREATE INDEX IF NOT EXISTS ix_invitations_org ON org_invitations(organization_id, status, created_at);
+CREATE INDEX IF NOT EXISTS ix_invitations_token ON org_invitations(token_hash);
 
 CREATE TABLE IF NOT EXISTS account_tokens (
   id TEXT PRIMARY KEY,

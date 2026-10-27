@@ -22,6 +22,7 @@ import { code2Session } from '../lib/wechat.js';
 import { issueManagerClaim, consumeManagerClaim } from '../lib/managerClaim.js';
 import { isStrongPassword } from '../config.js';
 import { accountMe, emailLogin, forgotPassword, registerAccount, resetPassword, verifyEmail } from '../domain/accounts.js';
+import { acceptInvitation, createOrgStore, inviteMember, orgOverview, revokeInvitation, updateMember } from '../domain/org.js';
 import { all, get, run } from '../lib/db.js';
 import { id, sha256 } from '../lib/ids.js';
 import { createStore, getStore, serializeStore } from '../domain/stores.js';
@@ -311,6 +312,35 @@ export function registerAuthRoutes(): void {
     guard(ctx, 'reset-password', 5, 60 * 60_000);
     const body = z.object({ token: z.string().trim().min(8).max(300), password: z.string().min(12).max(200) }).parse(ctx.body ?? {});
     return resetPassword(ctx.db, body.token, body.password);
+  });
+
+
+  route('POST', '/api/auth/accept-invitation', {}, (ctx) => {
+    guard(ctx, 'accept-invitation', 10, 60 * 60_000);
+    const body = z.object({ token: z.string().trim().min(8).max(300), name: z.string().trim().max(30).optional(), password: z.string().max(200).optional() }).parse(ctx.body ?? {});
+    return acceptInvitation(ctx.db, ctx.config, body.token, { name: body.name, password: body.password });
+  });
+
+  route('GET', '/api/org', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const orgId = typeof ctx.query.get('orgId') === 'string' ? ctx.query.get('orgId')! : undefined;
+    return orgOverview(ctx.db, ctx.auth!.userId, orgId);
+  });
+
+  route('POST', '/api/org/invitations', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const body = z.object({ email: z.string().trim().email().max(200), role: z.enum(['admin', 'manager', 'staff']), storeId: z.string().trim().max(100).optional(), orgId: z.string().trim().max(100).optional() }).parse(ctx.body ?? {});
+    return inviteMember(ctx.db, ctx.config, ctx.auth!.userId, body);
+  });
+
+  route('DELETE', '/api/org/invitations/:id', { roles: ['manager', 'staff', 'admin'] }, (ctx) => revokeInvitation(ctx.db, ctx.auth!.userId, ctx.params.id, typeof ctx.query.get('orgId') === 'string' ? ctx.query.get('orgId')! : undefined));
+
+  route('PATCH', '/api/org/members/:id', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const body = z.object({ role: z.enum(['owner', 'admin', 'manager', 'staff']).optional(), status: z.enum(['active', 'suspended']).optional(), storeId: z.string().trim().max(100).nullable().optional(), orgId: z.string().trim().max(100).optional() }).parse(ctx.body ?? {});
+    return updateMember(ctx.db, ctx.auth!.userId, ctx.params.id, body, body.orgId);
+  });
+
+  route('POST', '/api/org/stores', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {
+    const body = z.object({ name: z.string().trim().min(1).max(60), managerCode: z.string().trim().regex(/^[A-Za-z0-9]{3,10}$/).transform((s) => s.toUpperCase()), address: z.string().trim().max(120).optional(), orgId: z.string().trim().max(100).optional() }).parse(ctx.body ?? {});
+    return createOrgStore(ctx.db, ctx.auth!.userId, body, body.orgId);
   });
 
   route('GET', '/api/account/me', { roles: ['manager', 'staff', 'admin'] }, (ctx) => {

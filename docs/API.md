@@ -476,3 +476,13 @@ CSV/XLSX 表头至少包含：`store_code, business_date, table_type, party_size
 
 Schema v18：`organizations`、`memberships`、`account_tokens`、`users.email/email_verified/status`、`stores.organization_id`。
 邮件服务未配置；生产环境需接入 SMTP/邮件供应商后才能完成验证/重置流程。
+
+
+### 组织成员与邀请
+
+- `GET /api/org`：组织、成员、门店、待处理邀请（owner/admin）。
+- `POST /api/org/invitations` `{email,role,storeId?,orgId?}`：生成邀请；开发环境返回 inviteToken。
+- `DELETE /api/org/invitations/:id`：撤销。
+- `PATCH /api/org/members/:id` `{role?,status?,storeId?}`：更新角色/状态/门店。
+- `POST /api/org/stores` `{name,managerCode,address?}`：创建组织门店。
+- `POST /api/auth/accept-invitation` `{token,name?,password?}`：接受邀请；新用户需强密码。

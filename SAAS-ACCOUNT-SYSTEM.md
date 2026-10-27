@@ -1,7 +1,23 @@
 # SaaS Account System — Step 1 Foundation
 
-> Status: **ACCOUNT_FOUNDATION_READY / EMAIL_DELIVERY_BLOCKED**  
-> This is step 1 of the SaaS account work, not the final account product.
+> Status: **ACCOUNT_ORG_READY / EMAIL_DELIVERY_BLOCKED**  
+> Steps 1–2 of the SaaS account work are implemented; not the final account product.
+
+## Step 2 — organization administration
+
+Schema v19 adds `org_invitations`.
+
+Implemented:
+
+- owner/admin can list members, stores and pending invitations;
+- invite by email with role `admin/manager/staff` and optional store binding;
+- accept invitation for a new or existing user;
+- revoke pending invitation;
+- change member role, suspend/reactivate, bind store;
+- create a store inside the organization;
+- organization console at `/admin/org.html`.
+
+All endpoints are membership-authorised; staff cannot manage an organization.
 
 ## What is implemented
 
@@ -45,25 +61,30 @@ Part-time marketplace now filters open demands by the staff member's active orga
 
 ## Tests
 
-- **114/114** passed.
-- 5 new tests:
+- **117/117** passed.
+- 5 account tests:
   - register → verify → login → account/me
   - duplicate email + weak password
   - password reset invalidates old sessions
   - forgot password does not disclose account existence
   - staff marketplace tenant isolation
+- 3 organization tests:
+  - invite → accept → member login
+  - owner-only member/store management
+  - role change and invitation revoke
 - Existing 109 tests preserved.
 - H5 and mini-program builds pass.
 
 Evidence: `docs/r8-evidence/test-output-r8.txt`
 
+Screenshots: `docs/screenshots/19-saas-account.png`, `20-saas-account-dashboard.png`, `21-saas-org-console.png`
+
 ## Known blockers / next steps
 
 1. **Email delivery** — no SMTP/email provider. Dev returns verification/reset token; production cannot complete registration/reset until configured. Status: `EMAIL_DELIVERY_BLOCKED`.
-2. **Invitations** — org owner cannot yet invite managers/staff by email.
-3. **Membership management UI/API** — list/add/suspend/remove members and change roles.
-4. **Tenant enforcement on every business route** — marketplace is scoped; manager/admin routes need membership-aware checks.
-5. **Store onboarding inside a tenant** — owner account currently has no store until created; wire org → first store.
+2. **Tenant enforcement on every business route** — marketplace is scoped; manager/admin routes need membership-aware checks.
+3. **Store onboarding inside a tenant** — org can create stores; assigning a manager and opening the store setup flow is next.
+4. **Remove member** — role/status supported; hard removal and ownership transfer need a policy.
 6. **Session/device management** — list and revoke individual sessions.
 7. **Account profile** — name/email change, resend verification, close account.
 8. **Billing/plans** — organization plan exists, no billing integration.
