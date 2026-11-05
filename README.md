@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <b>Languages:</b> <a href="README.md">EN</a> · <a href="README.zh-CN.md">ZH</a> · <a href="README.ko.md">KO</a> · <a href="README.ja.md">JA</a>
+  <b>Languages:</b> <a href="README.md">EN</a> · <a href="README.zh-CN.md">ZH</a> · <a href="README.ko.md">KO</a> · <a href="README.ja.md">JA</a> · <a href="README.fr.md">FR</a>
 </p>
 
 ## What is this?
