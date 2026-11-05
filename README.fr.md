@@ -6,11 +6,6 @@ SmartStaff AI est un **framework de test** multi-tenant : comptes organisation, 
 
 [EN](README.md) · [ZH](README.zh-CN.md) · [KO](README.ko.md) · [JA](README.ja.md) · **FR**
 
-<p align="center">
-  <sub>DSH ecosystem: <a href="https://github.com/YanKaFei/Costume-Director-Vault-Starter">Costume Director</a> · <a href="https://github.com/YanKaFei/art-aesthetic-vault">Art Aesthetic Vault</a> · <a href="https://github.com/YanKaFei/ascii-h3-director">ASCII H3 Director</a> · <a href="https://github.com/YanKaFei/2d-limited-mv-studio">2D Limited MV Studio</a> · <a href="https://github.com/YanKaFei/virtual-heroine-atlas">Virtual Heroine Atlas</a> · <a href="https://github.com/YanKaFei/smartstaff-ai-deepseek-plugin">SmartStaff AI</a></sub>
-</p>
-
-
 ## Modules
 
 - comptes SaaS, rôles, invitations ;
