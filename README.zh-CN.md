@@ -20,6 +20,10 @@
   <b>语言：</b> <a href="README.md">EN</a> · <a href="README.zh-CN.md">中文</a> · <a href="README.ko.md">KO</a> · <a href="README.ja.md">JA</a>
 </p>
 
+<p align="center">
+  <sub>DSH ecosystem: <a href="https://github.com/YanKaFei/Costume-Director-Vault-Starter">Costume Director</a> · <a href="https://github.com/YanKaFei/art-aesthetic-vault">Art Aesthetic Vault</a> · <a href="https://github.com/YanKaFei/ascii-h3-director">ASCII H3 Director</a> · <a href="https://github.com/YanKaFei/2d-limited-mv-studio">2D Limited MV Studio</a> · <a href="https://github.com/YanKaFei/virtual-heroine-atlas">Virtual Heroine Atlas</a> · <a href="https://github.com/YanKaFei/smartstaff-ai-deepseek-plugin">SmartStaff AI</a></sub>
+</p>
+
 ## 这是什么？
 
 SmartStaff AI 是一个**测试版餐饮门店人力 SaaS 框架**，把以下能力放在同一套系统里：
